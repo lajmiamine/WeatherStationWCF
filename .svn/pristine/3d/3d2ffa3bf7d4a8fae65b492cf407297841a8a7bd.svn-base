@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+</br></br></br>
+
+<div style="text-align:center;">
+    <div id ="logo" @*style="float:left;margin-right:40px"*@>
+        <img id="image2" src="@Url.Content("~/Content/images/agrimote_logo.png")" border="0" style="width:250px;height:100px">
+    </div>
+    <div style=" display:inline-block; margin:10px;/*float:right;margin-top:40px;margin-right:40px;color: #1e9b4d;text-decoration: underline;*/">
+        <text>@Html.ActionLink("Connexion", "LogOn", "Account")</text>
+    </div>
+    <div style=" display:inline-block; margin:10px;/*float:right;margin-top:40px;margin-right:40px;color: #1e9b4d;text-decoration: underline;*/">
+        Contact
+    </div>
+    <div style=" display:inline-block; margin:10px;/*float:right;margin-top:40px;margin-right:40px;color: #1e9b4d;text-decoration: underline;*/">
+        About us
+    </div>
+</div>
+
+@**@
+
+<script type="text/javascript">
+    //    $("div#connexion").hide();
+    $("img#image").hide();
+    $("div#authentification").hide();
+</script>

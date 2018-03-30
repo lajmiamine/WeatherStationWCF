@@ -1,0 +1,39 @@
+﻿
+<img id = "image" src = "../../Content/images/agrimote_logo.png" border = "0" style = "float:left;">
+@Html.Partial("RibbonBarUser")
+<ul id = "menu-images"></ul>
+
+
+<script type="text/javascript">
+
+        function onSelect(e) {
+            var text = $(e.item).children(".k-link").text();
+            if (text == 'Déconnexion') {
+                location.href = '@Url.Action("../Account/LogOn")';
+                alert(text);
+            }
+        }
+
+        $("#menu-images").kendoMenu({
+            dataSource: [
+                {
+                    text: "@Model.NomProprietaire",
+                    imageUrl: "../../Content/images/pseudo.png",
+                    items: [
+                        { text: "Modifier Profile" },
+                        { text: "Déconnexion" }
+                    ]
+                }
+            ],
+            select: onSelect,
+        }).css({
+                'float': 'right',
+                'margin-left' : $("#image").width(),
+                'margin-top': $("#image").height() / 4,
+                'height' : $("#menu").height(),
+//                'position' : 'absolute',
+//                'left' : '50%',
+//                'top' : '50%',
+//                'margin-top' : -$(this).height()/2
+        });
+</script>

@@ -1,0 +1,1151 @@
+﻿@model IEnumerable<WeatherStation.Models.MesuresVitesseVentClimat>
+
+@{
+    System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+    customCulture.NumberFormat.NumberDecimalSeparator = ".";
+    System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+}           
+<div id = "vertical2_Vitesse_Vent" style="height:95%; width: 100%;">
+    <div id = "top-pane1">
+        <ul id = "menu_date_vitesse_vent">
+            <li id = "Horaire_VitesseVent" style = "width:100px">Horaire</li>
+            <li id = "Journaliere_VitesseVent" style = "width:100px">Journaliére </li>
+            <li id = "Hebdomadaire_VitesseVent">Hebdomadaire </li>
+            <li id = "mensuelle_VitesseVent" style = "width:100px">Mensuelle </li>
+            <li id = "periodique_VitesseVent">Periodique </li>
+        </ul>
+        <ul id = "menu_reporting_vitesse_vent">
+            <li onClick = "clickMonBoutonExcel();"><img id="MonBoutonExcel" src = "../../Content/images/excel.png" style="margin:0;" /></li>
+            <li onClick = "clickMonBoutonPdf();"><img id="MonBoutonPdf" src = "../../Content/images/curve.png" /></li>
+            <li><img src = "../../Content/images/pdf.jpeg" /></li>
+            <li><img id = "refresh" src = "../../Content/images/refresh.png" /></li>
+            <li><img id = "colorpicker_Vitesse" onClick = "clickColorPicker();"> </li>
+        </ul>
+        <div id = "window2" style = "display:none" >
+            <center>
+                <br /><br />
+                    <strong><label for = "start">date debut:</label></strong><input id = "start" style = "width: 200px" />
+                <br /><br />
+                    <strong><label for = "end">date fin:</label></strong><input id = "end" style = "width: 200px" />
+                <br /><br />
+                <button type = "button" id = "check">Valider</button>
+                <button type = "button" id = "annuler">Annuler</button>
+                <br /><br />
+            </center>  
+        </div>
+    </div>
+    <div id = "middle-pane1">
+        <div id = "stock-chart_VitesseVent" style = "height: 95%"></div>
+        <div id = "loading"></div>
+    </div>
+    <div id = "bottom-pane1">
+        <div id = "grid_VitesseVent" style = "height: 100%"></div>
+    </div>
+</div>
+
+<script type = "text/javascript">
+
+    $("#vertical2_Vitesse_Vent").kendoSplitter({
+        orientation: "vertical",
+        panes: [
+            { collapsible: true, size: "6%" },
+            { collapsible: true, size: "64%" },
+            { collapsible: true, size: "30%" }
+        ]
+    });
+    
+    var list_vitessevent1 = [], list_vitessevent2 = [], orders = [], id = 1;
+    var min_vitesse, max_vitesse;
+//    
+    $.ajax({
+        url: '../../UserSession/VitesseVentClimatByIntervalOneDay',
+        type: 'GET',
+        data: {
+            idNoeudClimat: @Model.ElementAt(0).IdParentNode,
+            startTime: new Date()
+        },
+        dataType: 'json',
+        async: false,
+        success: function (res){
+            var i = 0;
+            while ((res[i].VitesseVentClimat == null) && (i < res.length - 1)) {
+                i++;
+            }
+            min_vitesse = res[i].VitesseVentClimat;
+            max_vitesse = res[i].VitesseVentClimat;
+            for (var j = 0; j < res.length; j++) {
+                var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+              //alert(res[j].DateMesure + '\n' + date);
+                list_vitessevent1.push(res[j].VitesseVentClimat);
+                list_vitessevent2.push(res[j].DateMesure);
+                if (res[j].VitesseVentClimat != null) {
+                    orders.push({
+                        ID: id ++,
+                        OrderDate: date,
+                        VitesseVent: res[j].VitesseVentClimat,
+                    });
+                    if (res[j].VitesseVentClimat < min_vitesse) {
+                        min_vitesse = res[j].VitesseVentClimat;
+                    } else if (res[j].VitesseVentClimat > max_vitesse) {
+                        max_vitesse = res[j].VitesseVentClimat;
+                    }
+                }
+            }
+        },
+        failure: function (jqXHR, textStatus, errorThrown) {
+            alert("No DATA");
+        }
+    });
+
+    var list_seuil = [];
+    $.ajax({
+        url: '../../UserSession/ValeursSeuils',
+        type: 'GET',
+        data: { idNoeudClimat: @Model.ElementAt(0).IdParentNode},
+        dataType: 'json',
+        async: false,
+        success: function (res) {
+            list_seuil.push(-10);
+            list_seuil.push(100);
+        }
+    });
+    function  Selection_Courbe(x)
+    {
+        var chart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        var date =x.toString();
+        var datefinale = new Date(Number(date.substring(0,4)),(Number(date.substring(5,7)))-1,Number(date.substring(8,10)),Number(date.substring(11,13)),Number(date.substring(14,16)),00);
+        var select=0;
+        for(var d=0;d<chart.series[0].data.length;d++)
+        {
+            var dattttttttttee = new Date(chart.series[0].data[d].x);
+            if((datefinale.getFullYear()==dattttttttttee.getFullYear())&&(datefinale.getMonth()==dattttttttttee.getMonth())&&(datefinale.getDay()==dattttttttttee.getDay())&&(datefinale.getHours()==dattttttttttee.getHours())&&(datefinale.getMinutes()==dattttttttttee.getMinutes())&&(datefinale.getSeconds()==dattttttttttee.getSeconds())&&((chart.series[0].data[d].y)!=null))
+            {
+                select=d;
+            }
+        }
+
+        chart.series[0].data[select].select();
+        chart.series[0].markers.visible = true;
+    }
+
+     function onChangeVitesseVent(e) {
+        
+        var grid_vitesse = $("#grid_VitesseVent") .data("kendoGrid");
+        var rows_vitesse = grid_vitesse.select();
+        var select_vitesse = grid_vitesse.items().index(rows_vitesse); //alert("rows length: " + rows.length + "\nRows index: " + select + "\nRows uid: " + rows.uid);
+        if (select_vitesse != -1) {
+            $(".k-grid-content").animate({
+                scrollTop: ($('[data-uid = "' + grid_vitesse.dataItem(rows_vitesse).uid + '"] ').offset().top - $(".k-selectable").offset().top)
+            }, 800);
+                      
+            var stockChartvitesse = $("#stock-chart_VitesseVent").data("kendoStockChart");
+            rows_vitesse.each(function(index, row){
+                var selectedItem = grid_vitesse.dataItem(row);
+//                alert("rows: " + selectedItem.ID + ", " + selectedItem.OrderDate + ", " + selectedItem.Temperature);
+                var index_Vitesse= jQuery.inArray(selectedItem.VitesseVent, stockChartvitesse.options.series[0].data);
+//                alert("index: " + index); alert(stockChart.options.series[0].data[index] + "\n" + selectedItem.Temperature);
+                $(".k-tooltip").show();
+            });
+        }
+    }
+
+    function clickColorPicker() {
+        colorpicker.open();
+    }
+
+    var colorpicker = $("#colorpicker_Vitesse").kendoColorPicker({
+        change: function (e) {
+            //kendoConsole.log("Change in picker #" + this.element.attr("id") + " :: " + e.value);
+            var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+            stockChart.options.series[0].color = e.value;
+            stockChart.options.valueAxis[0].color = e.value;
+            stockChart.options.valueAxis[0].labels.color = e.value;
+            stockChart.options.valueAxis[0].line.color = e.value;
+            stockChart.options.valueAxis[0].title.color = e.value;
+            stockChart.options.series[2].color = e.value;
+            stockChart.refresh();
+        },
+        //  toolIcon: "k-foreColor"
+    }).data("kendoColorPicker");
+         
+
+    $("#grid_VitesseVent").kendoGrid({
+        dataSource: {
+            data: orders,
+            pageSize: 500
+        },
+        height: '99%',
+        change: onChangeVitesseVent,
+        selectable: "multiple",
+        scrollable: true,
+        groupable: false,
+        sortable: true,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 3
+        },
+        columns: [{
+            field: "ID",
+            title: "ID",
+            width: 50,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },{
+            field: "OrderDate",
+            title: "Date",
+            format: "{0:dd/MM/yyyy HH:mm:ss}",
+            width: 100,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },
+        {
+            field: "VitesseVent",
+            title: "Vitesse du Vent (m/s)",
+            width: 100,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        }]
+    });
+
+    function selectRowVitesseVent(Datee,vitessevent)
+    {  
+        var grid_Vitesse = $("#grid_VitesseVent").data("kendoGrid"),
+            view_Vitesse = grid_Vitesse.dataSource.view();
+        var rows_Vitesse = $.grep(view_Vitesse, function(item){
+        
+            return item.VitesseVent === vitessevent && String(item.OrderDate) === String(Datee);
+        }).map(function(item) {  //alert('map: ' + item.uid);
+            return grid_Vitesse.tbody.find(">[data-uid=" + item.uid + "]");
+        });
+        grid_Vitesse.clearSelection(); grid_Vitesse.select(rows_Vitesse);
+       
+    }
+
+    $("#stock-chart_VitesseVent").kendoStockChart({
+        title: {
+            text: "Date : " + kendo.format('{0:dd/MM/yyyy}',new Date()),
+            color: "#000000",
+            font: "12px sans-serif",
+        },
+        dateField: null,
+        series: [{
+            name: "Vitesse du vent",
+            type: "line",
+            style: "smooth",
+            //field: "Temperature",
+            data: list_vitessevent1,
+            color:"#0d233a",
+            markers: {
+                visible : false,
+            },
+            tooltip: {
+                visible: true,
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value # m/s"
+            },
+        },{
+            name: "Seuil",
+        }],
+        valueAxis: [{
+            name: 'Vitesse du vent',
+            data: list_vitessevent1,
+            color:"#0d233a",
+            labels: {
+                format: "{0}"
+            },
+            min: Math.floor(min_vitesse - (max_vitesse - min_vitesse) * 0.1),
+            max: Math.ceil(max_vitesse + (max_vitesse - min_vitesse) * 0.1),
+            title: {
+                text: "Vitesse du vent (m/s)",
+                font: "12px sans-serif",
+            },
+            notes: {
+                label:{
+                    text :'seuil min',
+                    position:'outside',
+                    color: "#a0a700",
+                },   
+                visible: true,
+                line: {
+                    length:950,
+                    color: "#a0a700",
+                },
+                data: [{
+                    value: list_seuil[0],
+                },
+                {
+                    value: list_seuil[1],
+                    label: {
+                        text: "seuil max"
+                    }, 
+                    position:'outside'
+                }]
+            },
+//            plotBands: [{
+//                from: -5,
+//                to: list_seuil[0],
+//                color: "#f5f5f5"
+//            },
+//            {        
+//                from: list_seuil[1],
+//                to: 70,
+//                color: "#f5f5f5"
+//            }]
+        }],
+        legend: {
+            position: "bottom",
+            visible: true,
+            border: {
+                width: 2,
+                color: "grey",
+                dashType: "solid"
+            },
+        },
+        xAxis:{
+            color:"#0d233a",
+            labels: {
+                template: "#= kendo.format('{0}',value/60) #"
+            }
+        },
+        categoryAxis: {
+            categories: list_vitessevent2,
+            type: "date",
+            baseUnit: "minutes",
+            line:{
+                color:"#0d233a",
+            },
+            labels: {
+                visible: true,
+                step: 120
+            },
+            majorGridLines: {
+                visible: false,
+            },
+            majorTicks: {
+                visible: true,
+                size: 4,
+                step: 60,
+            }
+        },
+        navigator: {
+            dateField: null,
+            hint: {
+                // hint template
+                template: "From: #= from # To: #= to #",
+                visible: false,
+            },
+            categoryAxis: {
+                categories: list_vitessevent2,
+                type: "date",
+                autoBaseUnitSteps:{
+                    minutes:[15] ,
+                    hours:[2],
+                }
+            },
+            select: {
+                        from: list_vitessevent2[0],
+                        to:list_vitessevent2[list_vitessevent2.length - 1],
+            },
+            series:{
+                type: "area",
+                area: {
+                    line: {
+                        style: "smooth"
+                    }
+                },
+                data: list_vitessevent1,
+                color: "#0d233a",
+            },   
+//                select: {
+//                    from: list_vitessevent2[0],
+//                    to: list_vitessevent2[(list_vitessevent2.length)-1]
+//                }       
+        },
+        seriesClick: onSeriesClick_vitessevent,
+        legendItemClick: onLegendItemClick,
+    });
+
+    function onSeriesClick_vitessevent(e) {
+       
+        var grid_chart = $("#grid_VitesseVent").data("kendoGrid");
+        var data_chart = grid_chart.dataSource.data();
+        var res_chart = $.grep(data_chart, function (d) {
+            return  d.VitesseVent == e.value;
+        }); 
+        selectRowVitesseVent(e.category, e.value);
+    }
+
+    function onLegendItemClick(e) { alert("onLegendItemClick\n" + e);
+        var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        // kendoConsole.log(kendo.format("Legend item click :: {0}", e.text));
+        // kendoConsole.log(kendo.format("Legend item click :: {0}", e.text));
+        if(stockChart.options.valueAxis[0].notes.visible == false) {
+            stockChart.options.valueAxis[0].notes.visible = true;
+            stockChart.options.valueAxis[0].plotBands[0].color ="#f5f5f5";
+            stockChart.options.valueAxis[0].plotBands[1].color ="#f5f5f5";
+        }
+        else{
+            stockChart.options.valueAxis[0].notes.visible = false;
+            stockChart.options.valueAxis[0].plotBands[0].color = "#ffffff";
+            stockChart.options.valueAxis[0].plotBands[1].color = "#ffffff";
+        }
+    }
+</script>
+
+@*Menu forms of Selection & Reporting*@
+<script type="text/javascript">
+
+    $("#menu_date_vitesse_vent").clone(true).find(".k-state-active").removeClass("k-state-active");    
+    $("#menu_date_vitesse_vent").kendoMenu({
+    }).css({
+        'float': 'left',
+//            'margin-top': $("#image").height() / 4
+    });
+    
+    $("#menu_reporting_vitesse_vent").clone(true).find(".k-state-active").removeClass("k-state-active");
+    $("#menu_reporting_vitesse_vent").kendoMenu({
+    }).css({
+        'float': 'right',
+        'height': $("#menu_date_vitesse_vent").height()
+//          'margin-right': 30,
+//          'position': 'absolute',
+//          'left': '50%',
+//          'top': '50%',
+//          'margin-left': -$("#image").width() / 2,
+//            'margin-top': $("#image").height() / 4
+    });
+
+</script>
+
+@*Period Popup Form*@
+<script type='text/javascript'>
+
+    var undo = $("#undo").bind("click", function () {
+        $("#window2").data("kendoWindow").center().open();
+    });
+    undo.show();
+
+    var onClose = function () {
+        undo.show();
+    };
+
+    if (!$("#window2").data("kendoWindow")) {
+        $("#window2").kendoWindow({
+            //            width: "400px",
+            title: "Choix periode",
+            actions: ["Close"],
+            close: onClose
+        });
+    }
+
+</script>
+               
+
+@*ChoixHeure*@
+<script type='text/javascript'>
+
+    $("#Horaire_VitesseVent").kendoDateTimePicker({
+        value: new Date(),
+        close: myfunctionheurrefresh,
+    });
+
+    $(".k-input").css("background-color", "#e8e8e8");
+    $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+    var datepicker_hour = $("#Horaire_VitesseVent").data("kendoDateTimePicker");
+
+    $("#Horaire_VitesseVent").click(function () {
+        datepicker_hour.open("date");
+    });
+    
+    function myfunctionheurrefresh() {
+         
+        var startTime = new Date($("#Horaire_VitesseVent").data("kendoDateTimePicker").value());
+        var time = [], VVent = [], orders_update = [], seuil_min = [], seuil_max = [],id = 1 ;
+        var Min, Max;
+        $.ajax({
+            url: '../../UserSession/VitesseVentClimatByIntervalOneHour',
+            type: 'GET',
+            data: {
+                idNoeudClimat : @Model.ElementAt(0).IdParentNode,
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            beforeSend: function() {
+                kendo.ui.progress($("#loading"), true);        
+            },
+            success: function (res) {
+                var i = 0;
+                while ((res[i].VitesseVentClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].VitesseVentClimat;
+                Max = res[i].VitesseVentClimat; //alert(Min + '\n' + Max);
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    //list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    VVent.push(res[j].VitesseVentClimat);
+                    time.push(res[j].DateMesure);
+                    if (res[j].VitesseVentClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: kendo.format('{0:dd/MM/yyyy}',date),
+                            VitesseVent: res[j].VitesseVentClimat,
+                        });
+                        if(res[j].VitesseVentClimat > Max)
+                        {
+                            Max = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat < Min)
+                        {
+                            Min = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].VitesseVentClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].VitesseVentClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].VitesseVentClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading"), false);
+            }
+        });
+
+        jQuery("#grid_VitesseVent").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_VitesseVent").data("kendoGrid").refresh();
+        
+        //coloration grid 
+        var grid = $("#grid_VitesseVent").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.VitesseVent >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.VitesseVent < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+        
+        var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        stockChart.options.title.text = "time :" + kendo.format('{0:dd/MM/yyyy HH:mm}',startTime); 
+        stockChart.options.categoryAxis[0].categories = time;
+        stockChart.options.categoryAxis[0].labels.step = 5;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.series[0].data = VVent;
+        stockChart.options.series[0].name = "Vitesse du vent";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = time;
+        stockChart.options.categoryAxis[1].labels.step = 5;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+//        stockChart.options.categoryAxis[0].select.from = stockChart.options.categoryAxis[0].min;  //give the new range values
+//        stockChart.options.categoryAxis[0].select.to = stockChart.options.categoryAxis[0].max;
+        stockChart._navigator.options.select.from =time[0];
+        stockChart._navigator.options.select.to =time[time.length-1];
+        stockChart.options.series[2].data = VVent;
+        stockChart.options.series[2].name = "vitesse du vent";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart.refresh();
+    }
+
+</script>
+
+
+
+@*choix Day*@
+<script type='text/javascript'>
+
+    $("#Journaliere_VitesseVent").kendoDatePicker({        
+        close: myfunctionDaterefresh,      
+    });
+
+	$(".k-input").css("background-color", "#e8e8e8");
+	$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+	var datepicker = $("#Journaliere_VitesseVent").data("kendoDatePicker");
+	    
+    $("#Journaliere_VitesseVent").click(function () {
+	    datepicker.open("date");
+	});
+
+    function myfunctionDaterefresh() {
+
+        var startTime = $("#Journaliere_VitesseVent").data("kendoDatePicker").value();
+        if (startTime == null) {
+            startTime = new Date();
+        }//alert(startTime);
+        var day = [], VVent = [], orders_update = [],id = 1;
+        var Min, Max;
+        $.ajax({
+            url: '../../UserSession/VitesseVentClimatByIntervalOneDay',
+            type: 'GET',
+            data: {
+                idNoeudClimat : @Model.ElementAt(0).IdParentNode,
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            beforeSend: function() {
+                kendo.ui.progress($("#loading"), true);        
+            },
+            success: function (res) {
+                var i = 0;
+                while ((res[i].VitesseVentClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].VitesseVentClimat;
+                Max = res[i].VitesseVentClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    VVent.push(res[j].VitesseVentClimat);
+                    day.push(res[j].DateMesure);
+                    //list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    if (res[j].VitesseVentClimat != null) {
+                        if(res[j].VitesseVentClimat > Max)
+                        {
+                            Max = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat < Min)
+                        {
+                            Min = res[j].VitesseVentClimat;
+                        }
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            VitesseVent: res[j].VitesseVentClimat,
+                        });
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading"), false);
+            }
+        });
+
+        $("#grid_VitesseVent").data("kendoGrid").dataSource.data(orders_update); 
+        $("#grid_VitesseVent").data("kendoGrid").refresh();
+        //coloration grid 
+        var grid = $("#grid_VitesseVent").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.VitesseVent >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.VitesseVent < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#B0E0E6");
+        });
+
+        var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        stockChart.options.title.text = "Date :" + kendo.format('{0:dd/MM/yyyy}',startTime);
+        stockChart.options.categoryAxis[0].labels.step = 120;
+        stockChart.options.categoryAxis[0].majorTicks.step = 60;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.categoryAxis[0].categories = day;
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].name = "Vitesse du vent";
+        stockChart.options.series[0].data = VVent;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = day;
+        stockChart.options.categoryAxis[1].labels.step = 120;
+        stockChart.options.categoryAxis[1].majorTicks.step = 60;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = day[0];
+        stockChart._navigator.options.select.to = day[day.length-1];
+        stockChart.options.series[2].data = VVent;
+        stockChart.options.series[2].name = "Vitesse du vent";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart.refresh();
+       
+}
+</script>
+
+@* choix semaine*@
+<script type='text/javascript'>
+
+    $("#Hebdomadaire_VitesseVent").kendoDatePicker({
+        change: myfonctionWeekRefresh
+    });
+
+    $(".k-input").css("background-color", "#e8e8e8");
+    $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+    var datepicker_Week = $("#Hebdomadaire_VitesseVent").data("kendoDatePicker");
+    
+    $("#Hebdomadaire_VitesseVent").click(function () {
+        datepicker_Week.open("date");
+    });
+
+    function myfonctionWeekRefresh() {
+
+        var tr = $(".k-state-selected", Hebdomadaire_VitesseVent._table).closest("tr");
+        var day = this.value();
+        var first = $("td:first", tr).find("a").attr("title");
+        var last = $("td:last", tr).find("a").attr("title");
+        var startTime = new Date(first), endTime = new Date(last);// alert(first + '\n' + last);
+        var week = [], VVent = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/VitesseVentClimatByIntervalOneWeek',
+            //url: '../../UserSession/TemperatureClimatByIntervalDatesDebutFin',
+            type: 'GET',
+            data: {
+                idNoeudClimat : @Model.ElementAt(0).IdParentNode,
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            beforeSend: function() {
+                kendo.ui.progress($("#loading1"), true);        
+            },
+            success: function (res) { //alert("res: " + res.length);
+                var i = 0;
+                while ((res[i].VitesseVentClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].VitesseVentClimat;
+                Max = res[i].VitesseVentClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    VVent.push(res[j].VitesseVentClimat);
+                    week.push(res[j].DateMesure);
+                    if (res[j].VitesseVentClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            VitesseVent: res[j].VitesseVentClimat,
+                        });
+                        if(res[j].VitesseVentClimat > Max)
+                        {
+                            Max = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat < Min)
+                        {
+                            Min = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].VitesseVentClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].VitesseVentClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].VitesseVentClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading1"), false);
+            }
+        });
+        //alert("week: " + week.length + "\ntemp: " + temp.length + "\norders_update: " + orders_update.length);
+        jQuery("#grid_VitesseVent").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_VitesseVent").data("kendoGrid").refresh();
+   
+        //coloration grid 
+        var grid = $("#grid_VitesseVent").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.VitesseVent >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.VitesseVent < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+
+        var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut : " + kendo.format('{0:dd/MM/yyyy}', first)+ "Date fin : " + kendo.format('{0:dd/MM/yyyy}', last);
+        stockChart.options.categoryAxis[0].labels.step = 720;
+        stockChart.options.categoryAxis[0].majorTicks.step = 300;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.categoryAxis[0].categories = week;
+        stockChart.options.series[0].name = "Vitesse du vent";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].data = VVent;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = week;
+        stockChart.options.categoryAxis[1].labels.step = 480;
+        stockChart.options.categoryAxis[1].majorTicks.step = 300;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart.options.series[2].data = VVent;
+        stockChart.options.series[2].name = "Vitesse du vent";
+        stockChart._navigator.options.select.from = week[0];
+        stockChart._navigator.options.select.to = week[week.length-1];
+        stockChart.options.series[2].markers.visible = false;
+//      stockChart.options.navigator.series.type = "line";
+        stockChart.refresh();
+    }
+
+</script>
+
+@* Choix Mois *@
+<script type='text/javascript'>
+       
+    $("#mensuelle_VitesseVent").kendoDatePicker({
+        // defines the start view
+        start: "year",
+
+        // defines when the calendar should return date
+        depth: "year",
+
+        // display month and year in the input
+        format: "MMMM yyyy",
+        close: myfunctionMoisrefresh,
+    });
+
+	$(".k-input").css("background-color", "#e8e8e8");
+	$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+	var datepicker_month = $("#mensuelle_VitesseVent").data("kendoDatePicker");
+
+	$("#mensuelle_VitesseVent").click(function () {
+        datepicker_month.open("date");
+	});
+
+    function  myfunctionMoisrefresh()
+    {
+        var startTime = $("#mensuelle_VitesseVent").data("kendoDatePicker").value();
+        var month = [], VVent = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneMonth',
+            type: 'GET',
+            beforeSend: function() {
+                kendo.ui.progress($("#loading1"), true);        
+            },
+            data: { idNoeudClimat : '@Model.ElementAt(0).IdParentNode', startTime : startTime },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0;
+                while ((res[i].Vmoy == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].Vmoy;
+                Max = res[i].Vmoy;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesureMoy.substring(6, 19)));
+                    VVent.push(res[j].Vmoy);
+                    month.push(res[j].DateMesureMoy);
+                    //list9.push([date.getTime(), res[j].Tmoy]);
+                    if (res[j].Vmoy != null)
+                    {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: kendo.format('{0:dd/MM/yyyy}', date),
+                            VitesseVent: res[j].Vmoy,
+                        });
+                        if(res[j].Vmoy > Max)
+                        {
+                            Max = res[j].Vmoy;
+                        }
+                        if(res[j].Vvmoy < Min)
+                        {
+                            Min = res[j].Vmoy;
+                        }
+                        if(res[j].Vvmoy > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].Vmoy]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].Vmoy < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].Vmoy]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading1"), false);
+            }
+        });
+
+        jQuery("#grid_VitesseVent").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_VitesseVent").data("kendoGrid").refresh();
+   
+        //coloration grid 
+        var grid = $("#grid_VitesseVent").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.VitesseVent >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.VitesseVent < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+
+        var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        stockChart.options.title.text = "Mois : " + kendo.format('{0:MM/yyyy}',startTime);
+//      stockChart.options.navigator.series.type = "line";
+        stockChart.options.categoryAxis[0].categories = month;
+        stockChart.options.categoryAxis[0].labels.step = 2;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "days";
+        stockChart.options.series[0].name = "Vitesse du vent moyenne";
+        stockChart.options.series[0].data = VVent;
+        stockChart.options.series[0].markers.visible = true;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = month;
+        stockChart.options.categoryAxis[1].labels.step = 2;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart.options.categoryAxis[1].baseUnit = "days";
+        stockChart.options.series[2].data = VVent;
+        stockChart.options.series[2].name = "Vitesse du vent";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart._navigator.options.select.from =month[0];
+        stockChart._navigator.options.select.to =month[month.length-1];
+        stockChart.refresh();
+    }
+</script>
+
+@*choix periode*@
+<script type='text/javascript'>
+
+    $("#periodique_VitesseVent").click(function () {
+        $("#window2").data("kendoWindow").center().open();
+    });
+        
+    function startChange() {
+        var startDate = start.value(), endDate = end.value();
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function endChange() {
+
+        var endDate = end.value(), startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    var start = $("#start").kendoDateTimePicker({
+        change: startChange
+    }).data("kendoDateTimePicker");
+
+    var end = $("#end").kendoDateTimePicker({
+        change: endChange,
+//        close: myfunctionperiodrefresh,
+    }).data("kendoDateTimePicker");
+
+    start.max(end.value());
+    end.min(start.value());    
+
+    $("#check").kendoButton({
+        click: RefreshPeriod,
+        imageUrl: "../content/themes/base/images/connection.png",
+    });
+    $("#annuler").kendoButton({
+        click: exit,
+        imageUrl: "../content/themes/base/images/cancel.png"
+    });
+    function exit()
+    {
+        $("#window2").data("kendoWindow").center().close();
+    } 
+    function RefreshPeriod(){
+        $("#window2").data("kendoWindow").center().close();
+        var startTime = $("#start").data("kendoDateTimePicker").value();
+        var endTime = $("#end").data("kendoDateTimePicker").value();
+        var interval = [], VVent = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/VitesseVentClimatByInterval',
+            type: 'GET',
+            beforeSend: function() {
+                kendo.ui.progress($("#loading1"), true);        
+            },
+            data: {
+                idNoeudClimat : '@Model.ElementAt(0).IdParentNode',
+                startTime : startTime,
+                endTime : endTime
+            },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0;
+                while ((res[i].Vmoy == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].VitesseVentClimat;
+                Max = res[i].VitesseVentClimat;
+                for (var j = 0; j < res.length; j++) {                    
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    interval.push(res[j].DateMesure);
+                    VVent.push(res[j].VitesseVentClimat);
+//                    list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    if (res[j].VitesseVentClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            VitesseVent: res[j].VitesseVentClimat,
+                        });
+                        if(res[j].VitesseVentClimat > Max)
+                        {
+                            Max = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat < Min)
+                        {
+                            Min = res[j].VitesseVentClimat;
+                        }
+                        if(res[j].VitesseVentClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].VitesseVentClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].VitesseVentClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].VitesseVentClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading1"), false);
+            }
+        });
+
+        $("#grid_VitesseVent").data("kendoGrid").dataSource.data(orders_update); 
+        $("#grid_VitesseVent").data("kendoGrid").refresh();
+
+        //coloration grid 
+        var grid = $("#grid_VitesseVent").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.VitesseVent >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.VitesseVent < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+        
+        var stockChart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut:" + kendo.format('{0:dd/MM/yyyy HH:mm}', startTime) + " - date fin: " + kendo.format('{0:dd/MM/yyyy HH:mm}', endTime); 
+        stockChart.options.categoryAxis[0].categories = interval;
+        stockChart.options.categoryAxis[0].labels.step = 2400;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1200;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].name = "Vitesse du vent";
+        stockChart.options.series[0].data = VVent;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = interval;
+        stockChart.options.categoryAxis[1].labels.step = 600;
+        stockChart.options.categoryAxis[1].majorTicks.step = 600;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = interval[0];
+        stockChart._navigator.options.select.to = interval[interval.length-1];
+        stockChart.options.series[2].name = "Vitesse du vent";
+        stockChart.options.series[2].data = VVent;
+        stockChart.refresh();
+//    });
+    }
+
+</script>
+
+@* reporting*@
+<script type="text/javascript">
+
+    $("#refresh").click(function () {
+        myfunctionDaterefresh();
+    });
+
+    //    function clickMonBoutonPdf() {
+    $("#MonBoutonExcel").click(function (){
+        var chart = $("#stock-chart_VitesseVent").data("kendoStockChart");
+        var image = chart.imageDataURL(); //Kendo UI
+        var a = $("<a>").attr("href", image).attr("download", "img.png").appendTo("body");
+        a[0].click();
+        a.remove();
+    });
+    //    }
+
+    //    function clickMonBoutonExcel() {
+    $("#MonBoutonPdf").click(function () {
+        var dataSource = $("#grid").data("kendoGrid").dataSource;
+        var filteredDataSource = new kendo.data.DataSource({
+            data: dataSource.data(),
+            filter: dataSource.filter()
+        });
+
+        filteredDataSource.read();
+        var data = filteredDataSource.view();
+        var result = "data:application/vnd.ms-excel,";
+        result += "<table><tr><th>Date</th><th>Température °C</th><th> Date</th></tr>";
+        for (var i = 0; i < data.length; i++) {
+            var datee = data[i].OrderDate;
+            result += "<tr>";
+            result += "<td>";
+            result += kendo.format('{0:dd/MM/yyyy HH:mm}', datee);
+            result += "</td>";
+            result += "<td>";
+            result += data[i].VitesseVent;
+            result += "</td>";
+            result += "</tr>";
+        }
+        result += "</table>";
+        if (window.navigator.msSaveBlob) {
+            window.navigator.msSaveBlob(new Blob([result]), 'export.csv');
+        } else {
+            window.open(result);
+        }
+    });
+    //    }
+</script>

@@ -1,0 +1,469 @@
+﻿@model WeatherStation.Models.WaterConsumptionList
+   
+<div id = "vertical2_Consommation_Cummule_Par_Parcelle" style = "height:95%; width: 100%;">
+    <div id = "top-pane">
+        <ul id = "menu_date">
+            <li id = "Journaliere_Par" onclick = "Weekpicker();">Journaliére </li>
+            <li id = "mensuelle_Par" onclick = "MonthPicker();">mensuelle </li>
+        </ul>  
+        <ul id = "menu_reporting_par">
+                <li id = "excel_par"><img id = "MonBoutonExcel_exp" src = "../../Content/themes/base/images/excel.png" style="margin:0;" /></li>
+                <li id = "chart_img_par"><img id = "MonBoutonPdf_exp" src = "../../Content/themes/base/images/curve.png" /></li>
+                <li><img src = "../../Content/themes/base/images/pdf.jpeg" /></li>
+                <li><img id = "refresh_par" src="../../Content/themes/base/images/refresh.png" /></li>
+                <li id = "colorpicker_par" onClick = "clickColorPicker();"> </li>
+        </ul>
+    </div>
+    <div id = "middle-pane">
+        <div  id = "chart_" style = "height: 100%;float: left; width: 72%"></div>
+        <div id = "chart_pie" style = "height: 100% ; float: right; width: 28%"></div>
+    </div>
+    <div id = "bottom-pane">
+        <div id = "grid_QEPar" style = "height: 100%"></div>
+    </div>
+</div>     
+    
+   
+    <script type = "text/javascript">
+
+        var element = {};
+        var orders_ = [];
+        element.Id = '1';
+        element.OrderDate = '@Model.DateConsumption';
+        @{
+            int c = 0;
+        }
+        for (var k = 0; k < '@Model.QuantityConsumptionList.Count';k++)
+        {
+            element['p'+ k] ='@Model.QuantityConsumptionList[c]';
+            @{c = c + 1;}
+           
+        }
+        orders_.push(element);
+
+        $("#menu_date").clone(true).find(".k-state-active").removeClass("k-state-active");
+        
+        $("#menu_date").kendoMenu({
+        }).css({
+            'float': 'left',
+//            'margin-top': $("#image").height() / 4
+        });
+        $("#menu_reporting_par").clone(true).find(".k-state-active").removeClass("k-state-active");
+        $("#menu_reporting_par").kendoMenu({
+        }).css({
+            'float': 'right',
+            'height': $("#menu_date").height()
+        });
+        $("#vertical2_Consommation_Cummule_Par_Parcelle").kendoSplitter({
+            orientation: "vertical",
+            panes: [
+                { collapsible: true, size: "6%" },
+                { collapsible: true, size: "64%" },
+                { collapsible: true, size: "30%" }
+            ]
+        });
+
+        var chartvseries = [], orders = [] , grid_columns = [], chart_Pie_series = [],
+            idExpl = '@Model.IdConsumption',
+            grid_columns = [{
+                field: "Id",
+                title: "Id",
+                width: '15%',
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+            }];
+            grid_columns.push({
+                field: "OrderDate",
+                title: "Date",
+                format: "{0:yyyy/MM/dd}",
+                width: '25%',
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+            });
+
+         var somme = 0;
+         @for (var j = 0; j < Model.QuantityConsumptionList.Count; j++) {
+            @:somme = somme + @Model.QuantityConsumptionList[j];
+         }
+        
+        @for (var k = 0; k < Model.QuantityConsumptionList.Count; k++) {
+            @:grid_columns.push({
+                @:field: "p" + "@k",
+                @:title: "Parcelle " + (@k + 1),
+                @:width: '25%',
+                @:headerAttributes : {
+                    @:style: "text-align:center"
+                @:}
+            @:});
+
+            @:chartvseries.push({
+                @:type: "column",
+                @:name:  'Parcelle' + (@k + 1) ,
+                @:data : [@Model.QuantityConsumptionList[k]],
+                @:labels: {
+                    @:visible: true,
+                    @:background: "transparent"
+                @: },
+            @:});
+            @:if(somme !=0){
+            @:chart_Pie_series.push(
+            @:{
+                @:name: 'Parcelle' + (@k + 1) ,
+                @:category: 'Parcelle' + (@k + 1) ,
+                @:value:('@Model.QuantityConsumptionList[k]'/somme)*100,
+            @:});
+            @:}
+        }
+
+        
+        $("#grid_QEPar").kendoGrid({
+            dataSource: {
+                data: orders_,
+                pageSize: 50
+            },
+            height: '99%',
+            //change: onChange,
+            selectable: "multiple",
+            scrollable: true,
+            groupable: false,
+            sortable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true,
+                buttonCount: 3
+            },
+            columns : grid_columns
+        });
+
+        $("#chart_").kendoChart({
+            title: {
+                text: 'Date: ' + kendo.format('{0:dd/MM/yyyy}',new Date()),
+                color: "#000000",
+                font: "12px sans-serif",
+            },
+            series: chartvseries,
+            legend: {
+                position: "bottom",
+                visible: true,
+                border: {
+                    width: 2,
+                    color: "grey",
+                    dashType: "solid"
+                },
+            },
+            categoryAxis: {
+            // categories: ["Noeud1","Noeud2"],
+                labels: {
+                    visible: true,
+                },
+                majorGridLines: {
+                    visible: false
+                }
+            },
+            tooltip: {
+                visible: true,
+                format: "{0}%",
+                template: "#= series.name #: #= value #"
+            },
+            valueAxis: {
+                line: {
+                    visible: true
+                },
+                title: {
+                        text: "Quantité d\'eau (l)",
+                        color:'#ff6800'
+                },
+            }
+        });
+        
+    </script>
+    <script type = "text/javascript">
+        $("#chart_pie").kendoChart({
+            title: {
+                position: "top",
+                text: ""
+            },
+            legend: {
+                visible: true,
+                position: "bottom",
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= kendo.format('{0:P}', percentage)#",
+    //                format:"{0}%",
+                    position: 'center',
+                    //position: "inside",
+                    color : "#ffffff"
+                }
+            },
+            series: [{
+                type: "pie",
+                startAngle: 120,
+                data: chart_Pie_series,
+            }],
+            tooltip: {
+                visible: true,
+                format: "{0}%",
+                template: "#= category #: #= kendo.format('{0:P}', percentage)#"
+                //template: "#= series.name #: #= value#%"
+            },
+       });
+    function  shortLabels(value)
+    {
+     if(value.length >3)
+     {
+      value = value.substring(0,5);
+      return value;
+     }
+    }
+     </script>
+    <script type="text/javascript">
+    
+        //choix date
+        $("#Journaliere_Par").kendoDatePicker({
+            close: myfunctionDaterefresh,
+        });
+
+        //$(".k-state-default > .k-select").css("visibility", "hidden");
+        $(".k-input").css("background-color", "#e8e8e8");
+        $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+        function Weekpicker() {
+            $("#Journaliere_Par").data("kendoDatePicker").open("date");
+        }
+
+        function myfunctionDaterefresh() {
+            var startTime = $("#Journaliere_Par").data("kendoDatePicker").value();
+            if (startTime == null) {
+                startTime = new Date();
+            }
+            var list10 = [], orders_update = [];
+            $.ajax({
+                url: '../../UserSession/ConsommationJournalièreToutesParcellesOneDay',
+                type: 'GET',
+                data: { 
+                    idExpl: idExpl,
+                    startTime: startTime
+                },
+                dataType: 'json',
+                async: false,
+                success: function (res) {
+                    var element = {};
+                    element.Id = '1';
+                    element.OrderDate = kendo.format('{0:dd/MM/yyyy}',startTime);
+                    for (var k = 0; k < res.QuantityConsumptionList.length;k++)
+                    {
+                        element['p'+ k] = res.QuantityConsumptionList[k];
+                    }
+                    orders_update.push(element);
+
+                    var somme = 0;
+                    for (var i = 0; i < $("#chart_").data("kendoChart").options.series.length; i++) {
+                        $("#chart_").data("kendoChart").options.series[i].labels.visible = true;
+                        $("#chart_").data("kendoChart").options.series[i].data = [res.QuantityConsumptionList[i]];
+                        somme = somme + res.QuantityConsumptionList[i];
+                    }
+                    if(somme !=0)
+                    {
+                        var l = [];
+                        for (var i = 0; i < res.QuantityConsumptionList.length; i++) {
+                            l.push((res.QuantityConsumptionList[i]/somme)*100);
+                        }
+                        $("#chart_pie").data("kendoChart").options.series[0].data = l;
+                        $("#chart_pie").data("kendoChart").options.tooltip = "#= series.name #: #= value#%";
+                        $("#chart_pie").data("kendoChart").refresh();
+                    }
+                    else
+                    {
+                        for (var i = 0; i < $("#chart_pie").data("kendoChart").options.series.length; i++) {
+                            $("#chart_pie").data("kendoChart").options.series[i].data= [0];
+                            $("#chart_pie").data("kendoChart").refresh();
+                        }
+                    }
+                }
+            });
+ 
+            var Chart_ = $("#chart_").data("kendoChart");
+            Chart_.options.categoryAxis.categories = [];
+            Chart_.options.title = "Date" + kendo.format('{0:dd/MM/yyyy}', startTime);
+            Chart_.refresh();
+
+            $("#grid_QEPar").data("kendoGrid").dataSource.data(orders_update); 
+            $("#grid_QEPar").data("kendoGrid").refresh();
+        }
+
+    </script>
+
+    @* choix mois*@
+    <script type="text/javascript">
+
+        $("#mensuelle_Par").kendoDatePicker({
+            start: "year",
+            depth: "year",
+            format: "MMMM yyyy",
+            close: myfunctionMoisrefresh,
+        });
+
+        //$(".k-state-default > .k-select").css("visibility", "hidden");
+        $(".k-input").css("background-color", "#e8e8e8");
+        $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+        function MonthPicker() {
+            $("#mensuelle_Par").data("kendoDatePicker").open("date");
+        }
+
+        function myfunctionMoisrefresh()
+        {
+            var orders_update = [];
+            var startTimeMois = $("#mensuelle_Par").data("kendoDatePicker").value();
+            var list9 = [], orders_update = [], list_date = [];
+            var list10=new Array();
+            var somme_chart_pie = [];
+            var somme_par = [];
+            var somme_tatal = 0;
+            var somme1 = 0 ;
+            var somme2 = 0 ;
+            var somme3 = 0 ;
+            var l=0;
+            $.ajax({
+                url: '../../UserSession/ConsommationJournalièreToutesParcellesOneMonth',
+                type: 'GET',
+                data: { 
+                    idExpl : idExpl,
+                    startTime : startTimeMois
+                },
+                dataType: 'json',
+                async: false,
+                success: function (res){
+                    l=res[0].QuantityConsumptionList.length;
+                    for (var i = 0; i < res.length; i++) {
+                        var _date = new Date(Number(res[i].DateConsumption.substring(6, 19)));
+                        var element = {};
+                        element.OrderDate = kendo.format('{0:dd/MM/yyyy}',_date);
+                        element.Id = i + 1;
+                        for (var k = 0; k < res[i].QuantityConsumptionList.length;k++)
+                        {
+                            element['p'+ k] = res[i].QuantityConsumptionList[k];
+                        }
+                        orders_update.push(element);
+                        somme1 = somme1 + res[i].QuantityConsumptionList[0];
+                        somme2 = somme2 + res[i].QuantityConsumptionList[1];
+                        somme3 = somme3 + res[i].QuantityConsumptionList[2];
+                        
+                        list10.push(res[i].QuantityConsumptionList);
+                    }
+                        somme_tatal = somme1 + somme2 + somme3 ;
+                        somme_par.push(somme1);
+                        somme_par.push(somme2);
+                        somme_par.push(somme3);
+                }
+            });
+            var List____ = [];
+            for(var j = 0; j < l;j++)
+            {
+            var list_value_By_Par =[];
+            for(var k = 0; k < list10.length;k++)
+            { 
+              list_value_By_Par.push(list10[k][j]);
+            }
+            List____.push(list_value_By_Par);
+            }
+            var Chart = $("#chart_").data("kendoChart");
+            for (var i = 0; i < Chart.options.series.length; i++) {
+                Chart.options.series[i].data = List____[i];
+                Chart.options.series[i].labels.visible = false;
+            }
+            Chart.options.categoryAxis.categories = [];
+            for (var i = 1; i <= new Date(startTimeMois.getYear(), startTimeMois.getMonth() + 1, 0).getDate(); i++) {
+                Chart.options.categoryAxis.categories.push(i);
+            }
+            Chart.options.title = kendo.format('{0:MM/yyyy}', startTimeMois);
+            Chart.refresh();
+            var Chart_pie = $("#chart_pie").data("kendoChart");
+            if(somme_tatal != 0){
+                for (var i = 0; i < Chart_pie.options.series.length; i++) {
+                    Chart_pie.options.series[i].data = [(somme_par[i]/somme_tatal)*100];
+                    Chart_pie.options.series[i].data.name = "parcelle" + i;
+                    $("#chart_pie").data("kendoChart").options.tooltip.template = "#= series.name #: #= value#%";
+                }
+            }
+            else{
+             for (var i = 0; i < Chart_pie.options.series.length; i++) {
+                 Chart_pie.options.series[i].data = [0];
+             }
+            }
+            Chart_pie.refresh();
+            jQuery("#grid_QEPar").data("kendoGrid").dataSource.data(orders_update); 
+            jQuery("#grid_QEPar").data("kendoGrid").refresh();
+        }
+    </script>
+
+    @*reaporting*@
+    <script type ="text/javascript">
+        @* refresh *@
+        $("#refresh_par").click(function () {
+            myfunctionDaterefresh();
+        });
+        @* excel *@
+        $("#excel_par").click(function () {
+            var dataSource = $("#grid_QEPar").data("kendoGrid").dataSource;
+            var filteredDataSource = new kendo.data.DataSource({
+                data: dataSource.data(),
+                filter: dataSource.filter()
+            });
+
+            filteredDataSource.read();
+            var data = filteredDataSource.view();
+            var result = "data:application/vnd.ms-excel,";
+            result += "<table><tr><th>id</th><th>Date</th><th> Consommation d eau</th></tr>";
+            for (var i = 0; i < data.length; i++) {
+                var datee = data[i].OrderDate;
+                result += "<tr>";
+                result += "<td>";
+                result += data[i].ID;
+                result += "</td>";
+                result += "<td>";
+                result += kendo.format('{0:dd/MM/yyyy HH:mm}', datee);
+                result += "</td>";
+                result += "<td>";
+                result += data[i].Somme;
+                result += "</td>";
+                result += "</tr>";
+            }
+            result += "</table>";
+            if (window.navigator.msSaveBlob) {
+                window.navigator.msSaveBlob(new Blob([result]), 'export.csv');
+            } else {
+                window.open(result);
+            }
+        });
+        @* chart *@
+        $("#chart_img_par").click(function () {
+            var chart = $("#chart_").data("kendoChart");
+            var image = chart.imageDataURL(); //Kendo UI
+            var a = $("<a>").attr("href", image).attr("download", "img.png").appendTo("body");
+            a[0].click();
+            a.remove();
+        });
+        @* color picker *@
+        function clickColorPicker() {
+            colorpicker.open();
+        }
+        var colorpicker = $("#colorpicker_par").kendoColorPicker({
+            change: function (e) {
+            //kendoConsole.log("Change in picker #" + this.element.attr("id") + " :: " + e.value);
+                var Chart = $("#chart_").data("kendoChart");
+                Chart.options.series[0].color = e.value;
+                Chart.options.valueAxis.color = e.value;
+//                Chart.options.valueAxis[0].labels.color = e.value;
+//                Chart.options.valueAxis[0].line.color = e.value;
+                Chart.options.valueAxis.title.color = e.value;
+                Chart.refresh();
+            },
+        //  toolIcon: "k-foreColor"
+        }).data("kendoColorPicker");
+    </script>

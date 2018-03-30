@@ -1,0 +1,1643 @@
+﻿@model IEnumerable<WeatherStation.Models.MesuresClimatChoix>
+@{
+    System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+    customCulture.NumberFormat.NumberDecimalSeparator = ".";
+    System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+}
+<div id = "vertical2_Courbesuperpose" style = "height:95%; width: 100%;">
+        @*Les selections*@
+        <div id = "top-pane">
+             <ul style = "border-radius: 5px" id = "menu_date_super">
+                <li id = "Horaire_Super" onclick = "HourPicker();" style = "width:110px">Horaire</li>
+                <li id = "Journaliere_Super" onclick = "gggg();" style = "width:100px">Journaliére </li>
+                <li id = "Hebdomadaire_Super" onclick = "weekpicker();">Hebdomadaire </li>
+                <li id = "mensuelle_Super" onclick = "MonthPicker();" style = "width:100px">mensuelle </li>
+                <li id = "periodique_Super" onclick = "Periode();" style = "width:100px">periodique </li>
+            </ul>  
+            <ul style="border-radius: 5px" id = "menu_reporting_super">
+                <li id = "excel_super"><img src = "../../Content/images/excel.png" /></li>
+                <li id = "chart_img_super"><img src = "../../Content/images/curve.png"></li>
+                <li id = "pdf_super"><img src = "../../Content/images/pdf.jpeg"> </li>
+                <li><img id="refresh_super" src = "../../Content/images/refresh.png" /></li>
+                <li><img id = "colorpicker_super" onClick = "clickColorPicker();"> </li>
+            </ul>         
+        </div>
+        @*Chart Curve*@
+        <div id = "middle-pane">
+            <div id = "stock-chart_superposée" style = "height: 95%"></div>
+        </div>
+        @*Chart Grid*@
+        <div id = "bottom-pane">
+            <div id = "grid_Courbes_Seuperposées" style = "height: 100%"></div>
+        </div>
+    </div>
+    <div id = "window2"style = "display:none">
+        <center>
+            <br /><br />
+            <strong><label for = "start">date debut:</label></strong><input id = "start" style = "width: 200px" />
+            <br /><br /><br /><br />
+            <strong> <label for = "end">date fin:</label></strong><input id = "end" style = "width: 200px" />
+            <br /><br />
+            <button type = "button" id = "valider_periode">Valider</button>
+            <button type = "button" id = "annuleru  ">Annuler</button>
+            <br /><br/>
+        </center>  
+    </div>    
+     <script type="text/javascript">
+        @* menu *@
+        $("#menu_date_super").clone(true).find(".k-state-active").removeClass("k-state-active");    
+        $("#menu_date_super").kendoMenu({
+        }).css({
+            'float': 'left',
+            //'margin-top': $("#image").height() / 4
+        });
+
+        $("#menu_reporting_super").clone(true).find(".k-state-active").removeClass("k-state-active");
+        $("#menu_reporting_super").kendoMenu({
+        }).css({
+            'float': 'right',
+            'height': $("#menu_date_super").height()
+        });
+    </script>
+
+    
+<script type ="text/javascript">
+
+   var temp_tab = [], hum_tab = [],orders = [], pluv_tab = [], categories = [],date_cat = [], ray_tab = [], vitesse_tab = [], sens_tab = [], orders_grid = [];
+   var k = 1;
+   var DDD = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDay());
+   var Columns_Grid = [], valueAxisSepar = [], seri_super = [];
+   var min_temp_s = 100, max_temp_s = null, min_hum_s = 100, max_hum_s = null ,
+       min_pluv_s = null, max_pluv_s = null, min_ray_s = null, max_ray_s = null, min_vitesse_s = null, max_vitesse_s = null, min_sens_s = null, max_sens_s = null;
+   @foreach (var tmp in Model)
+    {
+
+        if (tmp.TemperatureClimat == null)
+        {
+            @:temp_tab.push(null);
+        }
+        else
+        {
+            @:temp_tab.push(@tmp.TemperatureClimat);
+            @:if(@tmp.TemperatureClimat < min_temp_s)
+            {
+                @:min_temp_s = @tmp.TemperatureClimat;
+            }
+            @:if(@tmp.TemperatureClimat > max_temp_s)
+            {
+                @:max_temp_s = @tmp.TemperatureClimat;
+            }
+        }
+
+        if (tmp.HumiditeClimat == null)
+        {
+            @:hum_tab.push(null);
+        }
+        else
+        {
+            @:hum_tab.push(@tmp.HumiditeClimat);
+            @:if(@tmp.HumiditeClimat < min_hum_s)
+            {
+                @:min_hum_s = @tmp.HumiditeClimat;
+            }
+            @:if(@tmp.HumiditeClimat > max_hum_s)
+            {
+                @:max_hum_s = @tmp.HumiditeClimat;
+            }
+        }
+         if (tmp.PluviometrieClimat == null)
+        {
+            @:pluv_tab.push(null);
+        }
+        else
+        {
+            @:pluv_tab.push(@tmp.PluviometrieClimat);
+            @:if(@tmp.PluviometrieClimat < min_pluv_s)
+            {
+                @:min_pluv_s = @tmp.PluviometrieClimat;
+            }
+            @:if(@tmp.PluviometrieClimat > max_pluv_s)
+            {
+                @:max_pluv_s = @tmp.PluviometrieClimat;
+            }
+        }
+
+        
+
+        if (tmp.RayonnementClimat == null)
+        {
+            @:ray_tab.push(null);
+        }
+        else
+        {
+            @:ray_tab.push(@tmp.RayonnementClimat);
+             @:if(@tmp.RayonnementClimat < min_ray_s)
+            {
+                @:min_ray_s = @tmp.RayonnementClimat;
+            }
+            @:if(@tmp.RayonnementClimat > max_ray_s)
+            {
+                @:max_ray_s = @tmp.RayonnementClimat;
+            }
+        }
+
+        if (tmp.VitesseVentClimat == null)
+        {
+            @:vitesse_tab.push(null);
+        }
+        else
+        {
+            @:vitesse_tab.push(@tmp.VitesseVentClimat);
+            @:if(@tmp.VitesseVentClimat < min_vitesse_s)
+            {
+                @:min_vitesse_s = @tmp.VitesseVentClimat;
+            }
+            @:if(@tmp.VitesseVentClimat > max_vitesse_s)
+            {
+                @:max_vitesse_s = @tmp.VitesseVentClimat;
+            }
+        }
+
+        if (tmp.SensVentClimat == null)
+        {
+            @:sens_tab.push(null);
+        }
+        else
+        {
+             @:sens_tab.push(@tmp.SensVentClimat);
+             @:if(@tmp.SensVentClimat < min_sens_s)
+            {
+                @:min_sens_s = @tmp.SensVentClimat;
+            }
+            @:if(@tmp.SensVentClimat > max_sens_s)
+            {
+                @:max_sens_s = @tmp.SensVentClimat;
+            }
+        }
+        @:categories.push('@tmp.DateMesure.ToString("yyyy/MM/dd HH:mm:ss")');
+
+        if (tmp.TemperatureClimat != null)
+        {
+            @:if('@tmp.TemperatureClimat' < min_temp_s )
+            {
+                @:min_temp_s = '@tmp.TemperatureClimat';
+            }
+            @:else if('@tmp.TemperatureClimat' > max_temp_s)
+            {
+                @:max_temp_s = '@tmp.TemperatureClimat';
+            }
+
+            @:orders_grid.push({
+                @:Id: k,
+                @:OrderDate : '@tmp.DateMesure',
+                @:Temperature : '@tmp.TemperatureClimat',
+                @:Humidite : '@tmp.HumiditeClimat',
+                @:Rayonnement : '@tmp.RayonnementClimat',
+                @:Pluviometrie : '@tmp.PluviometrieClimat',
+                @:VitesseVent : '@tmp.VitesseVentClimat',
+                @:sensvent : '@tmp.SensVentClimat'
+            @:});
+            @:k = k+1;
+        }
+   }     
+   Columns_Grid.push({
+       field: "Id",
+       title: "Id",
+       width: 50,
+       headerAttributes: {
+           style: "text-align:center"
+       }
+   });
+
+   Columns_Grid.push({
+       field: "OrderDate",
+       title: "Date",
+       format: "{0:yyyy/MM/dd HH:mm:ss}",
+       width: 100,
+       headerAttributes: {
+           style: "text-align:center"
+       }
+   });
+
+    if (('@Model.ElementAt(0).Temp_Etat').toString()== "True"){
+   Columns_Grid.push({
+            field: "Temperature",
+            title: "Température(°C)",
+            width: 50,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        });
+        seri_super.push({
+            name: "température",
+            type: "line",
+            style: "smooth",
+            data: temp_tab,
+            color:"#910000",
+            markers: {
+                visible :false,
+            },
+            tooltip: {
+                visible: true,
+                //template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ;#= series.name # : #= value #"
+                template: "#= value # °C"
+            },
+            axis : "temperature"
+        });
+
+        valueAxisSepar.push({
+            line: {
+                visible: true
+            },
+//            data: temp_tab,
+            name: 'temperature',
+            labels: {
+                format: "{0}"
+            }, 					
+            title: {
+                text: "temperature (°C)",
+                font: "12px sans-serif",
+            },
+            color:"#910000",
+            min: Math.floor(min_temp_s/* - (max_temp_s - min_temp_s) * 0.1*/),
+            max: Math.ceil(max_temp_s/* + (max_temp_s - min_temp_s) * 0.1*/),
+        });
+     }
+
+     if(('@Model.ElementAt(0).Hum_Etat').toString()== "True"){
+       Columns_Grid.push({
+                field:"Humidite",
+                title: "Humidité(%)",
+                width: 50,
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+      });
+       seri_super.push({
+            name: "humidité",
+            type: "line",
+            style: "smooth",
+            data:hum_tab,
+            color:"#492970",
+            markers:
+            {
+                visible :false,
+            },
+            tooltip: {
+                //template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ;#= series.name # : #= value #"
+                visible: true,
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value # %"
+            },
+            axis: "humidite",
+        });
+           
+        valueAxisSepar.push({
+            line: {
+                visible: true
+            },
+//            data: hum_tab,
+            name: 'humidite',
+            labels: {
+                format: "{0} "
+            }, 
+		    title: {
+                text: "humidité (%)",
+                font: "12px sans-serif",
+            },
+            color:"#492970",
+            min: Math.floor(min_hum_s/* - (max_hum_s - min_hum_s) * 0.1*/),
+            max: Math.ceil(max_hum_s/* + (max_hum_s - min_hum_s) * 0.1*/),
+
+        });
+    }
+
+     if(('@Model.ElementAt(0).Pluv_Etat').toString()== "True"){
+         Columns_Grid.push({
+                field: "Pluviometrie",
+                title: "Pluviometrie(mm)",
+                width: 50,
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+         });
+         seri_super.push({
+            name: "pluviométrie",
+            type: "line",
+            axis: "pluviometrie",
+            style: "smooth",
+            data: pluv_tab,
+            color: "#2f7ed8",
+            markers: 
+            {
+                visible :false,
+            },
+            tooltip: {
+                visible: true,
+                //template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ;#= series.name # : #= value #"
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value # mm"
+            },
+        });
+          
+        valueAxisSepar.push({
+            line: {
+                visible: true
+            },
+            data: pluv_tab,
+            name: 'pluviometrie',
+            labels: {
+                format: "{0} "
+            }, 
+            title: {
+                text: "pluviométrie (mm)",
+                font: "12px sans-serif",
+            },
+            color:"#2f7ed8",
+            min: Math.floor(min_pluv_s/* - (max_pluv_s - min_pluv_s) * 0.1*/),
+            max: Math.ceil(max_pluv_s/* + (max_pluv_s - min_pluv_s) * 0.1*/),
+        });
+
+     }
+
+     if(('@Model.ElementAt(0).Ray_Etat').toString()== "True"){
+         Columns_Grid.push({
+                field: "Rayonnement",
+                title: "Rayonnement solaire(watt/m²)",
+                width: 50,
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+         });
+          seri_super.push({
+            axis: "rayonnement",
+            name: "rayonnemnt",
+            type: "line",
+            style: "smooth",
+            data: ray_tab,
+            color: "#e9b657",
+            markers: 
+            {
+                visible :false,
+            },
+            tooltip: {
+                visible: true,
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value #Watt/m²"
+                //template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ;#= series.name # : #= value #"
+            },
+        });
+           
+        valueAxisSepar.push({
+            line: {
+                visible: true
+            },
+            data: ray_tab,
+            name: 'rayonnement',
+            labels: {
+                format: "{0}"
+            }, 
+		    title: {
+                text: "rayomnnment (watt/m²)",
+                font: "12px sans-serif",
+            },
+            color:"#e9b657",
+            min: Math.floor(min_ray_s - (max_ray_s - min_ray_s) * 0.1),
+            max: Math.ceil(max_ray_s + (max_ray_s - min_ray_s) * 0.1),
+        });
+     }
+
+     if(('@Model.ElementAt(0).Vitesse_Etat').toString()== "True"){
+         Columns_Grid.push({
+                field: "VitesseVent",
+                title: "Vitesse du vent(m/s)",
+                width: 50,
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+         });
+         seri_super.push({
+            axis: "vitessevent",
+            name: "vitesse_vent",
+            type: "line",
+            style: "smooth",
+            data: vitesse_tab,
+            color: "#0d233a",
+            markers: 
+            {
+                visible :false,
+            },
+            tooltip: {
+                visible: true,
+                //template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ;#= series.name # : #= value #"
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value #m/s"
+            },
+        });
+            
+        valueAxisSepar.push({
+            line: {
+                visible: true
+            },
+            data: vitesse_tab,
+            name: 'vitessevent',
+            labels: {
+                format: ""
+            }, 
+		    title: {
+                text: "vitesse vent (m/s)",
+                font: "12px sans-serif",
+            },
+            color:"#0d233a",
+            min: Math.floor(min_vitesse_s - (max_vitesse_s - min_vitesse_s) * 0.1),
+            max: Math.ceil(max_vitesse_s + (max_vitesse_s - min_vitesse_s) * 0.1),
+        });
+     }
+
+     if(('@Model.ElementAt(0).Sens_Etat').toString()== "True") {
+         Columns_Grid.push({
+                field: "sensvent",
+                title: "Sens du vent(°)",
+                width: 50,
+                headerAttributes : {
+                    style: "text-align:center"
+                }
+         });
+         seri_super.push({
+            axis: "sensvent",
+            name: "sens_vent",
+            type: "line",
+            style: "smooth",
+            data: sens_tab,
+            color: "#105380",
+            markers: 
+            {
+                visible :false,
+            },
+            tooltip: {
+                visible: true,
+                //template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ;#= series.name # : #= value #"
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value # °"
+            },
+        });
+           
+        valueAxisSepar.push({
+            line: {
+                visible: true
+            },
+            data: sens_tab,
+            name: 'sensvent',
+            labels: {
+                format: "{0}"
+            }, 
+		    title: {
+                text: "sens du vent(°)",
+                font: "12px sans-serif",
+            },
+            color:"#105380",
+            min: Math.floor(min_sens_s - (max_sens_s - min_sens_s) * 0.1),
+            max: Math.ceil(max_sens_s + (max_sens_s - min_sens_s) * 0.1),
+        });
+
+     }
+
+</script>
+
+ <script type="text/javascript">
+
+        $("#vertical2_Courbesuperpose").kendoSplitter({
+            orientation: "vertical",
+            panes: [
+                { collapsible: true, size: "6%" },
+                { collapsible: true, size: "64%" },
+                { collapsible: true, size: "30%" }
+            ]
+        });
+
+
+         $("#stock-chart_superposée").kendoStockChart({
+            title: {
+                text: "Date : " + kendo.format('{0:dd/MM/yyyy}',new Date()),
+                color: "#000000",
+                font: "12px sans-serif",
+            },
+            legend: {
+                position: "bottom",
+                visible: true,
+                border: {
+                    width: 2,
+                    color: "grey",
+                    dashType: "solid"
+                },
+            },
+            dateField: null,
+            series: seri_super,
+            valueAxis: valueAxisSepar,
+            categoryAxis: {
+                categories: categories,
+                axisCrossingValues: [0,100800,0,100800,0,100800],
+                type: "date",
+                crosshair: {
+                    color: "green",
+                    width: 1,
+                    visible:true,
+                    template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) #",
+                },
+                baseUnit: "minutes",
+                majorGridLines: {
+                    visible: false
+                },
+                labels: {
+                    visible: true,
+                    step: 120
+                },                   
+                majorTicks: {
+                    visible: true,
+                    size: 4,
+                    step: 60,
+                }                
+            },
+            tooltip: {
+                visible: true,
+                format: "{0}%",
+                background :"#e8e8e8",
+                color : "#000000",
+                template: "#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) #",
+                shared: true
+            },
+            navigator: {
+                dateField: null,
+                series: seri_super,
+                categoryAxis: {
+                    categories: categories,
+                },
+                hint: {
+                    visible: false,
+                },
+            }
+        });
+         $("#grid_Courbes_Seuperposées").kendoGrid({
+            dataSource: {
+                data: orders_grid,
+                pageSize: 50
+            },
+            height: '99%',
+            //change: onChange,
+            selectable: true,
+            scrollable: true,
+            groupable: false,
+            sortable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true,
+                buttonCount: 3
+            },
+            columns: Columns_Grid
+        });
+
+        function clickColorPicker() {
+        colorpicker.open();
+    }
+
+    var colorpicker = $("#colorpicker_super").kendoColorPicker({
+        change: function (e) {
+            //kendoConsole.log("Change in picker #" + this.element.attr("id") + " :: " + e.value);
+            var stockChart = $("#stock-chart_superposée").data("kendoStockChart");
+            stockChart.options.series[0].color = e.value;
+            stockChart.options.valueAxis[0].color = e.value;
+            stockChart.options.valueAxis[0].labels.color = e.value;
+            stockChart.options.valueAxis[0].line.color = e.value;
+            stockChart.options.valueAxis[0].title.color = e.value;
+            stockChart.options.series[2].color = e.value;
+            stockChart.refresh();
+        },
+        //  toolIcon: "k-foreColor"
+    }).data("kendoColorPicker");
+</script>
+
+
+
+@*choix heure*@
+<script type="text/javascript">
+    $("#Horaire_Super").kendoDateTimePicker({
+    close: myfunctionheurrefresh,
+});
+//$(".k-state-default > .k-select").css("visibility", "hidden");
+$(".k-input").css("background-color", "#e8e8e8");
+$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+var datepicker_hour = $("#Horaire_Super").data("kendoDateTimePicker");
+alert('hour picker');
+function HourPicker() {
+    datepicker_hour.open();
+}
+function myfunctionheurrefresh() {
+            var table = [], tab_hum=[],tab_pluv=[],tab_ray=[],tab_vitesse=[],tab_sens_vent=[];
+            var startTime = $("#Horaire_Super").data("kendoDateTimePicker").value();
+            var orders_update = [], seuil_min = [],seuil_max = [],cat_time=[],temp_time=[];
+            var min_temp = 0, Max_temp = 0, min_hum = 0, Max_hum = 0, min_pluv = 0, Max_pluv = 0 , y = 0;
+            $.ajax({
+                url: '../../UserSession/AllClimatByIntervalOneHour',
+                type: 'GET',
+                data: { idNoeudClimat : @Model.ElementAt(0).IdParentNode, startTime : startTime },
+                dataType: 'json',
+                async: false,
+                success: function (res) {
+                        var i = 0, k = 0, h = 0, g = 0,d = 0, f = 0;
+                        while ((res[i].TemperatureClimat == null) && (i < res.length - 1)){
+                            i++;
+                        }
+                        while ((res[k].HumiditeClimat == null) && (k < res.length - 1)) {
+                            k++;
+                        }
+                        while ((res[h].PluviometrieClimat == null) && (h < res.length - 1)) {
+                            h++;
+                        }
+                         min_temp = res[i].TemperatureClimat;
+                         Max_temp = res[i].TemperatureClimat;
+                         min_hum = res[k].HumiditeClimat;
+                         Max_hum = res[k].HumiditeClimat;
+                         min_pluv = res[h].PluviometrieClimat;
+                         Max_pluv = res[h].PluviometrieClimat;
+                         for (var j = 0; j < res.length; j++) {
+                            var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                            var temps = res[j].DateMesure;
+                            temp_time.push(res[j].TemperatureClimat);
+                            cat_time.push(temps);
+                            table.push(res[j].TemperatureClimat);
+                            tab_hum.push(res[j].HumiditeClimat);
+                            tab_pluv.push(res[j].PluviometrieClimat);
+                            tab_ray.push(res[j].RayonnementClimat);
+                            tab_vitesse.push(res[j].VitesseVentClimat);
+                            tab_sens_vent.push(res[j].SensVentClimat);
+                            if(res[j].TemperatureClimat!= null)
+                            {
+                                if(res[j].TemperatureClimat>Max_temp)
+                                {
+                                    Max_temp = res[j].TemperatureClimat;
+                                }
+                                if(res[j].TemperatureClimat<min_temp)
+                                {
+                                    min_temp = res[j].TemperatureClimat;
+                                }
+
+                                if(res[j].HumiditeClimat>Max_hum)
+                                {
+                                    Max_hum=res[j].HumiditeClimat;
+                                }
+                                else if(res[j].HumiditeClimat<min_hum)
+                                {
+                                    min_hum=res[j].HumiditeClimat;
+                                }
+                                if(res[j].PluviometrieClimat>Max_pluv)
+                                {
+                                    Max_pluv=res[j].PluviometrieClimat;
+                                }
+                                else if(res[j].PluviometrieClimat<min_pluv)
+                                {
+                                    min_pluv=res[j].PluviometrieClimat;
+                                }
+                                y++;
+                                orders_update.push({
+                                    Id: y,
+                                    OrderDate: date,
+                                    Temperature: res[j].TemperatureClimat,
+                                    Humidite: res[j].HumiditeClimat,
+                                    Pluviometrie: res[j].PluviometrieClimat,
+                                    Rayonnement: res[j].RayonnementClimat,
+                                    VitesseVent: res[j].VitesseVentClimat,
+                                    sensvent: res[j].SensVentClimat,
+                                });
+                            }
+                      }
+                 }
+            });
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").refresh();
+        var stockChart = $("#stock-chart_superposée").data("kendoStockChart");
+        stockChart.options.title.text = "time : " + kendo.format('{0:dd/MM/yyyy HH:mm}',startTime); 
+        stockChart.options.categoryAxis[0].categories = cat_time;
+        stockChart.options.categoryAxis[0].labels.step = 5;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        
+        for(var u=0;u<Columns_Grid.length-2;u++)
+        {
+            if(Columns_Grid[u+2].field == "Temperature")
+            {
+                stockChart.options.series[u].data = table;
+                stockChart.options.series[u].markers.visible = false;
+                stockChart.options.series[u + Columns_Grid.length - 2].data = table;
+                stockChart.options.valueAxis[u].min = Math.floor(min_temp - (Max_temp - min_temp) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(Max_temp + (Max_temp - min_temp) * 0.1);
+            }
+            else if(Columns_Grid[u+2].field == "Humidite")
+            {
+                    stockChart.options.series[u].data = tab_hum;
+                    stockChart.options.series[u + Columns_Grid.length-2].data = tab_hum;
+                    stockChart.options.series[u].markers.visible = false;
+                    stockChart.options.valueAxis[u].min = Math.floor(min_hum - (Max_hum - min_hum) * 0.1);
+                    stockChart.options.valueAxis[u].max = Math.ceil(Max_hum + (Max_hum - min_hum) * 0.1);
+            }
+            else if(Columns_Grid[u+2].field=="Pluviometrie")
+            {
+                    stockChart.options.series[u].data = tab_pluv;
+                    stockChart.options.series[u + Columns_Grid.length-2].data = tab_pluv;
+                    stockChart.options.series[u].markers.visible = false;
+                    stockChart.options.valueAxis[u].min=min_pluv;
+                    stockChart.options.valueAxis[u].max=Max_pluv + 5;
+            }
+            else if(Columns_Grid[u+2].field=="Rayonnement")
+            {
+                    stockChart.options.series[u].data = tab_ray;
+                    stockChart.options.series[u + Columns_Grid.length-2].data = tab_ray;
+                    stockChart.options.series[u].markers.visible = false;
+            }
+            else if(Columns_Grid[u+2].field=="VitesseVent")
+            {
+                stockChart.options.series[u].data = tab_vitesse;
+                stockChart.options.series[u + Columns_Grid.length-2].data = tab_vitesse;
+                stockChart.options.series[u].markers.visible = false;
+            }
+            else if(Columns_Grid[u+2].field=="sensvent")
+            {
+                stockChart.options.series[u].data = tab_sens_vent;
+                stockChart.options.series[u + Columns_Grid.length-2].data = tab_sens_vent;
+                stockChart.options.series[u].markers.visible = false;
+            }
+        }
+        stockChart.options.categoryAxis[1].categories = cat_time;
+        stockChart.options.categoryAxis[1].labels.step = 5;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart._navigator.options.select.from = cat_time[0];
+        stockChart._navigator.options.select.to = cat_time[cat_time.length-1];
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart.refresh();
+        }
+       
+</script>
+
+@*choix date*@
+<script type="text/javascript">
+    $("#Journaliere_Super").kendoDatePicker({
+    close: myfunctionDaterefresh,
+});
+$(".k-input").css("background-color", "#e8e8e8");
+$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+var datepicker = $("#Journaliere_Super").data("kendoDatePicker");
+function gggg() {
+    datepicker.open("date");
+}
+ function myfunctionDaterefresh() {
+          var startTime = $("#Journaliere_Super").data("kendoDatePicker").value();
+          if (startTime == null) {
+            startTime = new Date();
+          }
+          var list9 = [], Min_Max = [],  orders_update = [],temp_date=[],cat_date=[];
+          var table = [], tab_hum=[],tab_pluv=[],tab_ray=[],tab_vitesse=[],tab_sens_vent=[];
+          var min_temp, max_temp, min_hum, max_hum;
+          var id = 0;
+          $.ajax({
+            url: '../../UserSession/AllMesuresClimatByIntervalOneDay',
+            type: 'GET',
+            data: { idNoeudClimat : @Model.ElementAt(0).IdParentNode, startTime : startTime },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0, k = 0, h = 0, g = 0,d = 0, f = 0;
+                while ((res[i].TemperatureClimat == null) && (i < res.length - 1)){
+                    i++;
+                }
+                while ((res[k].HumiditeClimat == null) && (k < res.length - 1)) {
+                    k++;
+                }
+                while ((res[h].PluviometrieClimat == null) && (h < res.length - 1)) {
+                    h++;
+                }
+                min_temp = res[i].TemperatureClimat;
+                max_temp = res[i].TemperatureClimat;
+                min_hum = res[i].HumiditeClimat;
+                max_hum = res[i].HumiditeClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    table.push(res[j].TemperatureClimat);
+                    tab_hum.push(res[j].HumiditeClimat);
+                    tab_pluv.push(res[j].PluviometrieClimat);
+                    tab_ray.push(res[j].RayonnementClimat);
+                    tab_vitesse.push(res[j].VitesseVentClimat);
+                    tab_sens_vent.push(res[j].SensVentClimat);
+                    if (res[j].TemperatureClimat != null) {
+                        if(res[j].TemperatureClimat > max_temp)
+                        {
+                            max_temp = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat < min_temp)
+                        {
+                            min_temp = res[j].TemperatureClimat;
+                        }
+                        if(res[j].HumiditeClimat > max_hum)
+                        {
+                            max_hum = res[j].HumiditeClimat;
+                        }
+                        if(res[j].HumiditeClimat < min_hum)
+                        {
+                            min_hum = res[j].HumiditeClimat;
+                        }
+                        id++;
+                        orders_update.push({
+                            Id: id,
+                            OrderDate: date,
+                            Temperature: res[j].TemperatureClimat,
+                            Humidite: res[j].HumiditeClimat,
+                            Pluviometrie: res[j].PluviometrieClimat,
+                            Rayonnement: res[j].RayonnementClimat,
+                            VitesseVent: res[j].VitesseVentClimat,
+                            sensvent: res[j].SensVentClimat,
+                        });
+                    }
+                    var temps_=res[j].DateMesure;
+                    temp_date.push(res[j].TemperatureClimat);
+                    cat_date.push(temps_);
+                    
+                }
+         }
+     });
+
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").refresh();
+        var stockChart = $("#stock-chart_superposée").data("kendoStockChart");
+        stockChart.options.title.text = "Date : " + kendo.format('{0:dd/MM/yyyy}',startTime); 
+            stockChart.options.categoryAxis[0].categories = cat_date;
+             for(var u=0;u<Columns_Grid.length-2;u++)
+              {
+              if(Columns_Grid[u+2].field == "Temperature")
+              {
+                stockChart.options.series[u].data = table;
+                stockChart.options.series[u+Columns_Grid.length-2].data = table;
+                stockChart.options.valueAxis[u].min = Math.floor(min_temp - (max_temp - min_temp) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(max_temp + (max_temp - min_temp) * 0.1);
+              }
+              else if(Columns_Grid[u+2].field == "Humidite")
+              {
+                stockChart.options.series[u].data = tab_hum;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_hum;
+                stockChart.options.valueAxis[u].min = Math.floor(min_hum - (max_hum - min_hum) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(max_hum + (max_hum - min_hum) * 0.1);
+              }
+              else if(Columns_Grid[u+2].field == "Pluviometrie")
+              {
+                stockChart.options.series[u].data = tab_pluv;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_pluv;
+              }
+              else if(Columns_Grid[u+2].field=="Rayonnement")
+              {
+                stockChart.options.series[u].data = tab_ray;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_ray;
+              }
+              else if(Columns_Grid[u+2].field == "VitesseVent")
+              {
+                stockChart.options.series[u].data = tab_vitesse;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_vitesse;
+              }
+              else if(Columns_Grid[u+2].field == "sensvent")
+              {
+                stockChart.options.series[u].data = tab_sens_vent;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_sens_vent;
+              }
+              }
+
+            stockChart.options.categoryAxis[0].labels.step = 120;
+            //stockChart.options.series[0].markers.visible=false;
+            stockChart.options.categoryAxis[0].majorTicks.step = 60;
+            stockChart.options.categoryAxis[0].baseUnit = "minutes";
+            //stockChart.options.series[0].name="Temperature";
+            //stockChart.options.series[0].data=temp_date;
+           // stockChart.options.valueAxis[0].min=Min_Max[0];
+           // stockChart.options.valueAxis[0].max=Min_Max[1]+5;
+            stockChart.options.categoryAxis[1].categories = cat_date;
+            stockChart.options.categoryAxis[1].labels.step = 120;
+            stockChart.options.categoryAxis[1].majorTicks.step = 60;
+            stockChart.options.categoryAxis[1].baseUnit = "minutes";
+            stockChart._navigator.options.select.from = cat_date[0];
+            stockChart._navigator.options.select.to = cat_date[cat_date.length-1];
+           // stockChart.options.series[2].name="Temperature";
+           // stockChart.options.series[2].data=temp_date;
+            stockChart.refresh();
+         
+    }   
+    
+</script>
+
+@*choix mois*@
+<script type="text/javascript">
+        $("#mensuelle_Super").kendoDatePicker({
+            start: "year",
+            depth: "year",
+            format: "MMMM yyyy",
+            close: myfunctionMoisrefresh,
+         });
+         //$(".k-state-default > .k-select").css("visibility", "hidden");
+	     $(".k-input").css("background-color", "#e8e8e8");
+	     $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+	      var datepicker_month = $("#mensuelle_Super").data("kendoDatePicker");
+	      function MonthPicker(){
+              datepicker_month.open("date");
+	      }
+
+         function  myfunctionMoisrefresh()
+          {
+            var startTime = $("#mensuelle_Super").data("kendoDatePicker").value();
+            var list9 = [], orders_update = [],Min_Max=[],catt=[],orders_chart=[], tab_temp_mois=[];
+            var table = [], tab_hum=[],tab_pluv=[],tab_ray=[],tab_vitesse=[],tab_sens_vent=[];
+            var min_temp = 0, Max_temp = 0, min_hum = 0, Max_hum = 0, min_pluv = 0, Max_pluv = 0, min_ray = 0, Max_ray = 0;
+            var min_vitesse_vent = 0, Max_vitesse_vent = 0, id = 1;
+            $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneMonth',
+            type: 'GET',
+            data: { idNoeudClimat : @Model.ElementAt(0).IdParentNode, startTime : startTime },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0, k = 0, h = 0, g = 0,d = 0, f = 0;
+                while ((res[i].Tmoy == null) && (i < res.length - 1)){
+                    i++;
+                }
+                while ((res[k].Hmoy == null) && (k < res.length - 1)) {
+                    k++;
+                }
+                while ((res[h].Pmoy == null) && (h < res.length - 1)) {
+                    h++;
+                }
+                while ((res[g].Rmoy == null) && (g < res.length - 1)) {
+                    g++;
+                }
+                while ((res[d].Vmoy == null) && (d < res.length - 1)) {
+                    d++;
+                }
+                
+                min_temp = res[i].Tmoy;
+                Max_temp = res[i].Tmoy;
+                min_hum = res[k].Hmoy;
+                Max_hum = res[k].Hmoy;
+                for (var j = 0; j < res.length; j++) {
+                     var date = new Date(Number(res[j].DateMesureMoy.substring(6, 19)));
+                     
+                    var ttt = res[j].DateMesureMoy;
+                    catt.push(date);
+                    tab_temp_mois.push(res[j].Tmoy);
+                    orders_chart.push({
+                        OrderDate: date,
+                        OrderDate22: ttt,
+                        Temperature: res[j].Tmoy,
+                    });
+                       table.push(res[j].Tmoy);
+                       tab_hum.push(res[j].Hmoy);
+                       tab_pluv.push(null);
+                       tab_ray.push(res[j].Rmoy);
+                       tab_vitesse.push(res[j].Vmoy);
+                       tab_sens_vent.push(null);
+                    if (res[j].Tmoy != null) {
+                        if(res[j].Tmoy>Max_temp)
+                         {
+                             Max_temp = res[j].Tmoy;
+                         }
+                         else if(res[j].Tmoy < min_temp)
+                         {
+                             min_temp = res[j].Tmoy;
+                         }
+                         if(res[j].Hmoy > Max_hum)
+                         {
+                             Max_hum = res[j].Hmoy;
+                         }
+                         else if(res[j].Hmoy < min_hum)
+                         {
+                             min_hum = res[j].Hmoy;
+                         }
+                          if(res[j].Rmoy > Max_ray)
+                         {
+                             Max_ray = res[j].Rmoy;
+                         }
+                         else if(res[j].Rmoy < min_ray)
+                         {
+                             min_ray = res[j].Rmoy;
+                         }
+                         if(res[j].Pmoy > Max_pluv)
+                         {
+                             Max_pluv = res[j].Pmoy;
+                         }
+                         else if(res[j].Pmoy < min_pluv)
+                         {
+                            min_pluv = res[j].Pmoy;
+                         }
+                         if(res[j].Vmoy > Max_vitesse_vent)
+                         {
+                             Max_vitesse_vent = res[j].Vmoy;
+                         }
+                         else if(res[j].Vmoy < min_vitesse_vent)
+                         {
+                            min_vitesse_vent = res[j].Vmoy;
+                         }
+                        orders_update.push({
+                            Id: id,
+                            OrderDate: date,
+                            Temperature: res[j].Tmoy,
+                            Humidite: res[j].Hmoy,
+                            Pluviometrie: res[j].Pmoy,
+                            Rayonnement: res[j].Rmoy,
+                            VitesseVent: res[j].Vmoy,
+                            sensvent: res[j].Smoy,
+                        });
+                    }
+                    id++;
+                }
+           
+            }
+        });
+            var stockChart = $("#stock-chart_superposée").data("kendoStockChart");
+            stockChart.options.title.text = "Mois : " + kendo.format('{0:MM/yyyy}',startTime); 
+            stockChart.options.categoryAxis[0].categories = catt;
+            stockChart.options.navigator.series.type = "line";
+            stockChart.options.categoryAxis[0].labels.step = 2;
+            stockChart.options.categoryAxis[0].majorTicks.step = 1;
+            stockChart.options.categoryAxis[0].baseUnit = "days";
+            for(var u=0;u<Columns_Grid.length-2;u++)
+              {
+              if(Columns_Grid[u+2].field == "Temperature")
+              {
+                stockChart.options.series[u].data = table;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = table;
+                 stockChart.options.valueAxis[u].min = Math.floor(min_temp - (Max_temp - min_temp) * 0.1);
+                 stockChart.options.valueAxis[u].max = Math.ceil(Max_temp + (Max_temp - min_temp) * 0.1);
+              }
+              else if(Columns_Grid[u+2].field == "Humidite")
+              {
+                stockChart.options.series[u].data = tab_hum;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_hum;
+                stockChart.options.valueAxis[u].min = Math.floor(min_hum - (Max_hum - min_hum) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(Max_hum + (Max_hum - min_hum) * 0.1);
+              }
+              else if(Columns_Grid[u+2].field == "Pluviometrie")
+              {
+                  stockChart.options.series[u].data = tab_pluv;
+                  stockChart.options.series[u+Columns_Grid.length-2].data = tab_pluv;
+                  stockChart.options.valueAxis[u].min = min_pluv;
+                  stockChart.options.valueAxis[u].max = Max_pluv + 5;
+              }
+              else if(Columns_Grid[u+2].field == "Rayonnement")
+              {
+                 stockChart.options.series[u].data = tab_ray;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = tab_ray;
+                 stockChart.options.valueAxis[u].min = min_ray;
+                 stockChart.options.valueAxis[u].max = Max_ray + 5;
+              }
+              else if(Columns_Grid[u+2].field == "VitesseVent")
+              {
+                stockChart.options.series[u].data = tab_vitesse;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = tab_vitesse;
+                 stockChart.options.valueAxis[u].min = min_vitesse_vent;
+                 stockChart.options.valueAxis[u].max = Max_vitesse_vent + 5;
+              }
+              else if(Columns_Grid[u+2].field == "sensvent")
+              {
+                stockChart.options.series[u].data = tab_sens_vent;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = tab_sens_vent;
+              }
+              }
+            stockChart.options.categoryAxis[1].categories = catt;
+            stockChart.options.categoryAxis[1].labels.step = 2;
+            stockChart.options.categoryAxis[1].majorTicks.step = 1;
+            stockChart.options.categoryAxis[1].baseUnit = "days";
+            stockChart._navigator.options.select.from = catt[0];
+            stockChart._navigator.options.select.to = catt[catt.length-1];
+            stockChart.refresh();
+            jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").dataSource.data(orders_update); 
+            jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").refresh();
+       }
+</script>
+
+@*semaine*@
+<script type = "text/javascript">
+
+    $("#Hebdomadaire_Super").kendoDatePicker({
+    change: myfonctionWeekRefresh
+});
+//$(".k-state-default > .k-select").css("visibility", "hidden");
+$(".k-input").css("background-color", "#e8e8e8");
+$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+var datepicker_Week = $("#Hebdomadaire_Super").data("kendoDatePicker");
+function weekpicker() {
+    datepicker_Week.open("date");
+}
+ function myfonctionWeekRefresh() {
+            var tr = $(".k-state-selected", Hebdomadaire_Super._table).closest("tr");
+            var day = this.value();
+            var first = $("td:first", tr).find("a").attr("title");
+            var last = $("td:last", tr).find("a").attr("title");
+            var startTime =new Date(first);
+            var endTime = new Date(last);
+            var min_temp = 0, Max_temp = 0, min_hum = 0, Max_hum = 0, min_pluv = 0, Max_pluv = 0, Max_ray = 0,Min_ray = 0;
+            var Max_vitesse_Vent = 0, Min_vitesse_Vent = 0 ,Max_Sens_Vent = 0 ,Min_Sens_Vent = 0;
+            var orders_update = [], seuil_min = [],seuil_max = [],cat_semaine=[],temp_semaine=[];
+            var table = [], tab_hum=[],tab_pluv=[],tab_ray=[],tab_vitesse=[],tab_sens_vent=[];
+            $.ajax({
+                url: '../../UserSession/MesureClimatByWeek',
+                type: 'GET',
+                data: { idNoeudClimat : @Model.ElementAt(0).IdParentNode, startTime : startTime,endTime:endTime },
+                dataType: 'json',
+                async: false,
+                success: function (res) {
+                        var i = 0, k = 0, h = 0, g = 0,d = 0, f = 0;
+                        while ((res[i].TemperatureClimat == null) && (i < res.length - 1)){
+                            i++;
+                        }
+                        while ((res[k].HumiditeClimat == null) && (k < res.length - 1)) {
+                            k++;
+                        }
+                        while ((res[h].PluviometrieClimat == null) && (h < res.length - 1)) {
+                            h++;
+                        }
+                        while ((res[g].RayonnementClimat == null) && (g < res.length - 1)) {
+                            g++;
+                        }
+                        while ((res[d].VitesseVentClimat == null) && (d < res.length - 1)) {
+                            d++;
+                        }
+                        while ((res[f].SensVentClimat == null) && (f < res.length - 1)) {
+                            f++;
+                        }
+                        min_temp = res[i].TemperatureClimat;
+                        Max_temp = res[i].TemperatureClimat;
+                        min_hum = res[k].HumiditeClimat;
+                        Max_hum = res[k].HumiditeClimat;
+                        min_pluv = res[h].PluviometrieClimat;
+                        Max_pluv = res[h].PluviometrieClimat;
+                        Max_ray = res[g].RayonnementClimat;
+                        Min_ray = res[g].RayonnementClimat;
+                        Max_vitesse_Vent = res[d].VitesseVentClimat;
+                        Min_vitesse_Vent = res[d].VitesseVentClimat;
+                        Max_Sens_Vent = res[f].SensVentClimat;
+                        Min_Sens_Vent = res[f].SensVentClimat;
+                        id = 1;
+                    for (var j = 0; j < res.length; j++) {
+                        var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                        var temps_chart=res[j].DateMesure;
+                        temp_semaine.push(res[j].TemperatureClimat);
+                        table.push(res[j].TemperatureClimat);
+                        tab_hum.push(res[j].HumiditeClimat);
+                        tab_pluv.push(res[j].PluviometrieClimat);
+                        tab_ray.push(res[j].RayonnementClimat);
+                        tab_vitesse.push(res[j].VitesseVentClimat);
+                        tab_sens_vent.push(res[j].SensVentClimat);
+                        cat_semaine.push(temps_chart);
+                        if (res[j].TemperatureClimat != null) {
+                            if(res[j].TemperatureClimat > Max_temp)
+                            {
+                                Max_temp = res[j].TemperatureClimat;
+                            }
+                            else if(res[j].TemperatureClimat < min_temp)
+                            {
+                                min_temp = res[j].TemperatureClimat;
+                            }
+                            if(res[j].HumiditeClimat > Max_hum)
+                            {
+                                Max_hum = res[j].HumiditeClimat;
+                            }
+                            else if(res[j].HumiditeClimat < min_hum)
+                            {
+                                min_hum = res[j].HumiditeClimat;
+                            }
+                            if(res[j].PluviometrieClimat > Max_pluv)
+                            {
+                                Max_pluv = res[j].PluviometrieClimat;
+                            }
+                            else if(res[j].PluviometrieClimat < min_pluv)
+                            {
+                                min_pluv = res[j].PluviometrieClimat;
+                            }
+                            if(res[j].RayonnementClimat < Min_ray)
+                            {
+                                Min_ray = res[j].RayonnementClimat;
+                            }
+                            else if(res[j].RayonnementClimat > Max_ray)
+                            {
+                                Max_ray = res[j].RayonnementClimat;
+                            }
+                            if(res[j].VitesseVentClimat < Min_vitesse_Vent)
+                            {
+                                Min_vitesse_Vent = res[j].VitesseVentClimat;
+                            }
+                            else if(res[j].VitesseVentClimat > Max_vitesse_Vent)
+                            {
+                                Max_vitesse_Vent = res[j].VitesseVentClimat;
+                            }
+                                if(res[j].SensVentClimat < Min_Sens_Vent)
+                            {
+                                Min_Sens_Vent = res[j].SensVentClimat;
+                            }
+                            else if(res[j].SensVentClimat > Max_Sens_Vent)
+                            {
+                                Max_Sens_Vent = res[j].SensVentClimat;
+                            }
+                            
+                            orders_update.push({
+                                Id: id++,
+                                OrderDate: date,
+                                Temperature: res[j].TemperatureClimat,
+                                Humidite: res[j].HumiditeClimat,
+                                Pluviometrie: res[j].PluviometrieClimat,
+                                Rayonnement: res[j].RayonnementClimat,
+                                VitesseVent: res[j].VitesseVentClimat,
+                                sensvent: res[j].SensVentClimat,
+                            });
+                        }
+                    }
+                }
+            });
+
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").refresh();
+        var stockChart = $("#stock-chart_superposée").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut : " + kendo.format('{0:dd/MM/yyyy HH:mm}',startTime) + " -  Date fin : " +  kendo.format('{0:dd/MM/yyyy HH:mm}',endTime); 
+        stockChart.options.categoryAxis[0].categories = cat_semaine;
+        // stockChart.options.categoryAxis[0].axisCrossingValues = [0,38,0,38, 0,38];
+        stockChart.options.categoryAxis[0].labels.step = 1440;
+        //stockChart.options.series[0].markers.visible = false;
+        stockChart.options.categoryAxis[0].majorTicks.step = 300;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        for(var u=0;u<Columns_Grid.length-2;u++)
+            {
+            if(Columns_Grid[u+2].field == "Temperature")
+            {
+            stockChart.options.series[u].data = table;
+            stockChart.options.series[u+Columns_Grid.length-2].data = table;
+            stockChart.options.valueAxis[u].min = Math.floor(min_temp - (Max_temp - min_temp) * 0.1);
+            stockChart.options.valueAxis[u].max = Math.ceil(Max_temp + (Max_temp - min_temp) * 0.1);
+
+            }
+            else if(Columns_Grid[u+2].field == "Humidite")
+            {
+                stockChart.options.series[u].data = tab_hum;
+                stockChart.options.series[u + Columns_Grid.length-2].data = tab_hum;
+                stockChart.options.valueAxis[u].min = Math.floor(min_hum - (Max_hum - min_hum) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(Max_hum + (Max_hum - min_hum) * 0.1);
+            }
+            else if(Columns_Grid[u+2].field == "Pluviometrie")
+            {
+            stockChart.options.series[u].data = tab_pluv;
+            stockChart.options.series[u + Columns_Grid.length-2].data = tab_pluv;
+            stockChart.options.valueAxis[u].min = Math.floor(min_pluv - (Max_pluv - min_pluv) * 0.1);
+            stockChart.options.valueAxis[u].max = Math.ceil(Max_pluv + (Max_pluv - min_pluv) * 0.1);
+            }
+            else if(Columns_Grid[u+2].field == "Rayonnement")
+            {
+            stockChart.options.series[u].data = tab_ray;
+            stockChart.options.series[u+Columns_Grid.length-2].data = tab_ray;
+            stockChart.options.valueAxis[u].min = Math.floor(Min_ray - (Max_ray - Min_ray) * 0.1);
+            stockChart.options.valueAxis[u].max = Math.ceil(Max_ray + (Max_ray - Min_ray) * 0.1);
+            }
+            else if(Columns_Grid[u+2].field == "VitesseVent")
+            {
+            stockChart.options.series[u].data = tab_vitesse;
+            stockChart.options.series[u+Columns_Grid.length-2].data = tab_vitesse;
+            stockChart.options.valueAxis[u].min = Math.floor(Min_vitesse_Vent - (Max_vitesse_Vent - Min_vitesse_Vent) * 0.1);
+            stockChart.options.valueAxis[u].max = Math.ceil(Max_vitesse_Vent + (Max_vitesse_Vent - Min_vitesse_Vent) * 0.1);
+            }
+            else if(Columns_Grid[u+2].field == "sensvent")
+            {
+            stockChart.options.series[u].data = tab_sens_vent;
+            stockChart.options.series[u + Columns_Grid.length-2].data = tab_sens_vent;
+            stockChart.options.valueAxis[u].min = Math.floor(Min_Sens_Vent - (Max_Sens_Vent - Min_Sens_Vent) * 0.1);
+            stockChart.options.valueAxis[u].max = Math.ceil(Max_Sens_Vent + (Max_Sens_Vent - Min_Sens_Vent) * 0.1);
+            }
+            }
+        stockChart.options.categoryAxis[1].categories = cat_semaine;
+        stockChart.options.categoryAxis[1].labels.step = 480;
+        stockChart.options.categoryAxis[1].majorTicks.step = 300;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = cat_semaine[0];
+        //stockChart.options.categoryAxis[1].axisCrossingValues = [0,10080,0,10080,0,10080]
+        stockChart._navigator.options.select.to = cat_semaine[cat_semaine.length-1];
+        stockChart.refresh();
+    }  
+</script>
+@*choix periode*@
+
+
+<script type="text/javascript">
+
+    var window = $("#window2"),
+                    undo = $("#undo")
+                            .bind("click", function () {
+                                $("#window2").data("kendoWindow").center().open();
+                            });
+    undo.show();
+    var onClose = function () {
+        undo.show();
+    }
+    if (!$("#window2").data("kendoWindow")) {
+        $("#window2").kendoWindow({
+            width: "400px",
+            title: "Choix periode",
+            actions: [
+                            "Close"
+                        ],
+            close: onClose
+        });
+    }
+
+    function Periode() {
+        //         var window = $("#window2");
+        $("#window2").data("kendoWindow").center().open();
+    }
+
+  </script>
+ <script type="text/javascript">
+
+     var window = $("#window2"),
+                    undo = $("#undo")
+                            .bind("click", function () {
+                                $("#window2").data("kendoWindow").center().open();
+                            });
+     undo.show();
+     var onClose = function () {
+         undo.show();
+     }
+     if (!$("#window2").data("kendoWindow")) {
+         $("#window2").kendoWindow({
+             width: "400px",
+             title: "Choix periode",
+             actions: [
+                            "Close"
+                        ],
+             close: onClose
+         });
+     }
+
+     function Periode() {
+         //         var window = $("#window2");
+         $("#window2").data("kendoWindow").center().open();
+     }
+
+  </script>
+    <script type='text/javascript'>
+        function startChange() {
+            var startDate = start.value(),
+                endDate = end.value();
+              if (startDate) {
+                startDate = new Date(startDate);
+                startDate.setDate(startDate.getDate());
+                end.min(startDate);
+            } else if (endDate) {
+                start.max(new Date(endDate));
+            } else {
+                endDate = new Date();
+                start.max(endDate);
+                end.min(endDate);
+            }
+        }
+
+        function endChange() {
+            var endDate = end.value(),
+                startDate = start.value();
+               if (endDate) {
+                endDate = new Date(endDate);
+                endDate.setDate(endDate.getDate());
+                start.max(endDate);
+            } else if (startDate) {
+                end.min(new Date(startDate));
+            } else {
+                endDate = new Date();
+                start.max(endDate);
+                end.min(endDate);
+            }
+        }
+
+        var start = $("#start").kendoDateTimePicker({
+            change: startChange
+        }).data("kendoDateTimePicker");
+
+        var end = $("#end").kendoDateTimePicker({
+             change: endChange,
+             //close: myfunctionperiodrefresh,
+        }).data("kendoDateTimePicker");
+
+        start.max(end.value());
+        end.min(start.value());
+
+        $("#valider_periode").kendoButton({
+            click: myfunctionperiodrefresh,
+            imageUrl: "../content/themes/base/images/connection.png",
+        });
+        $("#annuler").kendoButton({
+            click: exit,
+            imageUrl: "../content/themes/base/images/cancel.png",
+        });
+        function exit()
+        {
+            $("#window2").data("kendoWindow").center().close();
+        } 
+          function myfunctionperiodrefresh()
+        {
+//         var window = $("#window2");
+//	       window.data("kendoWindow").center().close();
+           var startTime = $("#start").data("kendoDateTimePicker").value();
+           var endTime = $("#end").data("kendoDateTimePicker").value();
+           var Min_Max = [], orders_update = [], seuil_min = [],seuil_max = [],tab_temp_periode=[],cat_periode=[];
+           var table = [], tab_hum=[],tab_pluv=[],tab_ray=[],tab_vitesse=[],tab_sens_vent=[];
+           var min_temp = 0 , max_temp = 0 , min_hum = 0 , max_hum = 0 ,min_pluv = 0 ,max_pluv = 0 ,min_ray = 0 ,max_ray = 0 ;
+           var min_vitesse_vent = 0 ,max_vitesse_vent = 0 ,min_sens_vent = 0 , max_sens_vent = 0, id = 0 ;
+           $.ajax({
+            url: '../../UserSession/AllMesureClimatByInterval',
+            type: 'GET',
+            data: { idNoeudClimat : @Model.ElementAt(0).IdParentNode, startTime : startTime,endTime:endTime },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+            var i = 0, k = 0, h = 0, g = 0,d = 0, f = 0;
+            while ((res[i].TemperatureClimat == null) && (i < res.length - 1)){
+                i++;
+            }
+            while ((res[k].HumiditeClimat == null) && (k < res.length - 1)) {
+                k++;
+            }
+            while ((res[h].PluviometrieClimat == null) && (h < res.length - 1)) {
+                h++;
+            }
+            min_temp = res[i].TemperatureClimat;
+            max_temp = res[i].TemperatureClimat;
+            min_hum = res[k].HumiditeClimat;
+            max_hum = res[k].HumiditeClimat;
+                for (var j = 0; j < res.length; j++) {
+                           
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    var temps=res[j].DateMesure;
+                    table.push(res[j].TemperatureClimat);
+                    tab_hum.push(res[j].HumiditeClimat);
+                    tab_pluv.push(res[j].PluviometrieClimat);
+                    tab_ray.push(res[j].RayonnementClimat);
+                    tab_vitesse.push(res[j].VitesseVentClimat);
+                    tab_sens_vent.push(res[j].SensVentClimat);
+                    cat_periode.push(temps);
+                    tab_temp_periode.push(res[j].TemperatureClimat);
+                  if (res[j].TemperatureClimat != null) {
+                        if(res[j].TemperatureClimat > max_temp)
+                            {
+                                max_temp = res[j].TemperatureClimat;
+                            }
+                            else if(res[j].TemperatureClimat < min_temp)
+                            {
+                                min_temp = res[j].TemperatureClimat;
+                            }
+                            if(res[j].HumiditeClimat > max_hum)
+                            {
+                                max_hum = res[j].HumiditeClimat;
+                            }
+                            else if(res[j].HumiditeClimat < min_hum)
+                            {
+                                min_hum = res[j].HumiditeClimat;
+                            }
+                            if(res[j].PluviometrieClimat > max_pluv)
+                            {
+                                max_pluv = res[j].PluviometrieClimat;
+                            }
+                            else if(res[j].PluviometrieClimat < min_pluv)
+                            {
+                                min_pluv = res[j].PluviometrieClimat;
+                            }
+                            if(res[j].RayonnementClimat < min_ray)
+                            {
+                                min_ray = res[j].RayonnementClimat;
+                            }
+                            else if(res[j].RayonnementClimat > max_ray)
+                            {
+                                max_ray = res[j].RayonnementClimat;
+                            }
+                            if(res[j].VitesseVentClimat < min_vitesse_vent)
+                            {
+                                min_vitesse_vent = res[j].VitesseVentClimat;
+                            }
+                            else if(res[j].VitesseVentClimat > max_vitesse_vent)
+                            {
+                                max_vitesse_vent = res[j].VitesseVentClimat;
+                            }
+                             if(res[j].SensVentClimat < min_sens_vent)
+                            {
+                                min_sens_vent = res[j].SensVentClimat;
+                            }
+                            else if(res[j].SensVentClimat > max_sens_vent)
+                            {
+                                max_sens_vent = res[j].SensVentClimat;
+                            }
+                        id++;
+                        orders_update.push({
+                            Id: id,
+                            OrderDate: date,
+                            Temperature: res[j].TemperatureClimat,
+                            Humidite: res[j].HumiditeClimat,
+                            Pluviometrie: res[j].PluviometrieClimat,
+                            Rayonnement: res[j].RayonnementClimat,
+                            VitesseVent: res[j].VitesseVentClimat,
+                            sensvent: res[j].SensVentClimat,
+                        });
+                    }
+               }
+            Min_Max.push(min);
+            Min_Max.push(Max);
+            }
+        });
+
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_Courbes_Seuperposées").data("kendoGrid").refresh();
+         var stockChart = $("#stock-chart_superposée").data("kendoStockChart");
+            stockChart.options.title.text = "Date debut : " +startTime.getFullYear()+"-"+(startTime.getMonth()+1)+"-" +startTime.getDate()+" "+startTime.getHours()+":"+startTime.getMinutes()+"- date fin: " +endTime.getFullYear()+"-"+(endTime.getMonth()+1)+"-" +endTime.getDate()+" "+endTime.getHours()+":"+endTime.getMinutes(); 
+            stockChart.options.categoryAxis[0].categories = cat_periode;
+            stockChart.options.categoryAxis[0].labels.step = 2400;
+            //stockChart.options.series[0].markers.visible = false;
+            stockChart.options.categoryAxis[0].majorTicks.step = 1200;
+            stockChart.options.categoryAxis[0].baseUnit = "minutes";
+             for(var u=0;u<Columns_Grid.length-2;u++)
+              {
+              if(Columns_Grid[u+2].field == "Temperature")
+              {
+                stockChart.options.series[u].data = table;
+                stockChart.options.series[u + Columns_Grid.length-2].data = table;
+                stockChart.options.valueAxis[u].min = Math.floor(min_temp - (max_temp - min_temp) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(max_temp + (max_temp - min_temp) * 0.1);
+              }
+              else if(Columns_Grid[u+2].field == "Humidite")
+              {
+                stockChart.options.series[u].data = tab_hum;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_hum;
+                stockChart.options.valueAxis[u].min = Math.floor(min_hum - (max_hum - min_hum) * 0.1);
+                stockChart.options.valueAxis[u].max = Math.ceil(max_hum + (max_hum - min_hum) * 0.1);
+              }
+              else if(Columns_Grid[u+2].field == "Pluviometrie")
+              {
+                 stockChart.options.series[u].data = tab_pluv;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = tab_pluv;
+                 stockChart.options.valueAxis[u].min = min_pluv;
+                 stockChart.options.valueAxis[u].max = max_pluv + 5;
+              }
+              else if(Columns_Grid[u+2].field == "Rayonnement")
+              {
+                 stockChart.options.series[u].data = tab_ray;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = tab_ray;
+                 stockChart.options.valueAxis[u].min = min_ray;
+                 stockChart.options.valueAxis[u].max = max_ray + 5;
+              }
+              else if(Columns_Grid[u+2].field == "VitesseVent")
+              {
+                stockChart.options.series[u].data = tab_vitesse;
+                stockChart.options.series[u+Columns_Grid.length-2].data = tab_vitesse;
+                stockChart.options.valueAxis[u].min = min_vitesse_vent;
+                 stockChart.options.valueAxis[u].max = max_vitesse_vent + 5;
+              }
+              else if(Columns_Grid[u+2].field == "sensvent")
+              {
+                stockChart.options.series[u].data = tab_sens_vent;
+                 stockChart.options.series[u+Columns_Grid.length-2].data = tab_sens_vent;
+                 stockChart.options.valueAxis[u].min = min_sens_vent;
+                 stockChart.options.valueAxis[u].max = max_sens_vent + 5;
+                 
+              }
+              }
+            stockChart.options.categoryAxis[1].categories = cat_periode;
+            stockChart.options.categoryAxis[1].labels.step = 600;
+            stockChart.options.categoryAxis[0].majorTicks.step = 600;
+            stockChart.options.categoryAxis[1].baseUnit = "minutes";
+            stockChart._navigator.options.select.from = cat_periode[0];
+            stockChart._navigator.options.select.to = cat_periode[cat_periode.length-1];
+            stockChart.refresh();
+    
+        }
+        
+</script>
+
+
+<script type="text/javascript">
+    var original = $("#menu_reporting").clone(true);
+    original.find(".k-state-active").removeClass("k-state-active");
+    $("#apply").click(function (e) {
+        e.preventDefault();
+        var menu = $("#menu_reporting"),
+                    clone = original.clone(true);
+        menu.data("kendoMenu").close($("#menu .k-link"));
+        menu.replaceWith(clone);
+        initMenuReporting();
+    });
+
+    var getDirection = function () {
+        var checked = $("input[type=radio]:checked")[0].id;
+        return /custom|customValue/.test(checked) ? $("#customValue").val() : checked;
+    };
+
+    var initMenuReporting = function () {
+        $("#menu_reporting").kendoMenu({
+    }).css({
+        'float': 'right',
+        'margin-right': 30,
+        'margin-top': $("#image").height() / 4
+    });
+};
+
+initMenuReporting();
+</script>
+

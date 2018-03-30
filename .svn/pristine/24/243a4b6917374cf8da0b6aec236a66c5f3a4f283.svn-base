@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherStation", "WeatherStation\WeatherStation.csproj", "{BF67CA41-4703-4EFF-86BC-61CA0383E3D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfService1", "WcfService1\WcfService1.csproj", "{E8547655-53A8-474C-85B2-5E73B4E5F2D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{21A2BD14-382F-4006-9657-3262E055CDB6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF67CA41-4703-4EFF-86BC-61CA0383E3D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF67CA41-4703-4EFF-86BC-61CA0383E3D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF67CA41-4703-4EFF-86BC-61CA0383E3D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF67CA41-4703-4EFF-86BC-61CA0383E3D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8547655-53A8-474C-85B2-5E73B4E5F2D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8547655-53A8-474C-85B2-5E73B4E5F2D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8547655-53A8-474C-85B2-5E73B4E5F2D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8547655-53A8-474C-85B2-5E73B4E5F2D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21A2BD14-382F-4006-9657-3262E055CDB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A2BD14-382F-4006-9657-3262E055CDB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21A2BD14-382F-4006-9657-3262E055CDB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21A2BD14-382F-4006-9657-3262E055CDB6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+	EndGlobalSection
+EndGlobal

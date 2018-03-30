@@ -1,0 +1,149 @@
+﻿@model IEnumerable<WeatherStation.Models.ExploitationModel>
+@{
+    ViewBag.Title = "Choix de l'Exploitation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+</br></br></br></br>
+<center><div style="font:bold 24px Lucida Sans Unicode,verdana;  width:320px; text-align:center; center bottom no-repeat; color:#273a90">Choix de l'exploitation</div></center>
+</br></br></br>
+<div id="example" class="k-content">
+    <div id="grid_e" ></div>
+    <script type = "text/javascript" src="~/Scripts/jquery.signalR-1.1.4.js"></script>
+    <script type = "text/javascript" src="~/Scripts/Hubscript.js" />
+    <script type = "text/javascript">
+        $(function () {
+           // Proxy created on the fly
+            var job = $.connection.JobHub;
+
+            // Declare a function on the job hub so the server can invoke it
+            job.client.displayStatus = function () {
+                getData();
+            };
+            // Start the connection
+            $.connection.hub.start();
+            getData();
+        });
+
+        function getData() {
+            $.ajax({
+                url: '../../Values/Get',
+                type: 'GET',
+                datatype: 'json',
+                success: function (data) {
+                    alert('hello');
+                }
+            });
+        }
+    </script>
+</div>
+
+
+<script type="text/javascript">
+    var orders = [];
+    @foreach (var item in Model) {
+        @:orders.push({
+            @:OrderDate: '@item.DateAjoutExploitation.ToString("dd/MM/yyyy")',
+            @:NomExploitation: '@item.NomExploitation',
+            @:DescriptionExploitation :('@item.DescriptionExploitation').replace("&#232;", 'è'), 
+            @:Projet :'@item.NomProjetPère',
+            @:IdExploitation: '@item.IdExploitation',
+        @:});                 
+    }
+</script>
+          
+<script type="text/javascript">
+
+    function onChange(arg) {
+
+        var idExploitation = 0;
+
+            var selected = $.map(this.select(), function (row) {
+                @foreach (var item in Model) {
+                    @:if ('@item.NomExploitation' == row.cells[0].innerHTML) {
+                        Session["Exploit"] = new WeatherStation.Models.PassModel { idUser = item.IdExploitation, admin = false };
+                        @:location.href = '@Url.Action("Index", "UserSession")';
+                    @:}
+                }
+            });
+        //$.post(
+        //    url,
+        //    { idExploitation: idExploitation },
+        //    function (content) {
+        //        //alert( "Data Loaded: " + data );
+        //        $( "#page" ).empty().append( content );
+        //});
+        //alert("Selected: " + selected.length + " item(s), [" + selected.join(", ") + "]");
+    }
+
+    function addExtraStylingToGrid() {
+        $(".k-grid > table > tbody > tr").hover(
+            function () {
+                $(this).toggleClass("k-state-hover");
+            }
+        );
+    };
+
+    $("#grid_e").kendoGrid({
+        dataSource: {
+            data: orders,
+            pageSize: 5
+        },
+        change: onChange,
+        selectable: true,
+        scrollable: false,
+        groupable: false,
+        sortable: true,
+        dataBound: addExtraStylingToGrid,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 5
+        },
+        columns: [
+        {
+            field: "NomExploitation",
+            title: "Nom",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "DescriptionExploitation",
+            title: "Description",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "Projet",
+            title: "Projet correspondant",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "Localisation",
+            title: "Localisation",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }
+        , {
+            field: "OrderDate",
+            title: "Date de création",
+            format: "{0:yyyy/MM/dd HH:m}",
+            width: 160,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }
+        ]
+    });
+
+</script>
+
+<script type="text/javascript">
+    $("img#image").hide();
+    $("div#authentification").hide();
+</script>

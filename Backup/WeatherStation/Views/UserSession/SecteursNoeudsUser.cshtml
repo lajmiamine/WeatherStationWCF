@@ -1,0 +1,912 @@
+﻿@model WeatherStation.Models.ParcelModel
+    
+<div id = "par-@Model.IdParcelle" style="overflow:auto;">
+    <div id = "loading1"></div>
+</div>
+@*<div id="scale-@Model.IdParcelle" style="display:none">
+    @Html.Partial("ParcelScale", Model.Saison)
+</div>*@
+<div id = "id_Climat" style="display:none;">
+    <div id = "mesureClimat" >
+        <div>
+            <button id = "152_temp"     onclick = "TempératureClimat(idNoeudClimat);"><img src = "../../Content/images/temperature.png"  height = "50px" width = "50px"  /></button>
+            <button id = "hum_button"   onclick = "humiditéClimat(idNoeudClimat);"><img src = "../../Content/images/humidité.png"  height="50px" width="50px"  /></ button>
+            <button id = "Ray_button"   onclick = "Rayonnement(idNoeudClimat);"><img src = "../../Content/images/rayonnemet.png"  height="50px" width="50px"  /></ button><br/>
+        </div>
+        <div>
+            <button id = "Pluv_button" onclick = "PluviometrieClimat(idNoeudClimat);"><img src="../../Content/images/pluvimetrie.png"  height="50px" width="50px"  /></ button>
+            <button id = "Vitesse_vent_button" onclick = "VitesseDuvent(idNoeudClimat);"><img src="../../Content/images/vitessevent.png"  height="50px" width="50px"  /></ button>
+            <button id = "Sens_vent_button" onclick = "SensDuvent(idNoeudClimat);"><img src="../../Content/images/sensduvent.png"  height="50px" width="50px"  /></ button> <br/>
+        </div>
+        <div>
+            <button id = "Curve_super_button" onclick = "Courbesuperpose(idNoeudClimat);" ><img src="../../Content/images/CTH.png"  height="50px" width="50px"  /></ button>
+            <button id = "Curve_sepa_button" onclick = "Courbesepare(idNoeudClimat);" ><img src="../../Content/images/CTHS.png"  height="50px" width="50px"  /></ button>
+            <button id = "Tab_button" onclick = "MesuresClimat_tab(idNoeudClimat);" ><img src="../../Content/images/tableau.png"  height="50px" width="50px"  /></ button>
+        </div>
+        <div style="text-align: center">
+            <button id = "ET0-Node" onclick = "ET0();" ><img src="../../Content/images/et.png"  height="50px" width="50px"  /></ button>
+        </div>
+    </div>
+
+    <div id="choix1" style = "display:none;">
+        <table>
+            <tr><td>
+            <INPUT TYPE = "CHECKBOX" NAME = "temperature" id ="temperature" style= "float:left;">temperature <BR> </td><td><INPUT TYPE="CHECKBOX" NAME=humidite id="humidite" style= "float:left;">humidite <BR></td></tr>
+            <tr><td><INPUT TYPE = "CHECKBOX" NAME = "pluviometrie" id = "pluviometrie" style= "float:left;" >pluviometrie <BR></td> <td><INPUT TYPE="CHECKBOX" NAME=sensduvent id="sensduvent" style= "float:left;" >sens du vent <BR> </td></tr>
+            <tr><td><INPUT TYPE = "CHECKBOX" NAME = vitesseduvent id = "vitesseduvent" style= "float:left;" >vitesse du vent <BR> </td><td><INPUT TYPE="CHECKBOX" NAME=rayonnement id="rayonnement" style= "float:left;" >rayonnement solaire <BR> </td></tr>
+            <tr><td><center><INPUT TYPE = "button" id = "Visualiser" VALUE = "Visualiser" style="width:85px;" onclick="Visualiser(idNoeudClimat);" ><center> <BR> </td><td><center>
+            <INPUT TYPE="button"  VALUE=" retour" id = "Annuler" onclick = "back();" style="width:85px;"><center> <BR> </td></tr>
+        </table>
+    </div>
+</div>
+    <script type = "text/javascript">
+
+        var undo = $("#undo").bind("click", function () {
+        $("#id_Climat").data("kendoWindow").center().open();
+        });
+        undo.show();
+        var onClose = function () {
+            undo.show();
+        };
+
+        if (!$("#id_Climat").data("kendoWindow")) {
+            $("#id_Climat").kendoWindow({
+            //width: "400px",
+            title: "Choix periode",
+            actions: ["Close"],
+            close: onClose
+            });
+        }
+
+
+
+        $("#152_temp").kendoButton({
+
+        });
+        $("#hum_button").kendoButton({
+
+        });
+        $("#Ray_button").kendoButton({
+
+        });
+        $("#Pluv_button").kendoButton({
+
+        });
+        $("#Vitesse_vent_button").kendoButton({
+
+        });
+        $("#Sens_vent_button").kendoButton({
+
+        });
+        $("#Curve_super_button").kendoButton({
+
+        });
+        $("#Curve_sepa_button").kendoButton({
+
+        });
+        $("#Tab_button").kendoButton({
+
+        });
+        $("#Visualiser").kendoButton({
+            imageUrl: "../content/themes/base/images/connection.png",
+        });
+        $("#Annuler").kendoButton({
+
+        });
+        $("#ET0-Node").kendoButton({
+
+        });
+    </script>
+
+<script type="text/javascript">
+
+    var parPath = [], secPath = [];
+    var info;
+    var Courbessep = false;
+    var Courbesuper = false;
+
+    $.ajax({
+        url: '../../UserSession/contourParcelle',
+        data: { idParcel: '@Model.IdParcelle' },
+            type: 'GET',
+            dataType: 'json',
+            async: false,
+            success: function (path01) {
+                parPath = path01;
+            }
+        });
+
+        polygon_parcels[i_parcels] = new GMaps({
+            div: '#par-@Model.IdParcelle',
+            lat: parPath.lattitude,
+            lng: parPath.longitude,
+            width: $("#tabs ul").width(),
+            height: '95%',
+            maxZoom: 19,
+            minZoom: 19,
+            mapTypeControl: false,
+            zoomControl: false,
+            draggable: false,
+            scrollwheel: false,
+            disableDoubleClickZoom: true,
+            panControl: false,
+            streetViewControl: false,
+            clickable: false,
+            dblclick: false,
+            mousemove: false,
+            mapTypeId: google.maps.MapTypeId.SATELLITE,
+        });
+
+            polygon_parcels[i_parcels].drawPolyline({
+                path: parPath.latlng,
+                strokeColor: parPath.couleur,
+                strokeOpacity: 0.6,
+                strokeWeight: 6,
+                clickable: false
+            });
+</script>
+
+@foreach (var sect in Model.SecteursParcelle)
+{
+    <script type="text/javascript">
+
+        $.ajax({
+            url: '../../UserSession/contourSecteur',
+            type: 'GET',
+            data: { idSector: '@sect.IdSecteur' },
+            dataType: 'json',
+            async: false,
+            success: function (path02) {
+                secPath = path02;
+            }
+        });
+
+        polygon_sectors[i_sectors] = polygon_parcels[i_parcels].drawPolygon({
+            paths: secPath.latlng,
+            strokeColor: secPath.couleur,
+            strokeOpacity: 1,
+            strokeWeight: 3,
+            fillColor: secPath.couleur,
+            fillOpacity: 0.0
+        });
+
+        // tooltip info secteur
+        google.maps.event.addListener(polygon_sectors[i_sectors], 'mouseover', (function (i_sectors) {
+            return function () {
+
+                if (over) {
+                    $("#elementId").empty();
+                    $('#elementId').append("<div id='demo2_tip'><table><tr>\
+                                        <div id='Exploitation_Name'><center><strong>\
+                                        @sect.NomSecteur\
+                                        </strong></center></div></tr>\
+                                        <tr><td>Description</td><div>\
+                                        <td> @sect.DescriptionSecteur</td></tr>\
+                                        </ div></table>\
+                                    </div>");
+                    $("#elementId").data("kendoWindow").center().open();
+                }
+
+                var content = '';
+                polygon_sectors[i_sectors].setOptions({ fillOpacity: 0.6 });
+                //tooltipp.pop(polygon_sectors[i_sectors], content);
+            }
+        })(i_sectors));
+
+        google.maps.event.addListener(polygon_sectors[i_sectors], 'mouseout', (function (i_sectors) {
+            return function () {
+                if (over) {
+                    $("#elementId").data("kendoWindow").center().close();
+                }
+                polygon_sectors[i_sectors].setOptions({ fillOpacity: 0.0 });
+                //                tooltipp.hide();
+            }
+        })(i_sectors));
+
+        // tooltip info secteur
+        google.maps.event.addListener(polygon_sectors[i_sectors], 'click', (function (i_sectors) {
+            return function () {
+                loadLeftSplitterWithSecInfos(@sect.IdSecteur);
+            }
+        })(i_sectors));
+
+        i_sectors++;
+
+    </script>
+}
+
+<script type="text/javascript">
+
+    var idNoeudClimat = 0;
+    $.ajax({
+        url: '../../UserSession/enumMarker',
+        data: { idParcel: '@Model.IdParcelle' },
+        type: 'GET',
+        dataType: 'json',
+        async: false,
+        success: function (mark1) {
+
+            for (var i = 0; i < mark1.length; i++) {
+
+                markers[i_markers] = polygon_parcels[i_parcels].addMarker({
+                    lat: mark1[i].Latitude,
+                    lng: mark1[i].Longitude,
+                    draggable: false,
+                    visible: mark1[i].Visible,
+                    //animation: google.maps.Animation.BOUNCE
+                });
+
+                google.maps.event.addListener(markers[i_markers], 'click', (function (i) {
+                    return function () {
+                        switch (mark1[i].NodeType) {
+                            case 1:
+                                idNoeudClimat = mark1[i].IdImplanter_noeud_secteur;
+                                $('#mesureClimat').show();
+                                $('#choix1').hide();
+                                $("#id_Climat").data("kendoWindow").center().open();
+                                over = false;
+                                break;
+                            case 2:
+                                $("#id_Climat").data("kendoWindow").center().close();
+                                $("#elementId").empty();
+                                $("#elementId").data("kendoWindow").center().open();
+                                over = false;
+                                break;
+                            case 3:
+                                $("#id_Climat").data("kendoWindow").center().close();
+                                $("#elementId").empty();
+                                $("#elementId").data("kendoWindow").center().open();
+                                over = false;
+                                break;
+                            case 4:
+                                $("#id_Climat").data("kendoWindow").center().close();
+                                $("#elementId").empty();
+                                $('#elementId').data("kendoWindow").content("<button onclick = 'calender(" + mark1[i].IdImplanter_noeud_secteur + ");'>\
+                                                                                <img src='../../Content/images/calendar2.png'  height='50px' width='50px'  />\
+                                                                            </button>\
+                                                                            <button onclick='Consommation(" + mark1[i].IdImplanter_noeud_secteur + ")'>\
+                                                                                <img src='../../Content/images/humidité.png'  height='50px' width='50px'  />\
+                                                                            </button>");
+                                $("#elementId").data("kendoWindow").center().open();
+                                over = false;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                })(i));
+
+                google.maps.event.addListener(markers[i_markers], 'mouseover', (function (i) {
+                    return function () {
+                        switch (mark1[i].NodeType) {
+                            case 1:
+                                $("#id_Climat").data("kendoWindow").center().close();
+                                break;
+                            default:
+                                if (over) {
+                                    $("#elementId").data("kendoWindow").center().close();
+                                }
+                                break;
+                        }
+                    }
+                })(i));
+
+                markers[i_markers].setIcon({ url: mark1[i].Icon });
+                i_markers++;
+            }
+        }
+    });
+
+    function TempératureClimat(idClimat) {
+
+        $("#elementId").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Température)").length;
+        var index = $("#tabs a[href='#vertical2_Température']").parent().index();
+        if (length != 0 && index != -1) {
+
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $("#tabs").tabs("refresh");
+            $.ajax({
+                url: '../../UserSession/TemperatureClimat',
+                type: 'POST',
+                data: {
+                    idNoeudClimat: idClimat,
+                    startTime: new Date()
+                },
+                //dataType: 'json',
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                    $("#tabs").children("ul:first").append("<li><a href='#vertical2_Température'>Température</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+                    var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+                    $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    //                    alert("No DATA");
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+        }
+    }
+
+    function humiditéClimat(idClimat) {
+
+        $("#id_Climat").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Humidité)").length;
+        var index = $("#tabs a[href='#vertical2_Humidite']").parent().index();
+        if (length != 0 && index != -1) {
+
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/HumiditeClimat',
+                type: 'POST',
+                data: { 
+                    idNoeudClimat: idClimat,
+                    startTime: new Date()
+                },
+                //dataType: 'json',
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Humidite'>Humidité</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+
+        }
+    }
+
+    function PluviometrieClimat(idClimat) {
+
+        $("#id_Climat").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Pluviométrie)").length;
+        var index = $("#tabs a[href='#vertical2_Pluviometrie']").parent().index();
+        if (length != 0 && index != -1) {
+
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/PluviometrieClimat',
+                type: 'POST',
+                data: { 
+                        idNoeudClimat: idClimat ,
+                        startTime: new Date()
+                       },
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Pluviometrie'>Pluviométrie</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+
+        }
+    }
+
+    function Rayonnement(idClimat) {
+
+        $("#id_Climat").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Rayonnement)").length;
+        var index = $("#tabs a[href='#vertical2_Rayonnement']").parent().index();
+        if (length != 0 && index != -1) {
+
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/RayonnementSolaireClimat',
+                type: 'POST',
+                data: { 
+                        idNoeudClimat: idClimat ,
+                        startTime: new Date()
+                       },
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Rayonnement'>Rayonnement</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+    function VitesseDuvent(idClimat) {
+
+        $("#id_Climat").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Vitesse du Vent)").length;
+        var index = $("#tabs a[href='#vertical2_Vitesse_Vent']").parent().index();
+        if (length != 0 && index != -1) {
+
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/VitesseVentClimat',
+                type: 'POST',
+                data: {
+                        idNoeudClimat: idClimat ,
+                        startTime: new Date()
+                       },
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Vitesse_Vent'>Vitesse du Vent</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+    function SensDuvent(idClimat) {
+
+        $("#id_Climat").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Sens du Vent)").length;
+        var index = $("#tabs a[href='#vertical2_Sens_Vent']").parent().index();
+        if (length != 0 && index != -1) {
+
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/SensVentClimat',
+                type: 'POST',
+                data: { 
+                        idNoeudClimat: idClimat,
+                        startTime: new Date()
+                        },
+                //dataType: 'json',
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Sens_Vent'>Sens du Vent</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+    function MesuresClimat_tab(idClimat) {
+
+        $("#id_Climat").data("kendoWindow").center().close();
+
+        //        infowindow.close();
+        if ($("div#tabs ul li:contains(tableau des mesures)").length != 0) {
+
+            var index = $('#tabs a[href="#tableau"]').parent().index() - 1;
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            var num_tabs = $("div#tabs ul li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+            $.ajax({
+                url: '../../UserSession/MesuresClimat_tab',
+                type: 'POST',
+                data: { idNoeudClimat: idClimat },
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                }
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#tableau'>tableau des mesures</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+
+        }
+    }
+
+    function Courbesuperpose(idClimat) {
+        $('#mesureClimat').hide();
+        $('#choix1').show();
+         
+        Courbessep = false;
+        courbesuper = true;
+    }
+
+    function Courbesepare(idClimat) {
+
+        $('#mesureClimat').hide();
+        $('#choix1').show();
+        Courbessep = true;
+        courbesuper = false;
+    }
+
+    function back() {
+        $('#mesureClimat').show();
+        $('#choix1').hide();
+    }
+
+   
+    function Visualiser(idClimat){
+    
+    $("#id_Climat").data("kendoWindow").close();
+    if (Courbessep) {
+     
+        var temp_sep = false;
+        var hum_sep = false;
+        var pluv_sep = false;
+        var ray_sep = false;
+        var vitessevent_sep = false;
+        var sensvent_sep = false;
+        if ($("div#tabs ul li:contains(Courbes séparées)").length != 0) {
+            var index = $('#tabs a[href="#vertical2_Courbeseparé"]').parent().index() - 1;
+            $('#tabs').tabs('option', 'active', index);
+        } else {
+            if ($('#temperature').is(':checked')) {
+                temp_sep = true;
+            }
+            if ($('#humidite').is(':checked')) {
+                hum_sep = true;
+            }
+            if ($('#pluviometrie').is(':checked')) {
+                pluv_sep = true;
+            }
+            if ($('#rayonnement').is(':checked')) {
+                ray_sep = true;
+            }
+            if ($('#vitesseduvent').is(':checked')) {
+                vitessevent_sep = true;
+            }
+            if ($('#sensduvent').is(':checked')) {
+                sensvent_sep = true;
+            }
+            infowindow.close();
+            $("#tabs").tabs("refresh");
+            $("#tabs").children("ul:first").append("<li><a href='#Courbeseparé'>Courbes séparées</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+
+            $.ajax({
+                url: '../../UserSession/MesuresClimat2',
+                type: 'POST',
+                data: {
+                    idNoeudClimat: idClimat,
+                    temp: temp_sep,
+                    hum: hum_sep,
+                    pluv: pluv_sep,
+                    ray: ray_sep,
+                    vitessevent: vitessevent_sep,
+                    sensvent: sensvent_sep
+                },
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                    $("#tabs").tabs("refresh");
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                }
+            });
+
+            var num_tabs = $("div#tabs ul li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+
+        }
+    } else if (courbesuper) {
+     $("#id_Climat").data("kendoWindow").close();
+        var temp_super = false;
+        var hum_super = false;
+        var pluv_super = false;
+        var ray_super = false;
+        var vitessevent_super = false;
+        var sensvent_super = false;
+        alert('courbes superposée');
+        if ($("div#tabs ul li:contains(Courbes superposées)").length != 0) {
+            var index = $('#tabs a[href="#vertical2_Courbesuperpose"]').parent().index() - 1;
+            $('#tabs').tabs('option', 'active', index);
+        } else {
+            if ($('#temperature').is(':checked')) {
+                temp_super = true;
+                alert('hello');
+            }
+            if ($('#humidite').is(':checked')) {
+                hum_super = true;
+            }
+            if ($('#pluviometrie').is(':checked')) {
+                pluv_super = true;
+            }
+            if ($('#rayonnement').is(':checked')) {
+                ray_super = true;
+            }
+            if ($('#vitesseduvent').is(':checked')) {
+                vitessevent_super = true;
+            }
+            if ($('#sensduvent').is(':checked')) {
+                sensvent_super = true;
+            }
+            infowindow.close();
+            $("#tabs").tabs("refresh");
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Courbesuperpose'>Courbes superposées</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            //            var date = new Date();
+            //            var ddd = date.toString();
+            $.ajax({
+                url: '../../UserSession/MesuresClimat',
+                type: 'POST',
+                data: {
+                    idNoeudClimat: idClimat,
+                    temp: temp_super,
+                    hum: hum_super,
+                    pluv: pluv_super,
+                    ray: ray_super,
+                    vitessevent: vitessevent_super,
+                    sensvent: sensvent_super
+                },
+                //dataType: 'json',courbesuper 
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                    $("#tabs").tabs("refresh");
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                }
+            });
+
+            var num_tabs = $("div#tabs ul li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+    }
+    function ET0() {
+        //$("#ET0").click(function () {
+
+        $("#elementId").data("kendoWindow").center().close();
+
+        var startTime = new Date(new Date().setDate(new Date().getDate() - new Date().getDay())); //Sun, 17 Aug 2014 09:16:50 GMT //Sun, 17 Aug 2014 09:19:04 GMT
+
+        var length = $("div#tabs ul li:contains(ET @Model.NomExploitationMere)").length;
+            var index = $("#tabs a[href='#ET-@Model.FK_IdExploitation']").parent().index();
+
+            if (length != 0 && index != -1) {
+                $('#tabs').tabs('option', 'active', index);
+            }
+            else {
+                $.ajax({
+                    url: "../../UserSession/EvapoTranspirationByIdExploitationThisWeek",
+                    type: 'GET',
+                    data: {
+                        idExploit: '@Model.FK_IdExploitation',
+                        startTime: startTime
+                    },
+                    //beforeSend: function () {
+                    //    kendo.ui.progress($("#loading1"), true);
+                    //},
+                    success: function (result) {
+                        $("#tabs").append(result);
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")");
+                        alert(err.Message);
+                    },
+                    //complete: function () {
+                    //    kendo.ui.progress($("#loading1"), false);
+                    //}
+                });
+
+                $("#tabs").children("ul:first").append("<li><a href='#ET-@Model.FK_IdExploitation'>ET @Model.NomExploitationMere</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+                var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+                $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+            }
+            //});
+        };
+
+        /*********************** Irrigation ******************************************/
+        
+        function calender(idIrrigation) {
+            //$("[id^='calender']").click(function () {
+
+            //var item_id = $(this).attr('id').split('-'); alert(item_id[0] + '\n' + item_id[1]);
+
+            var length = $("div#tabs ul li:contains(Calendrier Irrigation)").length;
+            var index = $("#tabs a[href='#irrcal-" + idIrrigation + "']").parent().index();
+
+            if (length != 0 && index != -1) {
+
+                $('#tabs').tabs('option', 'active', index);
+
+            } else {
+
+                $.ajax({
+                    url: '../../UserSession/IrrigCalendar',
+                    type: 'POST',
+                    data: { idNoeudIrrig: idIrrigation },
+                    //dataType: 'json',
+                    async: false,
+                    success: function (result) {
+                        $("#tabs").append(result);
+                        $("#tabs").tabs("refresh");
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alert(xhr.status);
+                        alert(xhr.responseText);
+                        alert(thrownError);
+                    },
+                    complete: function () {
+                        $(this).attr("disabled", "false");
+                        $(".wait").remove();
+                    }
+                });
+
+                $("#tabs").children("ul:first").append("<li><a href='#irrcal-" + idIrrigation + "'>Calendrier Irrigation</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+                var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+                $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+            }
+        }
+
+        function Consommation(idIrrigation) {
+            
+            var length = $("div#tabs ul li:contains(Consommation Par Parcelles)").length;
+            var index = $("#tabs a[href='#vertical2_Consommation_Cummule_Par_Parcelle']").parent().index();
+
+            if (length != 0 && index != -1) {
+                $('#tabs').tabs('option', 'active', index);
+            }
+            else {
+                $.ajax({
+                    url: "../../UserSession/ConsommationJournalièreToutesParcelle",
+                    type: 'GET',
+                    data: { idExpl: '@Model.FK_IdExploitation' },
+                //beforeSend: function () {
+                //    kendo.ui.progress($("#loading1"), true);
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function () {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Consommation_Cummule_Par_Parcelle'>Consommation Par Parcelles</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+
+    i_parcels++;
+
+</script>

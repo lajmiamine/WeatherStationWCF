@@ -1,0 +1,91 @@
+﻿@model WeatherStation.Models.LogOnModel
+
+@{
+    ViewBag.Title = "Log On";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+</br></br></br></br>
+
+<center>
+    <div style = "font:bold 24px Lucida Sans Unicode,verdana;  width:320px; text-align:center; color:#273a90; margin:30px /*center bottom no-repeat;*/">
+        Authentification
+    </div>
+</center>
+
+<div style = "text-align:center; margin:30px">
+    s'il vous plait entrer votre nom d'utilisateur and mot de passe<br />
+    @Html.ActionLink("Register", "Register") si vous n'avez pas un compte
+</div>
+
+<center>
+    @Html.ValidationSummary(true, "Login was unsuccessful. Please correct the errors and try again.")
+</center>
+
+@using (Html.BeginForm())
+{    
+    <div>
+        <style>
+            #icons .k-button
+            {
+                vertical-align: top;
+                width: 28px;
+                padding: .1em .4em .3em;
+                display: block;
+                margin: auto;
+            }
+            .k-user {
+                background-image: url("../Content/images/user.png");
+            }
+            .k-pasword {
+                background-image: url("../Content/images/password.png");
+            }
+        </style>
+
+        <center>
+            <div style="font:bold 14px Lucida Sans Unicode,verdana;  width:320px; text-align:center; center bottom no-repeat; color:#273a90" class="editor-label">
+            @Html.LabelFor(m => m.Utilisateur)
+            </div>
+        </center><br />
+
+        <center>
+           <span class="k-textbox k-button k-space-left" style = "width: 200px;">
+           <input type="text" id="Utilisateur" name= "Utilisateur" class="k-textbox" placeholder="Nom d'utilisateur" required validationMessage="Enter {0}"  />
+           <a class="k-icon k-user"></a></span>
+        </center>
+
+        <center>
+            <div style = "font:bold 14px Lucida Sans Unicode,verdana;  width:320px; text-align:center; center bottom no-repeat; color:#273a90" class="editor-label">
+            @Html.LabelFor(m => m.Mot_de_passe)
+            </div>
+        </center><br />
+
+        <center>
+           <span class = "k-textbox k-button k-space-left" style = "width: 200px;">
+           <input type = "password" id = "Mot_de_passe" name = "Mot_de_passe" class = "k-textbox" placeholder="Mot de passe" required validationMessage="Enter {0}"  />
+           <a class = "k-icon k-pasword"></a></span>
+        </center><br />
+
+        <center><div class = "editor-label">
+            @Html.CheckBoxFor(m => m.RememberMe)
+            @Html.LabelFor(m => m.RememberMe)
+        </div></center>
+       
+        <p><center>
+            <input type = "submit" value = "Log On"  id = "connection"> </input>
+        </center></p>
+      
+    </div>   
+}
+  <script type="text/javascript">
+    $("#connection").kendoButton({
+        imageUrl: "../Content/images/connection.png",
+    });
+    $("img#image").hide();
+    $("div#authentification").hide();
+ </script>
+
+
+<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+

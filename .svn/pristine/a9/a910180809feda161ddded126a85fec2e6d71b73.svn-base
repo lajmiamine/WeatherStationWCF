@@ -1,0 +1,8 @@
+﻿@model WeatherStation.Models.SectorModel
+
+<table style="width:95%;height:95%">          
+    <tr><td COLSPAN=2><strong>@Model.NomSecteur</strong></td></tr>
+    <tr><td ><strong>Description</strong></td><td>@Model.DescriptionSecteur</td></tr>        
+    <tr><td><strong>Date d'ajout</strong></td><td>@Model.DateAjoutSecteur.ToString().Substring(0, 10)</td></tr>       
+</table>
+

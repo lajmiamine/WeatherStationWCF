@@ -1,0 +1,1146 @@
+﻿@model IEnumerable<WeatherStation.Models.MesuresRayonnementClimat>
+
+ @{
+    System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+    customCulture.NumberFormat.NumberDecimalSeparator = ".";
+    System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+ }
+<div id = "vertical2_Rayonnement" style="height:95%; width: 100%;">
+    <div id = "top-pane1">
+        <ul id = "menu_date_ray">
+            <li id = "Horaire_ray" style = "width:100px">Horaire </li>
+            <li id = "Journaliere_ray" style = "width:100px">Journaliére </li>
+            <li id = "Hebdomadaire_ray">Hebdomadaire </li>
+            <li id = "mensuelle_ray" style = "width:100px">mensuelle </li>
+            <li id = "periodique_ray">periodique </li>
+        </ul>
+        <ul id = "menu_reporting_ray">
+            <li onClick = "clickMonBoutonExcel();"><img id="MonBoutonExcel" src="../../Content/images/excel.png" style="margin:0;" /></li>
+            <li onClick = "clickMonBoutonPdf();"><img id="MonBoutonPdf" src="../../Content/images/curve.png" /></li>
+            <li><img src = "../../Content/images/pdf.jpeg" /></li>
+            <li><img id = "refresh" src="../../Content/images/refresh.png" /></li>
+            <li> <img id = "colorpicker_Ray" onClick = "clickColorPicker();"> </li>
+        </ul>
+        <div id = "window2" style="display:none" >
+            <center>
+                <br /><br />
+                    <strong><label for = "start">date debut:</label></strong><input id = "start" style = "width: 200px" />
+                <br /><br />
+                    <strong><label for = "end">date fin:</label></strong><input id = "end" style = "width: 200px" />
+                <br /><br />
+                <button type = "button" id = "check"  >Valider</button>
+                <button type = "button" id = "Annuler_ray"  >Annuler</button>
+                <br /><br />
+            </center>  
+        </div>
+    </div>
+    <div id = "middle-pane1">
+        <div id = "stock-chart_ray" style="height: 95%"></div>
+        <div id = "loading"></div>
+    </div>
+    <div id = "bottom-pane1">
+        <div id = "grid_ray" style = "height: 100%"></div>
+    </div>
+</div>
+
+<script type = "text/javascript">
+
+    $("#vertical2_Rayonnement").kendoSplitter({
+        orientation: "vertical",
+        panes: [
+            { collapsible: true, size: "6%" },
+            { collapsible: true, size: "64%" },
+            { collapsible: true, size: "30%" }
+        ]
+    });
+    var list_ray1 = [], list_ray2 = [], orders = [], id = 1,
+        list_ray1_min = '@Model.Where(i => i.RayonnementClimat != null).Min(j => j.RayonnementClimat)',
+        list_ray1_max = '@Model.Where(i => i.RayonnementClimat != null).Max(j => j.RayonnementClimat)';
+
+    @foreach (var mesure in Model)
+    {
+        @:list_ray2.push('@mesure.DateMesure.ToString("yyyy/MM/dd HH:mm:ss")');
+        @:if ('@mesure.RayonnementClimat' != '') {
+            @:list_ray1.push(@mesure.RayonnementClimat);
+            @:orders.push({
+                @:ID: id ++,
+                @:OrderDate: '@mesure.DateMesure.ToString("yyyy/MM/dd HH:mm:ss")',
+                @:RayonnementSolaire: '@mesure.RayonnementClimat',
+            @:});
+        @:}
+        @:else {
+                @:list_ray1.push(null);
+        @:}
+    }
+
+   var list_seuil = [];
+
+    $.ajax({
+        url: '../../UserSession/SeuilsTemperature',
+        type: 'Get',
+        data: { idnoeudclimat: '@Model.ElementAt(0).IdParentNode'},
+        datatype: 'json',
+        async: false,
+        success: function (res) {
+            list_seuil.push(res.seuilInfTemperatureAir);
+            list_seuil.push(res.seuilSuppTemperatureAir);
+        }
+    });
+
+
+    var list_seuil = [];
+    $.ajax({
+        url: '../../UserSession/ValeursSeuils',
+        type: 'GET',
+        data: { idNoeudClimat: @Model.ElementAt(0).IdParentNode},
+        dataType: 'json',
+        async: false,
+        success: function (res) {
+            list_seuil.push(0);
+            list_seuil.push(400);
+        }
+    });
+
+
+
+    function clickColorPicker() {
+        colorpicker.open();
+    }
+
+    var colorpicker = $("#colorpicker_Ray").kendoColorPicker({
+        change: function (e) {
+            //kendoConsole.log("Change in picker #" + this.element.attr("id") + " :: " + e.value);
+            var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+            stockChart.options.series[0].color = e.value;
+            stockChart.options.valueAxis[0].color = e.value;
+            stockChart.options.valueAxis[0].labels.color = e.value;
+            stockChart.options.valueAxis[0].line.color = e.value;
+            stockChart.options.valueAxis[0].title.color = e.value;
+            stockChart.options.series[2].color = e.value;
+            stockChart.refresh();
+        },
+        //  toolIcon: "k-foreColor"
+    }).data("kendoColorPicker");
+           
+
+
+    function  Selection_Courbe(x)
+    {
+        var chart = $("#stock-chart_ray").data("kendoStockChart");
+        var date =x.toString();
+        var datefinale = new Date(Number(date.substring(0,4)),(Number(date.substring(5,7)))-1,Number(date.substring(8,10)),Number(date.substring(11,13)),Number(date.substring(14,16)),00);
+        var select=0;
+        for(var d=0;d<chart.series[0].data.length;d++)
+        {
+            var dattttttttttee = new Date(chart.series[0].data[d].x);
+            if((datefinale.getFullYear()==dattttttttttee.getFullYear())&&(datefinale.getMonth()==dattttttttttee.getMonth())&&(datefinale.getDay()==dattttttttttee.getDay())&&(datefinale.getHours()==dattttttttttee.getHours())&&(datefinale.getMinutes()==dattttttttttee.getMinutes())&&(datefinale.getSeconds()==dattttttttttee.getSeconds())&&((chart.series[0].data[d].y)!=null))
+            {
+                select=d;
+            }
+        }
+
+        chart.series[0].data[select].select();
+        chart.series[0].markers.visible = true;
+    }
+
+    function onChangeRaySolaire(e) {
+        
+        var grid_ray = $("#grid_ray").data("kendoGrid");
+        var rows_ray = grid_ray.select();
+        var select_ray = grid_ray.items().index(rows_ray); //alert("rows length: " + rows.length + "\nRows index: " + select + "\nRows uid: " + rows.uid);
+        if (select_ray != -1) {
+            $(".k-grid-content").animate({
+                scrollTop: ($('[data-uid = "' + grid_ray.dataItem(rows_ray).uid + '"] ').offset().top - $(".k-selectable").offset().top)
+            }, 800);
+                      
+            var stockChartRay = $("#stock-chart_ray").data("kendoStockChart");
+            rows_ray.each(function(index, row){
+                var selectedItem = grid_ray.dataItem(row);
+//                alert("rows: " + selectedItem.ID + ", " + selectedItem.OrderDate + ", " + selectedItem.Temperature);
+                var index_ray = jQuery.inArray(selectedItem.RayonnementSolaire, stockChartRay.options.series[0].data);
+//                alert("index: " + index); alert(stockChart.options.series[0].data[index] + "\n" + selectedItem.Temperature);
+                $(".k-tooltip").show();
+            });
+        }
+    }
+
+    $("#grid_ray").kendoGrid({
+        dataSource: {
+            data: orders,
+            pageSize: 500
+        },
+        height: '99%',
+        change: onChangeRaySolaire,
+        selectable: "multiple",
+        scrollable: true,
+        groupable: false,
+        sortable: true,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 3
+        },
+        columns: [{
+            field: "ID",
+            title: "ID",
+            width: 50,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },{
+            field: "OrderDate",
+            title: "Date",
+            format: "{0:dd/MM/yyyy HH:mm:ss}",
+            width: 100,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },
+        {
+            field: "RayonnementSolaire",
+            title: "Rayonnement Solaire(watt/m²)",
+            width: 100,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        }]
+    });
+
+   function selectRowRay(Datee,ray)
+    {  
+        var grid_ray = $("#grid_ray").data("kendoGrid"),
+            view_ray = grid_ray.dataSource.view();
+        var rows_ray = $.grep(view_ray, function(item){
+        
+            return item.RayonnementSolaire === ray && String(item.OrderDate) === String(Datee);
+        }).map(function(item) {  //alert('map: ' + item.uid);
+            return grid_ray.tbody.find(">[data-uid=" + item.uid + "]");
+        });
+        grid_ray.clearSelection(); grid_ray.select(rows_ray);
+       
+    }
+    $("#stock-chart_ray").kendoStockChart({
+        title: {
+            text: "Date : " + kendo.format('{0:dd/MM/yyyy}',new Date()),
+            color: "#000000",
+            font: "12px sans-serif",
+        },
+        dateField: null,
+        series: [{
+            name: "Rayonnement solaire",
+            type: "line",
+            style: "smooth",
+            //field: "Temperature",
+            data: list_ray1,
+            color:"#e9b657",
+            markers: {
+                visible : false,
+            },
+            tooltip: {
+                visible: true,
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value # watt/m²"
+            },
+        },{
+            name: "Seuil",
+        }],
+        valueAxis: [{
+            name: 'rayonnement solaire',
+            data: list_ray1,
+            color:"#e9b657",
+            labels: {
+                format: "{0}"
+            },
+            min: Math.floor(list_ray1_min),
+            max: Math.ceil(list_ray1_max),
+            title: {
+                text: "rayonnement solaire (watt/m²)",
+                font: "12px sans-serif",
+            },
+            notes: {
+                label:{
+                    text :'seuil min',
+                    position:'outside',
+                    color: "#a0a000",
+                },   
+                visible: true,
+                line: {
+                    length:950,
+                    color: "#a0a000",
+                },
+                data: [{
+                    value: list_seuil[0],
+                },
+                {
+                    value: list_seuil[1],
+                    label: {
+                        text: "seuil max"
+                    }, 
+                    position:'outside'
+                }]
+            },
+//            plotBands: [{
+//                from: -5,
+//                to: list_seuil[0],
+//                color: "#f5f5f5"
+//            },
+//            {        
+//                from: list_seuil[1],
+//                to: 70,
+//                color: "#f5f5f5"
+//            }]
+        }],
+        legend: {
+            position: "bottom",
+            visible: true,
+            border: {
+                width: 2,
+                color: "grey",
+                dashType: "solid"
+            },
+        },
+        xAxis:{
+            color:"#2f7ed8",
+            labels: {
+                template: "#= kendo.format('{0}',value/60) #"
+            }
+        },
+        categoryAxis: {
+            categories: list_ray2,
+            type: "date",
+            baseUnit: "minutes",
+            line:{
+                color:"#e9b657",
+            },
+            labels: {
+                visible: true,
+                step: 120
+            },
+            majorGridLines: {
+                visible: false,
+            },
+            majorTicks: {
+                visible: true,
+                size: 4,
+                step: 60,
+            }
+        },
+        navigator: {
+            dateField: null,
+            hint: {
+                // hint template
+                template: "From: #= from # To: #= to #",
+                visible: false,
+            },
+            categoryAxis: {
+                categories: list_ray2,
+                type: "date",
+                autoBaseUnitSteps:{
+                    minutes:[15] ,
+                    hours:[2],
+                }
+            },
+            select: {
+                        from: list_ray2[0],
+                        to:list_ray2[list_ray2.length - 1],
+            },
+            series:{
+                type: "area",
+                area: {
+                    line: {
+                        style: "smooth"
+                    }
+                },
+                data: list_ray1,
+                color: "#e9b657",
+            },   
+//                select: {
+//                    from: list_ray2[0],
+//                    to: list_ray2[(list_ray2.length)-1]
+//                }       
+        },
+        seriesClick: onSeriesClick_ray,
+        legendItemClick: onLegendItemClick,
+    });
+
+   function onSeriesClick_ray(e) {
+       
+        var grid_chart = $("#grid_ray").data("kendoGrid");
+        var data_chart = grid_chart.dataSource.data();
+        var res_chart = $.grep(data_chart, function (d) {
+            return /*d.OrderDate == e.category &&*/ d.RayonnementSolaire == e.value;
+        }); //alert(res);
+        selectRowRay(e.category, e.value);
+    }
+
+    function onLegendItemClick(e) { 
+    //alert("onLegendItemClick\n" + e);
+        var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+        // kendoConsole.log(kendo.format("Legend item click :: {0}", e.text));
+        // kendoConsole.log(kendo.format("Legend item click :: {0}", e.text));
+        if(stockChart.options.valueAxis[0].notes.visible == false) {
+            stockChart.options.valueAxis[0].notes.visible = true;
+            stockChart.options.valueAxis[0].plotBands[0].color ="#f5f5f5";
+            stockChart.options.valueAxis[0].plotBands[1].color ="#f5f5f5";
+        }
+        else{
+            stockChart.options.valueAxis[0].notes.visible = false;
+            stockChart.options.valueAxis[0].plotBands[0].color = "#ffffff";
+            stockChart.options.valueAxis[0].plotBands[1].color = "#ffffff";
+        }
+    }
+</script>
+
+@*Menu forms of Selection & Reporting*@
+<script type="text/javascript">
+
+    $("#menu_date_ray").clone(true).find(".k-state-active").removeClass("k-state-active");    
+    $("#menu_date_ray").kendoMenu({
+    }).css({
+        'float': 'left',
+//            'margin-top': $("#image").height() / 4
+    });
+    
+    $("#menu_reporting_ray").clone(true).find(".k-state-active").removeClass("k-state-active");
+    $("#menu_reporting_ray").kendoMenu({
+    }).css({
+        'float': 'right',
+        'height': $("#menu_date_ray").height()
+//          'margin-right': 30,
+//          'position': 'absolute',
+//          'left': '50%',
+//          'top': '50%',
+//          'margin-left': -$("#image").width() / 2,
+//            'margin-top': $("#image").height() / 4
+    });
+
+</script>
+
+@*Period Popup Form*@
+<script type='text/javascript'>
+
+    var undo = $("#undo").bind("click", function () {
+        $("#window2").data("kendoWindow").center().open();
+    });
+    undo.show();
+
+    var onClose = function () {
+        undo.show();
+    };
+
+    if (!$("#window2").data("kendoWindow")) {
+        $("#window2").kendoWindow({
+            //            width: "400px",
+            title: "Choix periode",
+            actions: ["Close"],
+            close: onClose
+        });
+    }
+
+</script>
+               
+
+@*ChoixHeure*@
+<script type='text/javascript'>
+
+    $("#Horaire_ray").kendoDateTimePicker({
+        value: new Date(),
+        close: myfunctionheurrefresh,
+    });
+
+    $(".k-input").css("background-color", "#e8e8e8");
+    $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+    var datepicker_hour = $("#Horaire_ray").data("kendoDateTimePicker");
+
+    $("#Horaire_ray").click(function () {
+        datepicker_hour.open("date");
+    });
+    
+    function myfunctionheurrefresh() {
+         
+        var startTime = new Date($("#Horaire_ray").data("kendoDateTimePicker").value());
+        var time = [], Ray = [], orders_update = [], seuil_min = [], seuil_max = [],id = 0 ;
+        var Min, Max;
+        $.ajax({
+            url: '../../UserSession/RayonnementSolaireClimatByIntervalOneHour',
+            type: 'GET',
+            data: {
+                idNoeudClimat : @Model.ElementAt(0).IdParentNode,
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            beforeSend: function() {
+                kendo.ui.progress($("#loading"), true);        
+            },
+            success: function (res) {
+                var i = 0;
+                while ((res[i].RayonnementClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].RayonnementClimat;
+                Max = res[i].RayonnementClimat; //alert(Min + '\n' + Max);
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    //list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    Ray.push(res[j].RayonnementClimat);
+                    time.push(res[j].DateMesure);
+                    if (res[j].RayonnementClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: kendo.format('{0:dd/MM/yyyy HH:mm}',date),
+                            RayonnementSolaire: res[j].RayonnementClimat,
+                        });
+                        if(res[j].RayonnementClimat > Max)
+                        {
+                            Max = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat < Min)
+                        {
+                            Min = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].RayonnementClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].RayonnementClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].RayonnementClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading"), false);
+            }
+        });
+
+        jQuery("#grid_ray").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_ray").data("kendoGrid").refresh();
+        
+        //coloration grid 
+        var grid = $("#grid_ray").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.RayonnementSolaire >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.RayonnementSolaire < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+        var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+        stockChart.options.title.text = "time :" + kendo.format('{0:dd/MM/yyyy HH:mm}',startTime); 
+        stockChart.options.categoryAxis[0].categories = time;
+        stockChart.options.categoryAxis[0].labels.step = 5;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.series[0].data = Ray;
+        stockChart.options.series[0].name = "Rayonnement solaire";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = time;
+        stockChart.options.categoryAxis[1].labels.step = 5;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+//        stockChart.options.categoryAxis[0].select.from = stockChart.options.categoryAxis[0].min;  //give the new range values
+//        stockChart.options.categoryAxis[0].select.to = stockChart.options.categoryAxis[0].max;
+        stockChart._navigator.options.select.from =time[0];
+        stockChart._navigator.options.select.to =time[time.length-1];
+        stockChart.options.series[2].data = Ray;
+        stockChart.options.series[2].name = "Rayonnement solaire";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart.refresh();
+    }
+
+</script>
+
+
+
+@*choix Day*@
+<script type='text/javascript'>
+
+    $("#Journaliere_ray").kendoDatePicker({        
+        close: myfunctionDaterefresh,      
+    });
+
+	$(".k-input").css("background-color", "#e8e8e8");
+	$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+	var datepicker = $("#Journaliere_ray").data("kendoDatePicker");
+	    
+    $("#Journaliere_ray").click(function () {
+	    datepicker.open("date");
+	});
+
+    function myfunctionDaterefresh() {
+
+        var startTime = $("#Journaliere_ray").data("kendoDatePicker").value();
+        if (startTime == null) {
+            startTime = new Date();
+        }
+        //alert(startTime);
+        var day = [], Ray = [], orders_update = [],id = 0;
+        var Min, Max;
+        $.ajax({
+            url: '../../UserSession/RayonnementClimatByIntervalOneDay',
+            type: 'GET',
+            data: {
+                idNoeudClimat : @Model.ElementAt(0).IdParentNode,
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            beforeSend: function() {
+                kendo.ui.progress($("#loading"), true);        
+            },
+            success: function (res) {
+                var i = 0;
+                while ((res[i].RayonnementClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].RayonnementClimat;
+                Max = res[i].RayonnementClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    Ray.push(res[j].RayonnementClimat);
+                    day.push(res[j].DateMesure);
+                    //list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    if (res[j].RayonnementClimat != null) {
+                        if(res[j].RayonnementClimat > Max)
+                        {
+                            Max = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat < Min)
+                        {
+                            Min = res[j].RayonnementClimat;
+                        }
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            RayonnementSolaire: res[j].RayonnementClimat,
+                        });
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading"), false);
+            }
+        });
+
+        $("#grid_ray").data("kendoGrid").dataSource.data(orders_update); 
+        $("#grid_ray").data("kendoGrid").refresh();
+        //coloration grid 
+        var grid = $("#grid_ray").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.RayonnementSolaire >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.RayonnementSolaire < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#B0E0E6");
+        });
+
+        var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+        stockChart.options.title.text = "Date :" + kendo.format('{0:dd/MM/yyyy}',startTime);
+        stockChart.options.categoryAxis[0].labels.step = 120;
+        stockChart.options.categoryAxis[0].majorTicks.step = 60;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.categoryAxis[0].categories = day;
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].name = "Rayonnemnt solaire";
+        stockChart.options.series[0].data = Ray;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = day;
+        stockChart.options.categoryAxis[1].labels.step = 120;
+        stockChart.options.categoryAxis[1].majorTicks.step = 60;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = day[0];
+        stockChart._navigator.options.select.to = day[day.length-1];
+        stockChart.options.series[2].data = Ray;
+        stockChart.options.series[2].name = "Rayonnement solaire";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart.refresh();
+       
+}
+</script>
+
+@* choix semaine*@
+<script type='text/javascript'>
+
+    $("#Hebdomadaire_ray").kendoDatePicker({
+        change: myfonctionWeekRefresh
+    });
+
+    $(".k-input").css("background-color", "#e8e8e8");
+    $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+    var datepicker_Week = $("#Hebdomadaire_ray").data("kendoDatePicker");
+    
+    $("#Hebdomadaire_ray").click(function () {
+        datepicker_Week.open("date");
+    });
+
+    function myfonctionWeekRefresh() {
+
+        var tr = $(".k-state-selected", Hebdomadaire_ray._table).closest("tr");
+        var day = this.value();
+        var first = $("td:first", tr).find("a").attr("title");
+        var last = $("td:last", tr).find("a").attr("title");
+        var startTime = new Date(first), endTime = new Date(last); alert(first + '\n' + last);
+        var week = [], Ray = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/RayonnementClimatByIntervalOneWeek',
+            //url: '../../UserSession/TemperatureClimatByIntervalDatesDebutFin',
+            type: 'GET',
+            data: {
+                idNoeudClimat : @Model.ElementAt(0).IdParentNode,
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            beforeSend: function() {
+                kendo.ui.progress($("#loading1"), true);        
+            },
+            success: function (res) { 
+                var i = 0;
+                while ((res[i].RayonnementClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+            //alert("res: " + res.length);
+                Min = res[i].RayonnementClimat;
+                Max = res[i].RayonnementClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    Ray.push(res[j].RayonnementClimat);
+                    week.push(res[j].DateMesure);
+                    if (res[j].RayonnementClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            RayonnementSolaire: res[j].RayonnementClimat,
+                        });
+                        if(res[j].RayonnementClimat > Max)
+                        {
+                            Max = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat < Min)
+                        {
+                            Min = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].RayonnementClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].RayonnementClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].RayonnementClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading1"), false);
+            }
+        });
+        //alert("week: " + week.length + "\ntemp: " + temp.length + "\norders_update: " + orders_update.length);
+        jQuery("#grid_ray").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_ray").data("kendoGrid").refresh();
+   
+        //coloration grid 
+        var grid = $("#grid_ray").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.RayonnementSolaire >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.RayonnementSolaire < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+
+        var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut : " + kendo.format('{0:dd/MM/yyyy}', first)+ "Date fin : " + kendo.format('{0:dd/MM/yyyy}', last);
+        stockChart.options.categoryAxis[0].labels.step = 720;
+        stockChart.options.categoryAxis[0].majorTicks.step = 300;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.categoryAxis[0].categories = week;
+        stockChart.options.series[0].name = "Temperature";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].data = Ray;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = week;
+        stockChart.options.categoryAxis[1].labels.step = 480;
+        stockChart.options.categoryAxis[1].majorTicks.step = 300;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart.options.series[2].data = Ray;
+        stockChart.options.series[2].name = "Temperature";
+        stockChart._navigator.options.select.from = week[0];
+        stockChart._navigator.options.select.to = week[week.length-1];
+        stockChart.options.series[2].markers.visible = false;
+        stockChart.refresh();
+    }
+
+</script>
+
+@* Choix Mois *@
+<script type='text/javascript'>
+       
+    $("#mensuelle_ray").kendoDatePicker({
+        // defines the start view
+        start: "year",
+
+        // defines when the calendar should return date
+        depth: "year",
+
+        // display month and year in the input
+        format: "MMMM yyyy",
+        close: myfunctionMoisrefresh,
+    });
+
+	$(".k-input").css("background-color", "#e8e8e8");
+	$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+	var datepicker_month = $("#mensuelle_ray").data("kendoDatePicker");
+
+	$("#mensuelle_ray").click(function () {
+        datepicker_month.open("date");
+	});
+
+    function  myfunctionMoisrefresh()
+    {
+        var startTime = $("#mensuelle_ray").data("kendoDatePicker").value();
+        var month = [], Ray = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneMonth',
+            type: 'GET',
+            beforeSend: function() {
+                kendo.ui.progress($("#loading1"), true);        
+            },
+            data: { idNoeudClimat : '@Model.ElementAt(0).IdParentNode', startTime : startTime },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0;
+                while ((res[i].Rmoy == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].Rmoy;
+                Max = res[i].Rmoy;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesureMoy.substring(6, 19)));
+                    Ray.push(res[j].Rmoy);
+                    month.push(res[j].DateMesureMoy);
+                    //list9.push([date.getTime(), res[j].Tmoy]);
+                    if (res[j].Tmoy != null)
+                    {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: kendo.format('{0:dd/MM/yyyy}', date),
+                            RayonnementSolaire: res[j].Rmoy,
+                        });
+                        if(res[j].Rmoy > Max)
+                        {
+                            Max = res[j].Rmoy;
+                        }
+                        if(res[j].Rmoy < Min)
+                        {
+                            Min = res[j].Rmoy;
+                        }
+                        if(res[j].Rmoy > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].Rmoy]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].Rmoy < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].Rmoy]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading1"), false);
+            }
+        });
+
+        jQuery("#grid_ray").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid_ray").data("kendoGrid").refresh();
+   
+        //coloration grid 
+        var grid = $("#grid_ray").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.RayonnementSolaire >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.RayonnementSolaire < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+
+        var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+        stockChart.options.title.text = "Mois : " + kendo.format('{0:MM/yyyy}',startTime);
+//            stockChart.options.navigator.series.type = "line";
+        stockChart.options.categoryAxis[0].categories = month;
+        stockChart.options.categoryAxis[0].labels.step = 2;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "days";
+        stockChart.options.series[0].name = "Rayonnement moyenne";
+        stockChart.options.series[0].data = Ray;
+        stockChart.options.series[0].markers.visible = true;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = month;
+        stockChart.options.categoryAxis[1].labels.step = 2;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart.options.categoryAxis[1].baseUnit = "days";
+        stockChart.options.series[2].data = Ray;
+        stockChart.options.series[2].name = "Rayonnement";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart._navigator.options.select.from = month[0];
+        stockChart._navigator.options.select.to = month[month.length - 1];
+        stockChart.refresh();
+    }
+</script>
+
+@*choix periode*@
+<script type='text/javascript'>
+
+    $("#periodique_ray").click(function () {
+        $("#window2").data("kendoWindow").center().open();
+    });
+        
+    function startChange() {
+        var startDate = start.value(), endDate = end.value();
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function endChange() {
+
+        var endDate = end.value(), startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    var start = $("#start").kendoDateTimePicker({
+        change: startChange
+    }).data("kendoDateTimePicker");
+
+    var end = $("#end").kendoDateTimePicker({
+        change: endChange,
+//        close: myfunctionperiodrefresh,
+    }).data("kendoDateTimePicker");
+
+    start.max(end.value());
+    end.min(start.value()); 
+       
+    $("#check").kendoButton({
+        click: RefreshPeriod,
+        imageUrl: "../content/themes/base/images/connection.png",
+    });
+    $("#Annuler_ray").kendoButton({
+        click: exit,
+        imageUrl: "../content/themes/base/images/cancel.png",
+    });
+      function exit()
+      {
+      $("#window2").data("kendoWindow").center().close();
+      } 
+//    $("#check").click(function () {
+    function RefreshPeriod(){
+        $("#window2").data("kendoWindow").center().close();
+        var startTime = $("#start").data("kendoDateTimePicker").value();
+        var endTime = $("#end").data("kendoDateTimePicker").value();
+        var interval = [], Ray = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/RayonnementClimatByInterval',
+            type: 'GET',
+            beforeSend: function() {
+                kendo.ui.progress($("#loading1"), true);        
+            },
+            data: {
+                idNoeudClimat : '@Model.ElementAt(0).IdParentNode',
+                startTime : startTime,
+                endTime : endTime
+            },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0;
+                while ((res[i].RayonnementClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].RayonnementClimat;
+                Max = res[i].RayonnementClimat;
+                for (var j = 0; j < res.length; j++) {                    
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    interval.push(res[j].DateMesure);
+                    Ray.push(res[j].RayonnementClimat);
+//                    list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    if (res[j].RayonnementClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            RayonnementSolaire: res[j].RayonnementClimat,
+                        });
+                        if(res[j].RayonnementClimat > Max)
+                        {
+                            Max = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat < Min)
+                        {
+                            Min = res[j].RayonnementClimat;
+                        }
+                        if(res[j].RayonnementClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].RayonnementClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].RayonnementClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].RayonnementClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            complete: function() {
+                kendo.ui.progress($("#loading1"), false);
+            }
+        });
+
+        $("#grid_ray").data("kendoGrid").dataSource.data(orders_update); 
+        $("#grid_ray").data("kendoGrid").refresh();
+
+        //coloration grid 
+        var grid = $("#grid_ray").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.RayonnementSolaire >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.RayonnementSolaire < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+        
+        var stockChart = $("#stock-chart_ray").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut:" + kendo.format('{0:dd/MM/yyyy HH:mm}',startTime) + " - date fin: " + kendo.format('{0:dd/MM/yyyy HH:mm}',endTime); 
+        stockChart.options.categoryAxis[0].categories = interval;
+        stockChart.options.categoryAxis[0].labels.step = 2400;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1200;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].name = "Temperature";
+        stockChart.options.series[0].data = Ray;
+        stockChart.options.valueAxis[0].min = Math.floor(Min - (Max - Min) * 0.1);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max + (Max - Min) * 0.1);
+        stockChart.options.categoryAxis[1].categories = interval;
+        stockChart.options.categoryAxis[1].labels.step = 600;
+        stockChart.options.categoryAxis[1].majorTicks.step = 600;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = interval[0];
+        stockChart._navigator.options.select.to = interval[interval.length-1];
+        stockChart.options.series[2].name = "Temperature";
+        stockChart.options.series[2].data = Ray;
+        stockChart.refresh();
+//    });
+      }
+</script>
+
+@* reporting*@
+<script type="text/javascript">
+
+    $("#refresh").click(function () {
+        myfunctionDaterefresh();
+    });
+
+    //    function clickMonBoutonPdf() {
+    $("#MonBoutonExcel").click(function () {
+        var chart = $("#stock-chart_ray").data("kendoStockChart");
+        var image = chart.imageDataURL(); //Kendo UI
+        var a = $("<a>").attr("href", image).attr("download", "img.png").appendTo("body");
+        a[0].click();
+        a.remove();
+    });
+    //    }
+
+    //    function clickMonBoutonExcel() {
+    $("#MonBoutonPdf").click(function () {
+        var dataSource = $("#grid_ray").data("kendoGrid").dataSource;
+        var filteredDataSource = new kendo.data.DataSource({
+            data: dataSource.data(),
+            filter: dataSource.filter()
+        });
+
+        filteredDataSource.read();
+        var data = filteredDataSource.view();
+        var result = "data:application/vnd.ms-excel,";
+        result += "<table><tr><th>Date</th><th>Rayonnement °C</th><th> Date</th></tr>";
+        for (var i = 0; i < data.length; i++) {
+            var datee = data[i].OrderDate;
+            result += "<tr>";
+            result += "<td>";
+            result += kendo.format('{0:dd/MM/yyyy HH:mm}', datee);
+            result += "</td>";
+            result += "<td>";
+            result += data[i].RayonnementSolaire;
+            result += "</td>";
+            result += "</tr>";
+        }
+        result += "</table>";
+        if (window.navigator.msSaveBlob) {
+            window.navigator.msSaveBlob(new Blob([result]), 'export.csv');
+        } else {
+            window.open(result);
+        }
+    });
+    //    }
+</script>

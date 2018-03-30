@@ -1,0 +1,175 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
+
+using WeatherStation.AppData;
+
+namespace WeatherStation.Models
+{
+    public class ExploitationModel
+    {
+        [Required]
+        [Display(Name = "Nom de l'exploitation")]
+        public string NomExploitation { get; set; }
+
+        [HiddenInput(DisplayValue = true)]
+        public int IdExploitation { get; set; }
+
+        [Required]
+        [Display(Name = "Description de l'exploitation")]
+        public string DescriptionExploitation { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        public string AdresseExploitation { get; set; }
+
+        [Required]
+        [Display(Name = "Date de l'ajout de l'exploitation")]
+        public DateTime DateAjoutExploitation { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        [Display(Name = "Projet Père")]
+        public ProjectModel ProjetPère { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        [Display(Name = "Nom du Projet Père")]
+        public string NomProjetPère { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        [Display(Name = "Nom du Proprietaire")]
+        public string NomProprietaire { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        [Display(Name = "Parcelles Fils")]
+        public List<ParcelModel> ParcellesFils { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        [Display(Name = "Nombre Parcelles Fils")]
+        public int NombreParcellesFils { get; set; }
+
+        public bool Climat { get; set; }
+
+        public bool Irrigation { get; set; }
+
+        public bool Sol { get; set; }
+
+        public bool Plante { get; set; }
+    }
+
+    public interface IExploitationService
+    {
+        List<ExploitationModel> GetExploitationsByIdProject(int id);
+        ExploitationModel GetExploitationById(int idExpl);
+        ExploitationModel GetInfoExploitationById(int idExpl);
+        object GetContourExploitationById(int idExpl);
+    }
+
+    public class ExploitationService : IExploitationService
+    {
+        AgricultureEntities entities = new AgricultureEntities();
+
+        public List<ExploitationModel> GetExploitationsByIdProject(int id)
+        {
+            List<ExploitationModel> exploitationList = new List<ExploitationModel>();
+            var listEx = entities.exploitation.Where(x => x.FK_IdProjet.Value == id);
+            foreach (var element in listEx)
+                exploitationList.Add(
+                    new ExploitationModel
+                    {
+                        IdExploitation = element.IdExploitation,
+                        NomExploitation = element.NomExploitation.TrimEnd(),
+                        DescriptionExploitation = element.DescriptionExploitation.TrimEnd(),
+                        DateAjoutExploitation = (DateTime)element.DateAjoutExploitation,
+                        NomProjetPère = element.projet.NomProjet,
+                        ParcellesFils = new ParcelleService().GetParcelsByIdExploitation(element.IdExploitation)
+                    });
+            return exploitationList;
+        }
+
+        public ExploitationModel GetExploitationById(int idExploitation)
+        {
+            var exploit = entities.exploitation.FirstOrDefault(x => x.IdExploitation == idExploitation);
+            ExploitationModel exp_model = new ExploitationModel
+            {
+                IdExploitation = exploit.IdExploitation,
+                NomExploitation = exploit.NomExploitation.TrimEnd(),
+                AdresseExploitation = exploit.AdresseExploitation.TrimEnd(),
+                DateAjoutExploitation = (DateTime)exploit.DateAjoutExploitation,
+                DescriptionExploitation = exploit.DescriptionExploitation.TrimEnd(),
+                ProjetPère = new ProjectService().GetProjectByIdFromExploitation(exploit.projet.IdProjet),
+                NomProprietaire = exploit.projet.proprietaire.NomProprietaire,
+                ParcellesFils = new ParcelleService().GetParcelsByIdExploitation(exploit.IdExploitation),
+                Climat = exploit.Climat.Value,
+                Sol = exploit.Sol.Value,
+                Plante = exploit.Culture.Value,
+                Irrigation = exploit.Irrigation.Value,
+            };
+            return exp_model;
+        }
+
+        public ExploitationModel GetInfoExploitationById(int idExploitation)
+        {
+            var exploit = entities.exploitation.FirstOrDefault(x => x.IdExploitation == idExploitation);
+            ExploitationModel exp_model = new ExploitationModel
+            {
+                IdExploitation = exploit.IdExploitation,
+                NomExploitation = exploit.NomExploitation.TrimEnd(),
+                AdresseExploitation = exploit.AdresseExploitation.TrimEnd(),
+                DateAjoutExploitation = (DateTime)exploit.DateAjoutExploitation,
+                DescriptionExploitation = exploit.DescriptionExploitation.TrimEnd(),
+                NomProjetPère = exploit.projet.NomProjet,
+                NomProprietaire = exploit.projet.proprietaire.NomProprietaire,
+                NombreParcellesFils = exploit.parcelle.Count
+            };
+            return exp_model;
+        }
+
+        public Object GetContourExploitationById(int idExpl)
+        {
+            string[] points = entities.exploitation.FirstOrDefault(x => x.IdExploitation == idExpl).AdresseExploitation.Split(',');
+            List<Double> extrems = new List<Double>();
+            List<List<Double>> data = new List<List<Double>>();
+            var i = 0;
+            foreach (var point in points)
+            {
+                extrems.Add(new Operations().StrToDouble(point, '.'));
+                i++;
+            }
+            var j = 1;
+            int compteur = 0;
+            Double pointEx = 0;
+            Double lat = 0;
+            Double lng = 0;
+            foreach (var point in extrems)
+            {
+                if (j == 2)
+                {
+                    compteur += 1;
+                    lng += point;
+                    List<Double> test = new List<Double>();
+                    test.Add(pointEx);
+                    test.Add(point);
+                    data.Add(test);
+                    j = 1;
+                }
+                else
+                {
+                    pointEx = point;
+                    lat += point;
+                    j++;
+                }
+            }
+            lat = lat / compteur;
+            lng = lng / compteur;
+
+            return new
+            {
+                latlng = data,
+                lattitude = lat,
+                longitude = lng
+            };
+        }
+    }
+}

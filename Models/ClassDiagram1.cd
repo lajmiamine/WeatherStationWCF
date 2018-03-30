@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Models.Projet" Collapsed="true">
+    <Position X="8.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAECAAAAAAAAAAQAgQAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Projet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Project" Collapsed="true">
+    <Position X="8.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAgACAACAQQAAAAAAQEAAgAAQBABAEAAAAACAA=</HashCode>
+      <FileName>Project.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Exploitation" Collapsed="true">
+    <Position X="8.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAQAAAgAQAIBAAAAAYABAA=</HashCode>
+      <FileName>Exploitation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Parcelles" Collapsed="true">
+    <Position X="8.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAIAAEAAAAAAAAABQAAAAgAAAAACAA=</HashCode>
+      <FileName>Parcelles.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Secteurs" Collapsed="true">
+    <Position X="7.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAYAAAAAASgAAAABAAAAAAA=</HashCode>
+      <FileName>Secteurs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Noeuds" Collapsed="true">
+    <Position X="9.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAACAIAAAAIAAAAAAAAAwAAAQAAAAAAAAA=</HashCode>
+      <FileName>Noeuds.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Calendar" Collapsed="true">
+    <Position X="8.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAACAAAAAAAAAAAAAAAAAIAAQAAAABAAAAAAAQ=</HashCode>
+      <FileName>Calendar.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Mesures" Collapsed="true">
+    <Position X="10.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABBAAAAAAQAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+      <FileName>Mesures.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.Electrovannes" Collapsed="true">
+    <Position X="8.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAGAAAAAAAAgIAAAAAAAAAQAAAAAAAAAAAAQ=</HashCode>
+      <FileName>Electrovannes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.AgricultureEntities" Collapsed="true">
+    <Position X="2.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ogEBdWHBsKQVQgAAEiYtIFJEFCqAAIgCMXARACBAIII=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.proprietaire" Collapsed="true">
+    <Position X="4.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAkAAABAGgABBUoAAAAQQQEAAAAQwIgAUAABgAAgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.projet" Collapsed="true">
+    <Position X="4.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAgQiAEIAIAAABGACAQIEQACAgBAQAgEIICIAAAAQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.secteur" Collapsed="true">
+    <Position X="4.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAACgBAIIEgAAKAVEAACgIGEMCImCggICABAAFKgAQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.implanter_noeud_exploitation" Collapsed="true">
+    <Position X="13" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EIAwACAiAuJHAhNAgIpKAETgMEAGklAUEcEAECggBgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.electrovanne" Collapsed="true">
+    <Position X="4.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gIEiAAAGEMABAABAAEsogAEAEAAAUBAggkCACBAwAAQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.exploitation" Collapsed="true">
+    <Position X="4.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gACBgQQAAAAEAIICEACICikZAwAgCQMJEFKABIZQhAE=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.parcelle" Collapsed="true">
+    <Position X="4.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IQJAIC4AgUQAIEJJCIMBQAhHEDoADICAgEgBQAkEKIE=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.calendirer_irrigation" Collapsed="true">
+    <Position X="4.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAEAIAACQAAQAAACAABAIAAABIAAAAQIBCQAABAAAQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Models.App_Data.mesure_noeud" Collapsed="true">
+    <Position X="13" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACABICCwIIAQAAAAAAAIAAAgQABBAAAIEgCQEAEAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

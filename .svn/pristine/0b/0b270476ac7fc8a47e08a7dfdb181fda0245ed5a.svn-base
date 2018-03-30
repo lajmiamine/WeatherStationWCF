@@ -1,0 +1,775 @@
+﻿
+    <div id="treeview-sprites"></div>
+
+    <script type="text/javascript">
+
+        function onSelect(e) {                      
+            if (this.text(e.node) == '@Model.NomExploitation')
+            {
+                exp_function();
+            }
+            @foreach (var par in Model.ParcellesFils)
+            {
+                @:if( this.text(e.node) == '@par.NomParcelle')
+                {
+                    //@:var parent = this.parent(e.node);
+                    @:par_function(e,@par.IdParcelle, '@par.NomParcelle');
+                   
+                }
+                foreach (var sec in par.SecteursParcelle)
+                {
+                    @: if( this.text(e.node) == '@sec.NomSecteur')
+                    {
+                        @:sec_function(e, @par.IdParcelle, '@par.NomParcelle', @sec.IdSecteur);
+                    }
+                    foreach (var node in sec.ChildrenNodes)
+                    {
+//                      @:var parent = this.parent(e.node);
+//                      @:alert(this.text(parent_));
+//                      @:alert(parent.text());
+//                        @:if( this.text(e.node) == 'température')
+//                        @:{
+//                           @:alert('hello');
+//                           // @:TempératureClimat(@node.IdImplanter_noeud_secteur);
+//                        @:}
+                        @:if(this.text(e.node) == '@node.AdresseNoeud')
+                        {
+                            @:node_function(@par.IdParcelle, '@par.NomParcelle',@node.IdImplanter_noeud_secteur);  
+                        }
+
+                    }
+                }
+            } 
+       if( this.text(e.node) == 'Température')
+            {
+                var parent_ = this.parent(e.node);
+                @foreach (var par in Model.ParcellesFils)
+                {
+                    foreach (var sec in par.SecteursParcelle)
+                    {
+                        foreach (var node in sec.ChildrenNodes)
+                        {
+                            @:if('@node.AdresseNoeud' == this.text(parent_) )
+                            @:{
+                                @:TempératureClimat(@node.IdImplanter_noeud_secteur);
+                            @:}
+                        }
+                    }
+                }
+            }
+            if( this.text(e.node) == 'Humidité')
+            {
+                var parent_ = this.parent(e.node);
+                @foreach (var par in Model.ParcellesFils)
+                {
+                    foreach (var sec in par.SecteursParcelle)
+                    {
+                        foreach (var node in sec.ChildrenNodes)
+                        {
+                            @:if('@node.AdresseNoeud' == this.text(parent_) )
+                            @:{
+                                @:humiditéClimat(@node.IdImplanter_noeud_secteur);
+                            @:}
+                        }
+                    }
+                }
+            }
+
+            if( this.text(e.node) == 'Pluviométrie')
+            {
+                var parent_ = this.parent(e.node);
+                @foreach (var par in Model.ParcellesFils)
+                {
+                    foreach (var sec in par.SecteursParcelle)
+                    {
+                        foreach (var node in sec.ChildrenNodes)
+                        {
+                            @:if('@node.AdresseNoeud' == this.text(parent_) )
+                            @:{
+                                @:PluviometrieClimat(@node.IdImplanter_noeud_secteur);
+                            @:}
+                        }
+                    }
+                }
+            }
+            if( this.text(e.node) == 'Rayonnement solaire')
+            {
+                var parent_ = this.parent(e.node);
+                @foreach (var par in Model.ParcellesFils)
+                {
+                    foreach (var sec in par.SecteursParcelle)
+                    {
+                        foreach (var node in sec.ChildrenNodes)
+                        {
+                            @:if('@node.AdresseNoeud' == this.text(parent_) )
+                            @:{
+                                @:Rayonnement(@node.IdImplanter_noeud_secteur);
+                            @:}
+                        }
+                    }
+                }
+            }
+            if( this.text(e.node) == 'Vitesse du vent')
+            {
+                var parent_ = this.parent(e.node);
+                @foreach (var par in Model.ParcellesFils)
+                {
+                    foreach (var sec in par.SecteursParcelle)
+                    {
+                        foreach (var node in sec.ChildrenNodes)
+                        {
+                            @:if('@node.AdresseNoeud' == this.text(parent_) )
+                            @:{
+                                @:VitesseDuvent(@node.IdImplanter_noeud_secteur);
+                            @:}
+                        }
+                    }
+                }
+            }
+            if( this.text(e.node) == 'Sens du vent')
+            {
+                var parent_ = this.parent(e.node);
+                @foreach (var par in Model.ParcellesFils)
+                {
+                    foreach (var sec in par.SecteursParcelle)
+                    {
+                        foreach (var node in sec.ChildrenNodes)
+                        {
+                            @:if('@node.AdresseNoeud' == this.text(parent_) )
+                            @:{
+                                @:SensDuvent(@node.IdImplanter_noeud_secteur);
+                            @:}
+                        }
+                    }
+                }
+            }
+        }
+        var Tree_Exp = [];
+        var List_Parcelle = [];
+        
+         @foreach (var par in Model.ParcellesFils)
+         {
+            @: var List_Secteur = [];
+            foreach (var sec in par.SecteursParcelle)
+            {
+             @:var List_Noeud = [];
+             foreach (var node in sec.ChildrenNodes)
+             {
+                @:var List_Capteur = [];
+                
+                    if (Model.Climat && node.NodeType == 1)
+                    {  
+                        @:var cap_temp = false;
+                        @:var cap_hum = false;
+                        @:var cap_pluv = false;
+                        @:var cap_ray = false;
+                        @:var cap_vitessevent = false;
+                        @:var cap_sens_vent = false;
+                        @:$.ajax({
+                            @:url: '../../UserSession/ListCapteurByNodeClimat',
+                            @:type: 'GET',
+                            @:data: { 
+                            @:idNoeudClimat: @node.IdImplanter_noeud_secteur
+                            @:},
+                            @:async: false,
+                            @:success: function (result) {
+                                @:cap_temp = result.Temperature;
+                                @:cap_hum = result.Humidite;
+                                @:cap_pluv = result.Pluviometrie;
+                                @:cap_ray = result.Rayonnement;
+                                @:cap_vitessevent = result.Vitessevent;
+                                @:cap_sens_vent = result.sensvent;
+                            @:},
+                            @:error: function (xhr, status, error) {
+                                @:var err = eval("(" + xhr.responseText + ")");
+                                @:alert(err.Message);
+                            @:}
+                        @:});
+                        @:if(cap_temp)
+                        @:{
+                            @:List_Capteur.push({
+                                @:text: 'Température', 
+                                @:imageUrl: "../../Content/images/temperature_small.png" 
+                            @:});
+                        @:}
+                         @:if(cap_hum)
+                         @:{
+                            @:List_Capteur.push({
+                                @:text: 'Humidité', 
+                                @:imageUrl: "../../Content/images/humidite_small.png" 
+                            @:});
+                        @:}
+                        @:if(cap_pluv)
+                         @:{
+                            @:List_Capteur.push({
+                                @:text: 'Pluviométrie', 
+                                @:imageUrl: "../../Content/images/pluvimetrie_small.png" 
+                            @:});
+                        @:}
+                         @:if(cap_ray)
+                         @:{
+                            @:List_Capteur.push({
+                                @:text: 'Rayonnement solaire', 
+                                @:imageUrl: "../../Content/images/rayonnemet_small.png" 
+                            @:});
+                        @:}
+                        @:if(cap_vitessevent)
+                         @:{
+                            @:List_Capteur.push({
+                                @:text: 'Vitesse du vent', 
+                                @:imageUrl: "../../Content/images/vitessevent_small.png" 
+                            @:});
+                        @:}
+                        @:if(cap_sens_vent)
+                         @:{
+                            @:List_Capteur.push({
+                                @:text: 'Sens du vent', 
+                                @:imageUrl: "../../Content/images/sensduvent_small.png" 
+                            @:});
+                        @:}
+                        @:List_Noeud.push({
+                                @:text: '@node.AdresseNoeud', 
+                                @:imageUrl: "../../Content/images/rouge_s.png",
+                                @:items:List_Capteur
+                         @:});
+                }
+                else if (node.NodeType == 2 &&  Model.Sol )
+                {
+                    @:List_Noeud.push({
+                        @:text: '@node.AdresseNoeud', 
+                        @:imageUrl: "../../Content/images/orange_s.png" 
+                    @:});
+                   	
+                }
+                else if ( Model.Plante && node.NodeType == 3)
+                {
+                    @:List_Noeud.push({
+                        @:text: '@node.AdresseNoeud', 
+                        @:imageUrl: "../../Content/images/vert_s.png" 
+                    @:});
+                }
+                else if (Model.Irrigation && node.NodeType == 4)
+                {
+                    @:List_Noeud.push({
+                        @:text: '@node.AdresseNoeud', 
+                        @:imageUrl: "../../Content/images/bleu_s.png" 
+                    @:});
+                }
+             }
+            
+            @:List_Secteur.push({
+                @:text: '@sec.NomSecteur', 
+                @:imageUrl: "../../Content/images/secteur.png",
+                @:items:List_Noeud
+            @:});
+           }
+            @:List_Parcelle.push({
+                @:text: '@par.NomParcelle', 
+                @:expanded: false,
+                @:imageUrl: "../../Content/images/parcelle.png",
+                @:items:List_Secteur
+            @:});
+         }
+          Tree_Exp.push({
+                text: '@Model.NomExploitation', 
+                expanded: true,
+                imageUrl: "../../Content/images/exploitation.png",
+                items:List_Parcelle
+          });
+        $("#treeview-sprites").kendoTreeView({
+            animation: {
+                expand: {
+                    duration: 600
+                }
+            },                
+            dataSource: Tree_Exp,
+            select: onSelect,
+        });
+
+    @*    $("#treeview-sprites").kendoTreeView({                
+            dataSource: [{
+                text:  '@Model.NomExploitation', expanded: true, imageUrl: " ../../Content/images/exploitation.png", items: [                       
+                    @foreach (var par in Model.ParcellesFils)
+                    {
+                        @:  { text:'@par.NomParcelle', expanded: false, imageUrl: "../../Content/images/parcelle.png", items:[
+
+                               foreach (var sec in par.SecteursParcelle)
+                               {
+                                @: { text: '@sec.NomSecteur', imageUrl: " ../../Content/images/secteur.png", items:[
+
+                                       foreach (var node in sec.ChildrenNodes)
+                                       {
+                                           if (Model.ProjetPère.Climat || Model.ProjetPère.Irrigation || Model.ProjetPère.Sol || Model.ProjetPère.Plante)
+                                           {
+                                               if (node.NodeType == 1)
+                                               {
+                                 
+                                                @:{ text: '@node.AdresseNoeud', imageUrl: "../../Content/images/rouge_s.png" ,items:[
+                                                    @:{ text: 'température', imageUrl: "../../Content/images/temperature_small.png" },
+                                                    @:{ text: 'humidité', imageUrl: "../../Content/images/humidite_small.png" },
+                                                    @:{ text: 'pluviométrie', imageUrl: "../../Content/images/pluvimetrie_small.png" },
+                                                    @:{ text: 'rayonnement', imageUrl: "../../Content/images/rayonnemet_small.png" },
+                                                    @:{ text: 'vitesse du vent', imageUrl: "../../Content/images/vitessevent_small.png" },
+                                                    @:{ text: 'sens du vent', imageUrl: "../../Content/images/sensduvent_small.png" },
+                                                @:]},                     
+                                               }
+                                               else if (node.NodeType == 2)
+                                               {
+                                        @:	{ text: '@node.AdresseNoeud', imageUrl: "../../Content/images/orange_s.png" }
+                                    }
+                                               else if (node.NodeType == 3)
+                                               {
+                                        @:	{ text: '@node.AdresseNoeud', imageUrl: "../../Content/images/vert_s.png" }
+                                    }
+                                               else if (node.NodeType == 4)
+                                               {
+                                        @:	{ text: '@node.AdresseNoeud', imageUrl: "../../Content/images/bleu_s.png" }
+                                    }
+                                           }
+
+                                       }
+                            @: ] },
+                        }
+
+                        @: ]},
+                    }
+                ]
+            }],
+            select: onSelect,
+        });*@
+    </script>
+
+	
+<script type="text/javascript">
+
+    function exp_function() {
+
+        var length = $("div#tabs ul li:contains(@Model.NomExploitation)").length;
+        var index = $("#tabs a[href='#map']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        } else {
+            $.ajax({
+                url: '../../UserSession/LandViewUser',
+                type: 'GET',
+                data: { idExpl: '@Model.IdExploitation' },
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                    loadLeftSplitterWithExpInfos();
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                }
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#map' onclick='loadLeftSplitterWithExpInfos()'>@Model.NomExploitation</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+
+
+    function par_function(e,idParcel, nomParcel) {
+        
+        //reset items tree sizes
+        @foreach (var par in Model.ParcellesFils)
+        {
+            @:$("div#@par.IdParcelle").css( 'font-size', '100%');
+        }
+
+        $("div#" + idParcel).css('font-size', '115%');
+
+        var length = $("div#tabs ul li:contains(" + nomParcel + ")").length;
+        var index = $("#tabs a[href='#par-" + idParcel + "']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        } else {
+            $.ajax({
+                url: '../../UserSession/SecteursNoeudsUser',
+                type: 'GET',
+                data: { idParcel: idParcel },
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                }
+            });
+            $("#tabs").children("ul:first").append("<li onclick='loadLeftSplitterWithParInfos(" + idParcel + ")'><a href='#par-" + idParcel + "'>" + nomParcel + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+
+        loadLeftSplitterWithParInfos(idParcel);  
+        //e.stopPropagation();     
+    }
+
+    function sec_function(e, idParcelle, nomParcelle, idSecteur){
+        alert(nomParcelle);
+       //reset items tree sizes
+        @foreach (var par in Model.ParcellesFils)
+        {
+            @:$("div#@par.IdParcelle").css( 'font-size', '100%');
+        }
+        $("div#" + idSecteur).css('font-size', '115%');
+        var length = $("div#tabs ul li:contains(" + nomParcelle + ")").length;
+        var index = $("#tabs a[href='#par-" + idParcelle + "']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            $.ajax({
+                url: '../../UserSession/SecteursNoeudsUser',
+                type: 'GET',
+                data: { idParcel: idParcelle },
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                    loadLeftSplitterWithSecInfos(item_id[3]);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#par-" + idParcelle + "'onclick='loadLeftSplitterWithSecInfos("+ idSecteur +");' >" + nomParcelle + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });            
+        }
+        loadLeftSplitterWithSecInfos(idSecteur);
+        e.stopPropagation();
+    }
+
+    function node_function(idParcel, nomParcel, idNoeud) {
+
+//        if (event.stopPropagation) {
+//            event.stopPropagation();   // W3C model
+//        } else {
+//            event.cancelBubble = true; // IE model
+
+        var length = $("div#tabs ul li:contains(" + nomParcel + ")").length;
+        var index = $("#tabs a[href='#par-" + idParcel + "']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            $.ajax({
+                url: '../../UserSession/SecteursNoeudsUser',
+                type: 'GET',
+                data: { idParcel: idParcel },
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                }
+            });
+            tooltipp.hide();
+            $("#tabs").children("ul:first").append("<li onclick=''><a href='#par-" + idParcel + "'>" + nomParcel + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+            e.stopPropagation();
+        }
+
+        google.maps.event.addListener(markers[i_markers], "click", (function (i_markers) {
+            return null;
+        })(i_markers));
+
+
+        $.ajax({
+            url: '../../UserSession/InfoNods',
+            type: 'GET',
+            data: { idNode: idNoeud},
+            async: false,
+            success: function (result) {
+                $("#infos").innerHTML = "";
+                $("#infos").append(result);
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            }
+        });   
+     
+    }
+    function TempératureClimat(idClimat) {
+        var length = $("div#tabs ul li:contains(Température)").length;
+        var index = $("#tabs a[href='#vertical2_Température']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        } else {
+            $("#tabs").tabs("refresh");
+            $.ajax({
+                url: '../../UserSession/TemperatureClimat',
+                type: 'POST',
+                data: {
+                    idNoeudClimat: idClimat,
+                    startTime: new Date()
+                },
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                    $("#tabs").children("ul:first").append("<li><a href='#vertical2_Température'>Température</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+                    var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+                    $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(xhr.responseText);
+                alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                complete: function() {
+                    kendo.ui.progress($("#loading1"), false);
+                },
+            });
+        }
+    }
+
+     function humiditéClimat(idClimat) {
+  
+        //$("#elementId").data("kendoWindow").center().close();
+         $("#mesureClimat").data("kendoWindow").center().close();
+        var length = $("div#tabs ul li:contains(Humidité)").length;
+        var index = $("#tabs a[href='#vertical2_Humidite']").parent().index();
+        if (length != 0 && index != -1) {
+            
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/HumiditeClimat',
+                type: 'POST',
+                data: { 
+                    idNoeudClimat: idClimat,
+                    startTime: new Date()
+                },
+                //dataType: 'json',
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+            
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Humidite'>Humidité</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+
+        }
+    }
+    function PluviometrieClimat(idClimat){
+        $("#mesureClimat").data("kendoWindow").center().close();
+        //$("#elementId").data("kendoWindow").center().close();
+        var length = $("div#tabs ul li:contains(Pluviométrie)").length;
+        var index = $("#tabs a[href='#vertical2_Pluviometrie']").parent().index();
+        if (length != 0 && index != -1) {
+            
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/PluviometrieClimat',
+                type: 'POST',
+                data: { 
+                    idNoeudClimat: idClimat ,
+                    startTime: new Date()
+                },
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Pluviometrie'>Pluviométrie</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+
+        }
+    }
+    function Rayonnement(idClimat){
+  
+       // $("#elementId").data("kendoWindow").center().close();
+         $("#mesureClimat").data("kendoWindow").center().close();
+        var length = $("div#tabs ul li:contains(Rayonnement)").length;
+        var index = $("#tabs a[href='#vertical2_Rayonnement']").parent().index();
+        if (length != 0 && index != -1) {
+            
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/RayonnementSolaireClimat',
+                type: 'POST',
+                data: { 
+                    idNoeudClimat: idClimat ,
+                    startTime: new Date()},
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Rayonnement'>Rayonnement</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+    function  VitesseDuvent(idClimat){
+          $("#mesureClimat").data("kendoWindow").center().close();
+        //$("#elementId").data("kendoWindow").center().close();
+
+        var length = $("div#tabs ul li:contains(Vitesse du Vent)").length;
+        var index = $("#tabs a[href='#vertical2_Vitesse_Vent']").parent().index();
+        if (length != 0 && index != -1) {
+            
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/VitesseVentClimat',
+                type: 'POST',
+                data: { 
+                    idNoeudClimat: idClimat ,
+                    startTime: new Date()},
+                //dataType: 'json',
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Vitesse_Vent'>Vitesse du Vent</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }
+
+    function  SensDuvent(idClimat){
+        //$("#elementId").data("kendoWindow").center().close();
+         $("#mesureClimat").data("kendoWindow").center().close();
+        var length = $("div#tabs ul li:contains(Sens du Vent)").length;
+        var index = $("#tabs a[href='#vertical2_Sens_Vent']").parent().index();
+        if (length != 0 && index != -1) {
+            
+            $('#tabs').tabs('option', 'active', index);
+
+        } else {
+
+            $.ajax({
+                url: '../../UserSession/SensVentClimat',
+                type: 'POST',
+                data: { 
+                    idNoeudClimat: idClimat ,
+                    startTime: new Date()
+                },
+                //dataType: 'json',
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //},
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#vertical2_Sens_Vent'>Sens du Vent</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }   
+
+</script>

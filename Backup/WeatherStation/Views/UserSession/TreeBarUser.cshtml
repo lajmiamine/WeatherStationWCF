@@ -1,0 +1,23 @@
+﻿
+    <div id="tabstrip1">
+        <ul>
+            <li class="k-state-active">Exploitation</li>
+            <li>Noeuds</li>
+        </ul>
+        <div style="height:100%;">
+            <div>@Html.Partial("TreeBarExp")</div>
+        </div>
+        <div style="height:100%;">
+            <div>@Html.Partial("TreeBarNoeuds")</div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $("#tabstrip1").kendoTabStrip({
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            }
+        });
+    </script>

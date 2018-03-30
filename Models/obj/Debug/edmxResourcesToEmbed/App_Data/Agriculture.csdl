@@ -1,0 +1,857 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="AgricultureModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+  <EntityContainer Name="AgricultureEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="Bilan" EntityType="AgricultureModel.Bilan" />
+    <EntitySet Name="calendirer_irrigation" EntityType="AgricultureModel.calendirer_irrigation" />
+    <EntitySet Name="culture" EntityType="AgricultureModel.culture" />
+    <EntitySet Name="electrovanne" EntityType="AgricultureModel.electrovanne" />
+    <EntitySet Name="exploitation" EntityType="AgricultureModel.exploitation" />
+    <EntitySet Name="implanter_culture_parcelle" EntityType="AgricultureModel.implanter_culture_parcelle" />
+    <EntitySet Name="implanter_noeud_exploitation" EntityType="AgricultureModel.implanter_noeud_exploitation" />
+    <EntitySet Name="implanter_noeudclimat_exploitation" EntityType="AgricultureModel.implanter_noeudclimat_exploitation" />
+    <EntitySet Name="implanter_noeudclimatfictive_exploitation" EntityType="AgricultureModel.implanter_noeudclimatfictive_exploitation" />
+    <EntitySet Name="implanter_noeudirrigation_exploitation" EntityType="AgricultureModel.implanter_noeudirrigation_exploitation" />
+    <EntitySet Name="implanter_noeudplante_exploitation" EntityType="AgricultureModel.implanter_noeudplante_exploitation" />
+    <EntitySet Name="implanter_noeudsol_exploitation" EntityType="AgricultureModel.implanter_noeudsol_exploitation" />
+    <EntitySet Name="mesure_noeud" EntityType="AgricultureModel.mesure_noeud" />
+    <EntitySet Name="mesure_noeudclimat" EntityType="AgricultureModel.mesure_noeudclimat" />
+    <EntitySet Name="mesure_noeudclimat_moyennes" EntityType="AgricultureModel.mesure_noeudclimat_moyennes" />
+    <EntitySet Name="mesure_noeudirrigation" EntityType="AgricultureModel.mesure_noeudirrigation" />
+    <EntitySet Name="mesure_noeudplante" EntityType="AgricultureModel.mesure_noeudplante" />
+    <EntitySet Name="mesure_noeudsol" EntityType="AgricultureModel.mesure_noeudsol" />
+    <EntitySet Name="notification" EntityType="AgricultureModel.notification" />
+    <EntitySet Name="parcelle" EntityType="AgricultureModel.parcelle" />
+    <EntitySet Name="projet" EntityType="AgricultureModel.projet" />
+    <EntitySet Name="proprietaire" EntityType="AgricultureModel.proprietaire" />
+    <EntitySet Name="rampe" EntityType="AgricultureModel.rampe" />
+    <EntitySet Name="secteur" EntityType="AgricultureModel.secteur" />
+    <AssociationSet Name="FK_Bilan_implanter_culture_parcelle" Association="AgricultureModel.FK_Bilan_implanter_culture_parcelle">
+      <End Role="implanter_culture_parcelle" EntitySet="implanter_culture_parcelle" />
+      <End Role="Bilan" EntitySet="Bilan" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Calendirer_irrigation_Electrivane" Association="AgricultureModel.FK_Calendirer_irrigation_Electrivane">
+      <End Role="electrovanne" EntitySet="electrovanne" />
+      <End Role="calendirer_irrigation" EntitySet="calendirer_irrigation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_culture_parcelle_culture" Association="AgricultureModel.FK_implanter_culture_parcelle_culture">
+      <End Role="culture" EntitySet="culture" />
+      <End Role="implanter_culture_parcelle" EntitySet="implanter_culture_parcelle" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Electrivane_implanter_noeudirrigation_exploitation" Association="AgricultureModel.FK_Electrivane_implanter_noeudirrigation_exploitation">
+      <End Role="implanter_noeudirrigation_exploitation" EntitySet="implanter_noeudirrigation_exploitation" />
+      <End Role="electrovanne" EntitySet="electrovanne" />
+    </AssociationSet>
+    <AssociationSet Name="FK_electrovanne_secteur" Association="AgricultureModel.FK_electrovanne_secteur">
+      <End Role="secteur" EntitySet="secteur" />
+      <End Role="electrovanne" EntitySet="electrovanne" />
+    </AssociationSet>
+    <AssociationSet Name="FK_rampe_electrovanne" Association="AgricultureModel.FK_rampe_electrovanne">
+      <End Role="electrovanne" EntitySet="electrovanne" />
+      <End Role="rampe" EntitySet="rampe" />
+    </AssociationSet>
+    <AssociationSet Name="FK_secteur_electrovanne" Association="AgricultureModel.FK_secteur_electrovanne">
+      <End Role="electrovanne" EntitySet="electrovanne" />
+      <End Role="secteur" EntitySet="secteur" />
+    </AssociationSet>
+    <AssociationSet Name="FK_exploitation_projet" Association="AgricultureModel.FK_exploitation_projet">
+      <End Role="projet" EntitySet="projet" />
+      <End Role="exploitation" EntitySet="exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeudclimatfictive_exploitation_exploitation" Association="AgricultureModel.FK_implanter_noeudclimatfictive_exploitation_exploitation">
+      <End Role="exploitation" EntitySet="exploitation" />
+      <End Role="implanter_noeudclimatfictive_exploitation" EntitySet="implanter_noeudclimatfictive_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_parcelle_exploitation" Association="AgricultureModel.FK_parcelle_exploitation">
+      <End Role="exploitation" EntitySet="exploitation" />
+      <End Role="parcelle" EntitySet="parcelle" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_culture_parcelle_parcelle" Association="AgricultureModel.FK_implanter_culture_parcelle_parcelle">
+      <End Role="parcelle" EntitySet="parcelle" />
+      <End Role="implanter_culture_parcelle" EntitySet="implanter_culture_parcelle" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeud_exploitation_secteur" Association="AgricultureModel.FK_implanter_noeud_exploitation_secteur">
+      <End Role="secteur" EntitySet="secteur" />
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeudclimat_exploitation_implanter_noeud_exploitation" Association="AgricultureModel.FK_implanter_noeudclimat_exploitation_implanter_noeud_exploitation">
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+      <End Role="implanter_noeudclimat_exploitation" EntitySet="implanter_noeudclimat_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeudirrigation_exploitation_implanter_noeud_exploitation" Association="AgricultureModel.FK_implanter_noeudirrigation_exploitation_implanter_noeud_exploitation">
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+      <End Role="implanter_noeudirrigation_exploitation" EntitySet="implanter_noeudirrigation_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeudplante_exploitation_implanter_noeud_exploitation" Association="AgricultureModel.FK_implanter_noeudplante_exploitation_implanter_noeud_exploitation">
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+      <End Role="implanter_noeudplante_exploitation" EntitySet="implanter_noeudplante_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeudsol_exploitation_implanter_noeud_exploitation" Association="AgricultureModel.FK_implanter_noeudsol_exploitation_implanter_noeud_exploitation">
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+      <End Role="implanter_noeudsol_exploitation" EntitySet="implanter_noeudsol_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_mesure_noeud_implanter_noeud_exploitation" Association="AgricultureModel.FK_mesure_noeud_implanter_noeud_exploitation">
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+      <End Role="mesure_noeud" EntitySet="mesure_noeud" />
+    </AssociationSet>
+    <AssociationSet Name="FK_notification_notification" Association="AgricultureModel.FK_notification_notification">
+      <End Role="implanter_noeud_exploitation" EntitySet="implanter_noeud_exploitation" />
+      <End Role="notification" EntitySet="notification" />
+    </AssociationSet>
+    <AssociationSet Name="FK_implanter_noeudclimatfictive_exploitation_implanter_noeudclimat_exploitation" Association="AgricultureModel.FK_implanter_noeudclimatfictive_exploitation_implanter_noeudclimat_exploitation">
+      <End Role="implanter_noeudclimat_exploitation" EntitySet="implanter_noeudclimat_exploitation" />
+      <End Role="implanter_noeudclimatfictive_exploitation" EntitySet="implanter_noeudclimatfictive_exploitation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_mesure_noeudclimat_moyennes_implanter_noeudclimat_exploitation" Association="AgricultureModel.FK_mesure_noeudclimat_moyennes_implanter_noeudclimat_exploitation">
+      <End Role="implanter_noeudclimat_exploitation" EntitySet="implanter_noeudclimat_exploitation" />
+      <End Role="mesure_noeudclimat_moyennes" EntitySet="mesure_noeudclimat_moyennes" />
+    </AssociationSet>
+    <AssociationSet Name="FK_mesure_noeudclimat_mesure_noeud" Association="AgricultureModel.FK_mesure_noeudclimat_mesure_noeud">
+      <End Role="mesure_noeud" EntitySet="mesure_noeud" />
+      <End Role="mesure_noeudclimat" EntitySet="mesure_noeudclimat" />
+    </AssociationSet>
+    <AssociationSet Name="FK_mesure_noeudirrigation_mesure_noeud" Association="AgricultureModel.FK_mesure_noeudirrigation_mesure_noeud">
+      <End Role="mesure_noeud" EntitySet="mesure_noeud" />
+      <End Role="mesure_noeudirrigation" EntitySet="mesure_noeudirrigation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_mesure_noeudplante_mesure_noeud" Association="AgricultureModel.FK_mesure_noeudplante_mesure_noeud">
+      <End Role="mesure_noeud" EntitySet="mesure_noeud" />
+      <End Role="mesure_noeudplante" EntitySet="mesure_noeudplante" />
+    </AssociationSet>
+    <AssociationSet Name="FK_mesure_noeudsol_mesure_noeud" Association="AgricultureModel.FK_mesure_noeudsol_mesure_noeud">
+      <End Role="mesure_noeud" EntitySet="mesure_noeud" />
+      <End Role="mesure_noeudsol" EntitySet="mesure_noeudsol" />
+    </AssociationSet>
+    <AssociationSet Name="FK_secteur_parcelle" Association="AgricultureModel.FK_secteur_parcelle">
+      <End Role="parcelle" EntitySet="parcelle" />
+      <End Role="secteur" EntitySet="secteur" />
+    </AssociationSet>
+    <AssociationSet Name="FK_projet_proprietaire" Association="AgricultureModel.FK_projet_proprietaire">
+      <End Role="proprietaire" EntitySet="proprietaire" />
+      <End Role="projet" EntitySet="projet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="Bilan">
+    <Key>
+      <PropertyRef Name="IdBilan" />
+    </Key>
+    <Property Name="IdBilan" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="DateBilan" Type="DateTime" />
+    <Property Name="EToi" Type="Double" />
+    <Property Name="Kci" Type="Double" />
+    <Property Name="ETci" Type="Double" />
+    <Property Name="ETai" Type="Double" />
+    <Property Name="Pi" Type="Double" />
+    <Property Name="Ii" Type="Double" />
+    <Property Name="Di" Type="Double" />
+    <Property Name="RUi" Type="Double" />
+    <Property Name="RFUi" Type="Double" />
+    <Property Name="Ti" Type="Double" />
+    <Property Name="Zi" Type="Double" />
+    <Property Name="Q" Type="Double" />
+    <Property Name="FK_IdImplCultureParcelle" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="implanter_culture_parcelle" Relationship="AgricultureModel.FK_Bilan_implanter_culture_parcelle" FromRole="Bilan" ToRole="implanter_culture_parcelle" />
+  </EntityType>
+  <EntityType Name="calendirer_irrigation">
+    <Key>
+      <PropertyRef Name="IdCalendrier" />
+    </Key>
+    <Property Name="Datedebut" Type="DateTime" />
+    <Property Name="Duree" Type="Int32" />
+    <Property Name="FK_IdElectrovanne" Type="Int32" Nullable="false" />
+    <Property Name="IdCalendrier" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <NavigationProperty Name="electrovanne" Relationship="AgricultureModel.FK_Calendirer_irrigation_Electrivane" FromRole="calendirer_irrigation" ToRole="electrovanne" />
+  </EntityType>
+  <EntityType Name="culture">
+    <Key>
+      <PropertyRef Name="IdCulture" />
+    </Key>
+    <Property Name="IdCulture" Type="Int32" Nullable="false" />
+    <Property Name="NomCulture" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+    <Property Name="DureePhIni" Type="Int32" />
+    <Property Name="DureePhDev" Type="Int32" />
+    <Property Name="DureePhMid" Type="Int32" />
+    <Property Name="DureePhEnd" Type="Int32" />
+    <Property Name="Kcini" Type="Double" />
+    <Property Name="Kcmid" Type="Double" />
+    <Property Name="Kcend" Type="Double" />
+    <Property Name="Zini" Type="Double" />
+    <Property Name="Zend" Type="Double" />
+    <Property Name="Pini" Type="Double" />
+    <Property Name="Pmid" Type="Double" />
+    <Property Name="Pend" Type="Double" />
+    <NavigationProperty Name="implanter_culture_parcelle" Relationship="AgricultureModel.FK_implanter_culture_parcelle_culture" FromRole="culture" ToRole="implanter_culture_parcelle" />
+  </EntityType>
+  <EntityType Name="electrovanne">
+    <Key>
+      <PropertyRef Name="IdElectrovanne" />
+    </Key>
+    <Property Name="IdElectrovanne" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="FK_IdImlpNoeudIrrigation" Type="Int32" Nullable="false" />
+    <Property Name="FK_IdSecteur" Type="Int32" Nullable="false" />
+    <Property Name="Nombre" Type="Int32" Nullable="false" />
+    <Property Name="Latitude" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="Longitude" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="DebitL" Type="Double" />
+    <Property Name="DebitMM" Type="Double" />
+    <NavigationProperty Name="calendirer_irrigation" Relationship="AgricultureModel.FK_Calendirer_irrigation_Electrivane" FromRole="electrovanne" ToRole="calendirer_irrigation" />
+    <NavigationProperty Name="implanter_noeudirrigation_exploitation" Relationship="AgricultureModel.FK_Electrivane_implanter_noeudirrigation_exploitation" FromRole="electrovanne" ToRole="implanter_noeudirrigation_exploitation" />
+    <NavigationProperty Name="secteur" Relationship="AgricultureModel.FK_electrovanne_secteur" FromRole="electrovanne" ToRole="secteur" />
+    <NavigationProperty Name="rampe" Relationship="AgricultureModel.FK_rampe_electrovanne" FromRole="electrovanne" ToRole="rampe" />
+    <NavigationProperty Name="secteur1" Relationship="AgricultureModel.FK_secteur_electrovanne" FromRole="electrovanne" ToRole="secteur" />
+  </EntityType>
+  <EntityType Name="exploitation">
+    <Key>
+      <PropertyRef Name="IdExploitation" />
+    </Key>
+    <Property Name="IdExploitation" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="NomExploitation" Type="String" MaxLength="45" Unicode="true" FixedLength="true" />
+    <Property Name="DescriptionExploitation" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="DateAjoutExploitation" Type="DateTime" />
+    <Property Name="ImageExploitation" Type="Binary" MaxLength="Max" FixedLength="false" />
+    <Property Name="AdresseExploitation" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="FK_IdProjet" Type="Int32" />
+    <Property Name="Climat" Type="Boolean" />
+    <Property Name="Irrigation" Type="Boolean" />
+    <Property Name="Sol" Type="Boolean" />
+    <Property Name="Culture" Type="Boolean" />
+    <NavigationProperty Name="projet" Relationship="AgricultureModel.FK_exploitation_projet" FromRole="exploitation" ToRole="projet" />
+    <NavigationProperty Name="implanter_noeudclimatfictive_exploitation" Relationship="AgricultureModel.FK_implanter_noeudclimatfictive_exploitation_exploitation" FromRole="exploitation" ToRole="implanter_noeudclimatfictive_exploitation" />
+    <NavigationProperty Name="parcelle" Relationship="AgricultureModel.FK_parcelle_exploitation" FromRole="exploitation" ToRole="parcelle" />
+  </EntityType>
+  <EntityType Name="implanter_culture_parcelle">
+    <Key>
+      <PropertyRef Name="IdImplanterCulture" />
+    </Key>
+    <Property Name="IdImplanterCulture" Type="Int32" Nullable="false" />
+    <Property Name="DateImplantationCulture" Type="DateTime" />
+    <Property Name="DebutSaison" Type="DateTime" />
+    <Property Name="FinSaison" Type="DateTime" />
+    <Property Name="DebitNominalL" Type="Double" />
+    <Property Name="DebitNominalMM" Type="Double" />
+    <Property Name="FK_IdCulture" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="Bilan" Relationship="AgricultureModel.FK_Bilan_implanter_culture_parcelle" FromRole="implanter_culture_parcelle" ToRole="Bilan" />
+    <NavigationProperty Name="culture" Relationship="AgricultureModel.FK_implanter_culture_parcelle_culture" FromRole="implanter_culture_parcelle" ToRole="culture" />
+    <NavigationProperty Name="parcelle" Relationship="AgricultureModel.FK_implanter_culture_parcelle_parcelle" FromRole="implanter_culture_parcelle" ToRole="parcelle" />
+  </EntityType>
+  <EntityType Name="implanter_noeud_exploitation">
+    <Key>
+      <PropertyRef Name="IdImplanter_noeud_secteur" />
+    </Key>
+    <Property Name="IdImplanter_noeud_secteur" Type="Int32" Nullable="false" />
+    <Property Name="Type" Type="Int32" />
+    <Property Name="AdresseNoeud" Type="Int32" />
+    <Property Name="periode" Type="Int32" />
+    <Property Name="Voltage" Type="Int32" />
+    <Property Name="CodeActivation" Type="Int32" />
+    <Property Name="CodeCommunication" Type="Int32" />
+    <Property Name="Latitude" Type="String" MaxLength="1000" Unicode="false" FixedLength="false" />
+    <Property Name="Longitude" Type="String" MaxLength="1000" Unicode="false" FixedLength="false" />
+    <Property Name="DateImplementation" Type="DateTime" />
+    <Property Name="FK_Id_secteur" Type="Int32" Nullable="false" />
+    <Property Name="NomNoeud" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+    <NavigationProperty Name="secteur" Relationship="AgricultureModel.FK_implanter_noeud_exploitation_secteur" FromRole="implanter_noeud_exploitation" ToRole="secteur" />
+    <NavigationProperty Name="implanter_noeudclimat_exploitation" Relationship="AgricultureModel.FK_implanter_noeudclimat_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeud_exploitation" ToRole="implanter_noeudclimat_exploitation" />
+    <NavigationProperty Name="implanter_noeudirrigation_exploitation" Relationship="AgricultureModel.FK_implanter_noeudirrigation_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeud_exploitation" ToRole="implanter_noeudirrigation_exploitation" />
+    <NavigationProperty Name="implanter_noeudplante_exploitation" Relationship="AgricultureModel.FK_implanter_noeudplante_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeud_exploitation" ToRole="implanter_noeudplante_exploitation" />
+    <NavigationProperty Name="implanter_noeudsol_exploitation" Relationship="AgricultureModel.FK_implanter_noeudsol_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeud_exploitation" ToRole="implanter_noeudsol_exploitation" />
+    <NavigationProperty Name="mesure_noeud" Relationship="AgricultureModel.FK_mesure_noeud_implanter_noeud_exploitation" FromRole="implanter_noeud_exploitation" ToRole="mesure_noeud" />
+    <NavigationProperty Name="notification" Relationship="AgricultureModel.FK_notification_notification" FromRole="implanter_noeud_exploitation" ToRole="notification" />
+  </EntityType>
+  <EntityType Name="implanter_noeudclimat_exploitation">
+    <Key>
+      <PropertyRef Name="IdImplanter_noeud_secteur" />
+    </Key>
+    <Property Name="SeuilInfTemp" Type="Single" />
+    <Property Name="SeuilSuppTemp" Type="Single" />
+    <Property Name="SeuilInfHumidite" Type="Single" />
+    <Property Name="SeuilSuppHumidite" Type="Single" />
+    <Property Name="IdImplanter_noeud_secteur" Type="Int32" Nullable="false" />
+    <Property Name="seuilPluviometrie" Type="Single" />
+    <Property Name="seuilVitesseVent" Type="Single" />
+    <Property Name="Temperature" Type="Boolean" />
+    <Property Name="Humidite" Type="Boolean" />
+    <Property Name="Pluviometrie" Type="Boolean" />
+    <Property Name="Rayonnement" Type="Boolean" />
+    <Property Name="vitessevent" Type="Boolean" />
+    <Property Name="sensvent" Type="Boolean" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_implanter_noeudclimat_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeudclimat_exploitation" ToRole="implanter_noeud_exploitation" />
+    <NavigationProperty Name="implanter_noeudclimatfictive_exploitation" Relationship="AgricultureModel.FK_implanter_noeudclimatfictive_exploitation_implanter_noeudclimat_exploitation" FromRole="implanter_noeudclimat_exploitation" ToRole="implanter_noeudclimatfictive_exploitation" />
+    <NavigationProperty Name="mesure_noeudclimat_moyennes" Relationship="AgricultureModel.FK_mesure_noeudclimat_moyennes_implanter_noeudclimat_exploitation" FromRole="implanter_noeudclimat_exploitation" ToRole="mesure_noeudclimat_moyennes" />
+  </EntityType>
+  <EntityType Name="implanter_noeudclimatfictive_exploitation">
+    <Key>
+      <PropertyRef Name="IdNodeCF" />
+    </Key>
+    <Property Name="IdNodeCF" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="FK_IdNodeC" Type="Int32" />
+    <Property Name="FK_IdExp" Type="Int32" />
+    <Property Name="Latitude" Type="String" MaxLength="9" Unicode="true" FixedLength="true" />
+    <Property Name="Longitude" Type="String" MaxLength="9" Unicode="true" FixedLength="true" />
+    <NavigationProperty Name="exploitation" Relationship="AgricultureModel.FK_implanter_noeudclimatfictive_exploitation_exploitation" FromRole="implanter_noeudclimatfictive_exploitation" ToRole="exploitation" />
+    <NavigationProperty Name="implanter_noeudclimat_exploitation" Relationship="AgricultureModel.FK_implanter_noeudclimatfictive_exploitation_implanter_noeudclimat_exploitation" FromRole="implanter_noeudclimatfictive_exploitation" ToRole="implanter_noeudclimat_exploitation" />
+  </EntityType>
+  <EntityType Name="implanter_noeudirrigation_exploitation">
+    <Key>
+      <PropertyRef Name="IdImplanter_noeud_secteur" />
+    </Key>
+    <Property Name="SeuilPression1" Type="Single" />
+    <Property Name="SeuilPression2" Type="Single" />
+    <Property Name="SeuilPression3" Type="Single" />
+    <Property Name="SeuilPression4" Type="Single" />
+    <Property Name="IdImplanter_noeud_secteur" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="electrovanne" Relationship="AgricultureModel.FK_Electrivane_implanter_noeudirrigation_exploitation" FromRole="implanter_noeudirrigation_exploitation" ToRole="electrovanne" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_implanter_noeudirrigation_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeudirrigation_exploitation" ToRole="implanter_noeud_exploitation" />
+  </EntityType>
+  <EntityType Name="implanter_noeudplante_exploitation">
+    <Key>
+      <PropertyRef Name="IdImplanter_noeud_secteur" />
+    </Key>
+    <Property Name="Seuil_inf_temp" Type="Single" />
+    <Property Name="Seuil_supp_temp" Type="Single" />
+    <Property Name="IdImplanter_noeud_secteur" Type="Int32" Nullable="false" />
+    <Property Name="Seuil_inf_hummectation" Type="Single" />
+    <Property Name="Seuil_supp_hummectation" Type="Single" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_implanter_noeudplante_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeudplante_exploitation" ToRole="implanter_noeud_exploitation" />
+  </EntityType>
+  <EntityType Name="implanter_noeudsol_exploitation">
+    <Key>
+      <PropertyRef Name="IdImplanter_noeud_secteur" />
+    </Key>
+    <Property Name="CodeProfondeurTemperature" Type="Int32" />
+    <Property Name="SeuilHumidité1" Type="Single" />
+    <Property Name="SeuilHumidité2" Type="Single" />
+    <Property Name="SeuilHumidité3" Type="Single" />
+    <Property Name="SeuilHumidité4" Type="Single" />
+    <Property Name="CodeProfondeurHumidite" Type="Int32" />
+    <Property Name="IdImplanter_noeud_secteur" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_implanter_noeudsol_exploitation_implanter_noeud_exploitation" FromRole="implanter_noeudsol_exploitation" ToRole="implanter_noeud_exploitation" />
+  </EntityType>
+  <EntityType Name="mesure_noeud">
+    <Key>
+      <PropertyRef Name="IdMesureNoeud" />
+    </Key>
+    <Property Name="IdMesureNoeud" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="DateMesureNoeud" Type="DateTime" />
+    <Property Name="FK_IdImplNoeud" Type="Int32" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_mesure_noeud_implanter_noeud_exploitation" FromRole="mesure_noeud" ToRole="implanter_noeud_exploitation" />
+    <NavigationProperty Name="mesure_noeudclimat" Relationship="AgricultureModel.FK_mesure_noeudclimat_mesure_noeud" FromRole="mesure_noeud" ToRole="mesure_noeudclimat" />
+    <NavigationProperty Name="mesure_noeudirrigation" Relationship="AgricultureModel.FK_mesure_noeudirrigation_mesure_noeud" FromRole="mesure_noeud" ToRole="mesure_noeudirrigation" />
+    <NavigationProperty Name="mesure_noeudplante" Relationship="AgricultureModel.FK_mesure_noeudplante_mesure_noeud" FromRole="mesure_noeud" ToRole="mesure_noeudplante" />
+    <NavigationProperty Name="mesure_noeudsol" Relationship="AgricultureModel.FK_mesure_noeudsol_mesure_noeud" FromRole="mesure_noeud" ToRole="mesure_noeudsol" />
+  </EntityType>
+  <EntityType Name="mesure_noeudclimat">
+    <Key>
+      <PropertyRef Name="IdMesureNoeud" />
+    </Key>
+    <Property Name="Pluviometrie" Type="Single" />
+    <Property Name="SensVent" Type="Single" />
+    <Property Name="VitesseVent" Type="Single" />
+    <Property Name="RayonnementSolaire" Type="Single" />
+    <Property Name="TemperatureAir" Type="Single" />
+    <Property Name="HumiditeAir" Type="Single" />
+    <Property Name="IdMesureNoeud" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="mesure_noeud" Relationship="AgricultureModel.FK_mesure_noeudclimat_mesure_noeud" FromRole="mesure_noeudclimat" ToRole="mesure_noeud" />
+  </EntityType>
+  <EntityType Name="mesure_noeudclimat_moyennes">
+    <Key>
+      <PropertyRef Name="IdMesureMoyenne" />
+    </Key>
+    <Property Name="IdMesureMoyenne" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="JourMesure" Type="DateTime" />
+    <Property Name="Pluviometrie" Type="Single" />
+    <Property Name="TMin" Type="Single" />
+    <Property Name="TMax" Type="Single" />
+    <Property Name="TMoy" Type="Single" />
+    <Property Name="HMin" Type="Single" />
+    <Property Name="HMax" Type="Single" />
+    <Property Name="HMoy" Type="Single" />
+    <Property Name="RMax" Type="Single" />
+    <Property Name="RMin" Type="Single" />
+    <Property Name="Rmoy" Type="Single" />
+    <Property Name="REst" Type="Boolean" />
+    <Property Name="VvMax" Type="Single" />
+    <Property Name="VvMin" Type="Single" />
+    <Property Name="Vvmoy" Type="Single" />
+    <Property Name="VEst" Type="Boolean" />
+    <Property Name="ET0" Type="Single" />
+    <Property Name="FK_IdNoeudClimat" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="implanter_noeudclimat_exploitation" Relationship="AgricultureModel.FK_mesure_noeudclimat_moyennes_implanter_noeudclimat_exploitation" FromRole="mesure_noeudclimat_moyennes" ToRole="implanter_noeudclimat_exploitation" />
+  </EntityType>
+  <EntityType Name="mesure_noeudirrigation">
+    <Key>
+      <PropertyRef Name="IdMesureNoeud" />
+    </Key>
+    <Property Name="Pression1" Type="Double" />
+    <Property Name="Pression2" Type="Double" />
+    <Property Name="Pression3" Type="Double" />
+    <Property Name="Pression4" Type="Double" />
+    <Property Name="Electrovanne1" Type="Int32" />
+    <Property Name="Electrovanne2" Type="Int32" />
+    <Property Name="Electrovanne3" Type="Int32" />
+    <Property Name="Electrovanne4" Type="Int32" />
+    <Property Name="Quantite" Type="Double" />
+    <Property Name="IdMesureNoeud" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="mesure_noeud" Relationship="AgricultureModel.FK_mesure_noeudirrigation_mesure_noeud" FromRole="mesure_noeudirrigation" ToRole="mesure_noeud" />
+  </EntityType>
+  <EntityType Name="mesure_noeudplante">
+    <Key>
+      <PropertyRef Name="IdMesureNoeud" />
+    </Key>
+    <Property Name="RayonnementHaut" Type="Single" />
+    <Property Name="RayonnementBas" Type="Single" />
+    <Property Name="TemperatureFeuilles" Type="Single" />
+    <Property Name="HumiditeFeuilles" Type="Single" />
+    <Property Name="IdMesureNoeud" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="mesure_noeud" Relationship="AgricultureModel.FK_mesure_noeudplante_mesure_noeud" FromRole="mesure_noeudplante" ToRole="mesure_noeud" />
+  </EntityType>
+  <EntityType Name="mesure_noeudsol">
+    <Key>
+      <PropertyRef Name="IdMesureNoeud" />
+    </Key>
+    <Property Name="Temperature1" Type="Single" />
+    <Property Name="Temperature2" Type="Single" />
+    <Property Name="Temperature3" Type="Single" />
+    <Property Name="Temperature4" Type="Single" />
+    <Property Name="Humidite1" Type="Single" />
+    <Property Name="Humidite2" Type="Single" />
+    <Property Name="Humidite3" Type="Single" />
+    <Property Name="Humidite4" Type="Single" />
+    <Property Name="IdMesureNoeud" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="mesure_noeud" Relationship="AgricultureModel.FK_mesure_noeudsol_mesure_noeud" FromRole="mesure_noeudsol" ToRole="mesure_noeud" />
+  </EntityType>
+  <EntityType Name="notification">
+    <Key>
+      <PropertyRef Name="IdNotif" />
+    </Key>
+    <Property Name="IdNotif" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="MessgeNotif" Type="String" MaxLength="50" Unicode="true" FixedLength="false" />
+    <Property Name="DateNotif" Type="DateTime" />
+    <Property Name="Vue" Type="Boolean" />
+    <Property Name="TypeNotif" Type="Boolean" />
+    <Property Name="FK_IdNode" Type="Int32" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_notification_notification" FromRole="notification" ToRole="implanter_noeud_exploitation" />
+  </EntityType>
+  <EntityType Name="parcelle">
+    <Key>
+      <PropertyRef Name="IdParcelle" />
+    </Key>
+    <Property Name="IdParcelle" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="NomParcelle" Type="String" MaxLength="45" Unicode="true" FixedLength="true" />
+    <Property Name="DescriptionParcelle" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="DateAjoutParcelle" Type="DateTime" />
+    <Property Name="ImageParcelle" Type="Binary" MaxLength="Max" FixedLength="false" />
+    <Property Name="AdresseParcelle" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="CouleurParcelle" Type="String" MaxLength="50" Unicode="true" FixedLength="false" />
+    <Property Name="Occ" Type="Double" />
+    <Property Name="Opfp" Type="Double" />
+    <Property Name="TypeSol" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+    <Property Name="Surface" Type="Double" />
+    <Property Name="FK_IdExploitation" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="exploitation" Relationship="AgricultureModel.FK_parcelle_exploitation" FromRole="parcelle" ToRole="exploitation" />
+    <NavigationProperty Name="implanter_culture_parcelle" Relationship="AgricultureModel.FK_implanter_culture_parcelle_parcelle" FromRole="parcelle" ToRole="implanter_culture_parcelle" />
+    <NavigationProperty Name="secteur" Relationship="AgricultureModel.FK_secteur_parcelle" FromRole="parcelle" ToRole="secteur" />
+  </EntityType>
+  <EntityType Name="projet">
+    <Key>
+      <PropertyRef Name="IdProjet" />
+    </Key>
+    <Property Name="IdProjet" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="NomProjet" Type="String" MaxLength="45" Unicode="true" FixedLength="true" />
+    <Property Name="DescriptionProjet" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="DateAjoutExploitation" Type="DateTime" />
+    <Property Name="FK_IdProprietaire" Type="Int32" />
+    <Property Name="PrivilegeExploitation" Type="Boolean" />
+    <NavigationProperty Name="exploitation" Relationship="AgricultureModel.FK_exploitation_projet" FromRole="projet" ToRole="exploitation" />
+    <NavigationProperty Name="proprietaire" Relationship="AgricultureModel.FK_projet_proprietaire" FromRole="projet" ToRole="proprietaire" />
+  </EntityType>
+  <EntityType Name="proprietaire">
+    <Key>
+      <PropertyRef Name="IdProprietaire" />
+    </Key>
+    <Property Name="IdProprietaire" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="NomProprietaire" Type="String" MaxLength="50" Unicode="true" FixedLength="true" />
+    <Property Name="TelephoneProprietaire" Type="Int32" />
+    <Property Name="DateAjoutEProprietaire" Type="DateTime" />
+    <Property Name="PasswordProprietaire" Type="String" MaxLength="50" Unicode="true" FixedLength="true" />
+    <Property Name="EmailProprietaire" Type="String" MaxLength="50" Unicode="true" FixedLength="true" />
+    <Property Name="AdresseProprietaire" Type="String" MaxLength="50" Unicode="true" FixedLength="true" />
+    <NavigationProperty Name="projet" Relationship="AgricultureModel.FK_projet_proprietaire" FromRole="proprietaire" ToRole="projet" />
+  </EntityType>
+  <EntityType Name="rampe">
+    <Key>
+      <PropertyRef Name="IdRampe" />
+    </Key>
+    <Property Name="IdRampe" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Longueur" Type="Double" />
+    <Property Name="LongueurPortion" Type="Double" />
+    <Property Name="DebitParTrouL" Type="Double" />
+    <Property Name="DebitParTroumm" Type="Double" />
+    <Property Name="NombreTrous" Type="Int32" />
+    <Property Name="DebitTotalL" Type="Double" />
+    <Property Name="DebitTotalMM" Type="Double" />
+    <Property Name="FK_IdElectrovanne" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="electrovanne" Relationship="AgricultureModel.FK_rampe_electrovanne" FromRole="rampe" ToRole="electrovanne" />
+  </EntityType>
+  <EntityType Name="secteur">
+    <Key>
+      <PropertyRef Name="IdSecteur" />
+    </Key>
+    <Property Name="IdSecteur" Type="Int32" Nullable="false" />
+    <Property Name="NomSecteur" Type="String" MaxLength="45" Unicode="true" FixedLength="true" />
+    <Property Name="DescriptionSecteur" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+    <Property Name="DateAjoutSecteur" Type="DateTime" />
+    <Property Name="ImageSecteur" Type="Binary" MaxLength="Max" FixedLength="false" />
+    <Property Name="AdresseSecteur" Type="String" MaxLength="1000" Unicode="true" FixedLength="true" />
+    <Property Name="Surface" Type="Double" />
+    <Property Name="FK_IdParcelle" Type="Int32" Nullable="false" />
+    <Property Name="FK_IdElect" Type="Int32" />
+    <NavigationProperty Name="electrovanne" Relationship="AgricultureModel.FK_electrovanne_secteur" FromRole="secteur" ToRole="electrovanne" />
+    <NavigationProperty Name="electrovanne1" Relationship="AgricultureModel.FK_secteur_electrovanne" FromRole="secteur" ToRole="electrovanne" />
+    <NavigationProperty Name="implanter_noeud_exploitation" Relationship="AgricultureModel.FK_implanter_noeud_exploitation_secteur" FromRole="secteur" ToRole="implanter_noeud_exploitation" />
+    <NavigationProperty Name="parcelle" Relationship="AgricultureModel.FK_secteur_parcelle" FromRole="secteur" ToRole="parcelle" />
+  </EntityType>
+  <Association Name="FK_Bilan_implanter_culture_parcelle">
+    <End Role="implanter_culture_parcelle" Type="AgricultureModel.implanter_culture_parcelle" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="Bilan" Type="AgricultureModel.Bilan" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_culture_parcelle">
+        <PropertyRef Name="IdImplanterCulture" />
+      </Principal>
+      <Dependent Role="Bilan">
+        <PropertyRef Name="FK_IdImplCultureParcelle" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Calendirer_irrigation_Electrivane">
+    <End Role="electrovanne" Type="AgricultureModel.electrovanne" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="calendirer_irrigation" Type="AgricultureModel.calendirer_irrigation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="electrovanne">
+        <PropertyRef Name="IdElectrovanne" />
+      </Principal>
+      <Dependent Role="calendirer_irrigation">
+        <PropertyRef Name="FK_IdElectrovanne" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_culture_parcelle_culture">
+    <End Role="culture" Type="AgricultureModel.culture" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_culture_parcelle" Type="AgricultureModel.implanter_culture_parcelle" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="culture">
+        <PropertyRef Name="IdCulture" />
+      </Principal>
+      <Dependent Role="implanter_culture_parcelle">
+        <PropertyRef Name="FK_IdCulture" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Electrivane_implanter_noeudirrigation_exploitation">
+    <End Role="implanter_noeudirrigation_exploitation" Type="AgricultureModel.implanter_noeudirrigation_exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="electrovanne" Type="AgricultureModel.electrovanne" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeudirrigation_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="electrovanne">
+        <PropertyRef Name="FK_IdImlpNoeudIrrigation" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_electrovanne_secteur">
+    <End Role="secteur" Type="AgricultureModel.secteur" Multiplicity="1" />
+    <End Role="electrovanne" Type="AgricultureModel.electrovanne" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="secteur">
+        <PropertyRef Name="IdSecteur" />
+      </Principal>
+      <Dependent Role="electrovanne">
+        <PropertyRef Name="FK_IdSecteur" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_rampe_electrovanne">
+    <End Role="electrovanne" Type="AgricultureModel.electrovanne" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="rampe" Type="AgricultureModel.rampe" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="electrovanne">
+        <PropertyRef Name="IdElectrovanne" />
+      </Principal>
+      <Dependent Role="rampe">
+        <PropertyRef Name="FK_IdElectrovanne" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_secteur_electrovanne">
+    <End Role="electrovanne" Type="AgricultureModel.electrovanne" Multiplicity="0..1" />
+    <End Role="secteur" Type="AgricultureModel.secteur" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="electrovanne">
+        <PropertyRef Name="IdElectrovanne" />
+      </Principal>
+      <Dependent Role="secteur">
+        <PropertyRef Name="FK_IdElect" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_exploitation_projet">
+    <End Role="projet" Type="AgricultureModel.projet" Multiplicity="0..1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="exploitation" Type="AgricultureModel.exploitation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="projet">
+        <PropertyRef Name="IdProjet" />
+      </Principal>
+      <Dependent Role="exploitation">
+        <PropertyRef Name="FK_IdProjet" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeudclimatfictive_exploitation_exploitation">
+    <End Role="exploitation" Type="AgricultureModel.exploitation" Multiplicity="0..1" />
+    <End Role="implanter_noeudclimatfictive_exploitation" Type="AgricultureModel.implanter_noeudclimatfictive_exploitation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="exploitation">
+        <PropertyRef Name="IdExploitation" />
+      </Principal>
+      <Dependent Role="implanter_noeudclimatfictive_exploitation">
+        <PropertyRef Name="FK_IdExp" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_parcelle_exploitation">
+    <End Role="exploitation" Type="AgricultureModel.exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="parcelle" Type="AgricultureModel.parcelle" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="exploitation">
+        <PropertyRef Name="IdExploitation" />
+      </Principal>
+      <Dependent Role="parcelle">
+        <PropertyRef Name="FK_IdExploitation" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_culture_parcelle_parcelle">
+    <End Role="parcelle" Type="AgricultureModel.parcelle" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_culture_parcelle" Type="AgricultureModel.implanter_culture_parcelle" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="parcelle">
+        <PropertyRef Name="IdParcelle" />
+      </Principal>
+      <Dependent Role="implanter_culture_parcelle">
+        <PropertyRef Name="IdImplanterCulture" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeud_exploitation_secteur">
+    <End Role="secteur" Type="AgricultureModel.secteur" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="secteur">
+        <PropertyRef Name="IdSecteur" />
+      </Principal>
+      <Dependent Role="implanter_noeud_exploitation">
+        <PropertyRef Name="FK_Id_secteur" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeudclimat_exploitation_implanter_noeud_exploitation">
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_noeudclimat_exploitation" Type="AgricultureModel.implanter_noeudclimat_exploitation" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeud_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="implanter_noeudclimat_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeudirrigation_exploitation_implanter_noeud_exploitation">
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_noeudirrigation_exploitation" Type="AgricultureModel.implanter_noeudirrigation_exploitation" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeud_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="implanter_noeudirrigation_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeudplante_exploitation_implanter_noeud_exploitation">
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_noeudplante_exploitation" Type="AgricultureModel.implanter_noeudplante_exploitation" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeud_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="implanter_noeudplante_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeudsol_exploitation_implanter_noeud_exploitation">
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="implanter_noeudsol_exploitation" Type="AgricultureModel.implanter_noeudsol_exploitation" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeud_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="implanter_noeudsol_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_mesure_noeud_implanter_noeud_exploitation">
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="0..1" />
+    <End Role="mesure_noeud" Type="AgricultureModel.mesure_noeud" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeud_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="mesure_noeud">
+        <PropertyRef Name="FK_IdImplNoeud" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_notification_notification">
+    <End Role="implanter_noeud_exploitation" Type="AgricultureModel.implanter_noeud_exploitation" Multiplicity="0..1" />
+    <End Role="notification" Type="AgricultureModel.notification" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeud_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="notification">
+        <PropertyRef Name="FK_IdNode" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_implanter_noeudclimatfictive_exploitation_implanter_noeudclimat_exploitation">
+    <End Role="implanter_noeudclimat_exploitation" Type="AgricultureModel.implanter_noeudclimat_exploitation" Multiplicity="0..1" />
+    <End Role="implanter_noeudclimatfictive_exploitation" Type="AgricultureModel.implanter_noeudclimatfictive_exploitation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeudclimat_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="implanter_noeudclimatfictive_exploitation">
+        <PropertyRef Name="FK_IdNodeC" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_mesure_noeudclimat_moyennes_implanter_noeudclimat_exploitation">
+    <End Role="implanter_noeudclimat_exploitation" Type="AgricultureModel.implanter_noeudclimat_exploitation" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="mesure_noeudclimat_moyennes" Type="AgricultureModel.mesure_noeudclimat_moyennes" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="implanter_noeudclimat_exploitation">
+        <PropertyRef Name="IdImplanter_noeud_secteur" />
+      </Principal>
+      <Dependent Role="mesure_noeudclimat_moyennes">
+        <PropertyRef Name="FK_IdNoeudClimat" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_mesure_noeudclimat_mesure_noeud">
+    <End Role="mesure_noeud" Type="AgricultureModel.mesure_noeud" Multiplicity="1" />
+    <End Role="mesure_noeudclimat" Type="AgricultureModel.mesure_noeudclimat" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="mesure_noeud">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Principal>
+      <Dependent Role="mesure_noeudclimat">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_mesure_noeudirrigation_mesure_noeud">
+    <End Role="mesure_noeud" Type="AgricultureModel.mesure_noeud" Multiplicity="1" />
+    <End Role="mesure_noeudirrigation" Type="AgricultureModel.mesure_noeudirrigation" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="mesure_noeud">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Principal>
+      <Dependent Role="mesure_noeudirrigation">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_mesure_noeudplante_mesure_noeud">
+    <End Role="mesure_noeud" Type="AgricultureModel.mesure_noeud" Multiplicity="1" />
+    <End Role="mesure_noeudplante" Type="AgricultureModel.mesure_noeudplante" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="mesure_noeud">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Principal>
+      <Dependent Role="mesure_noeudplante">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_mesure_noeudsol_mesure_noeud">
+    <End Role="mesure_noeud" Type="AgricultureModel.mesure_noeud" Multiplicity="1" />
+    <End Role="mesure_noeudsol" Type="AgricultureModel.mesure_noeudsol" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="mesure_noeud">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Principal>
+      <Dependent Role="mesure_noeudsol">
+        <PropertyRef Name="IdMesureNoeud" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_secteur_parcelle">
+    <End Role="parcelle" Type="AgricultureModel.parcelle" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="secteur" Type="AgricultureModel.secteur" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="parcelle">
+        <PropertyRef Name="IdParcelle" />
+      </Principal>
+      <Dependent Role="secteur">
+        <PropertyRef Name="FK_IdParcelle" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_projet_proprietaire">
+    <End Role="proprietaire" Type="AgricultureModel.proprietaire" Multiplicity="0..1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="projet" Type="AgricultureModel.projet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="proprietaire">
+        <PropertyRef Name="IdProprietaire" />
+      </Principal>
+      <Dependent Role="projet">
+        <PropertyRef Name="FK_IdProprietaire" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

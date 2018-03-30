@@ -1,0 +1,59 @@
+﻿@model IEnumerable<WeatherStation.Models.Notification>
+<div id = "vertical2_Notification"  style = "height:95%; width: 100%;">
+    <div id = "grid_notif" style="height: 100%"></div>
+</div>
+
+
+<script type ="text/javascript">
+  var notif_tab = [];
+  var id = 1;
+   @foreach (var notif in Model)
+    {
+       @:notif_tab.push({
+                @:ID: id ++,
+                @:notification: '@notif.message',
+                @:Date: '@notif.Date',
+            @:});  
+    }
+
+    $("#grid_notif").kendoGrid({
+        dataSource: {
+            data: notif_tab,
+            pageSize: 50
+        },
+        height: '99%',
+        selectable: "multiple",
+        scrollable: true,
+        groupable: false,
+        sortable: true,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 3
+        },
+        columns: [{
+            field: "ID",
+            title: "ID",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "notification",
+            title: "notification",
+            format: "{0:dd/MM/yyyy HH:mm:ss}",
+            width: 100,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        },
+        {
+            field: "Date",
+            title: "Date",
+            width: 100,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }]
+    });
+</script>

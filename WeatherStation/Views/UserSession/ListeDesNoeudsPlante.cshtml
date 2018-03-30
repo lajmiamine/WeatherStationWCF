@@ -1,0 +1,454 @@
+﻿@model IEnumerable<WeatherStation.Models.NodeModel>
+
+<script>
+         var orders = [];
+          @foreach (var item in Model)
+          {
+              @:var annee = @item.DateImplementation.Year;
+              @:var mois = @item.DateImplementation.Month;
+              @:var jour = @item.DateImplementation.Day;
+              @:var heure = @item.DateImplementation.Hour;
+              @:var minute = @item.DateImplementation.Minute;
+              @:var seconde = @item.DateImplementation.Second;
+              @:orders.push({
+                @:OrderDate: new Date(annee, mois, jour, heure, minute, seconde, 0),
+                @:AdresseNoeud: '@item.AdresseNoeud',
+                @:Secteur :'@item.NomSecteur', 
+                @:Parcelle : '@item.NomParcelle',
+                @:CodeActivation :@item.codeActivation,
+            @:}); 
+ }
+              
+  </script>
+<div id="Liste_des_noeuds_Plante">
+
+
+<div id="example" class="k-content">
+
+
+         <div id="grid_NP" ></div>
+            <style scoped>
+                 .demo-section {
+                    width: 100%;
+                }
+                .demo-section h3 {
+                    margin: 0px 0 0px 0;
+                    text-align: center;
+                }
+               
+            </style>
+            <script>
+            var id_noeud=0;
+            function onChange(arg) {
+                var selected = $.map(this.select(), function (item) {
+                    var window = $("#window");
+                    window.data("kendoWindow").center().open();
+                    @foreach (var item in Model)
+                    {
+                    @:if(@item.AdresseNoeud==$(item).text())
+                    {
+                      @:id_noeud=@item.IdImplanter_noeud_secteur;
+                      //@:alert(@item.IdImplanter_noeud_secteur);
+                    }
+                   
+                    }
+                });
+                   kendoConsole.log("Selected: " + selected.length + " item(s), [" + selected.join(", ") + "]");
+                 //alert(id_noeud);
+                }
+              $(document).ready(function(){
+                    $("#grid_NP").kendoGrid({
+                        dataSource: {
+                            data: orders,
+                            pageSize: 5
+                        },
+                        change: onChange,
+                        selectable: "multiple cell",
+                        scrollable: false,
+                        groupable: false,
+                        sortable: true,
+                        pageable: {
+                            refresh: true,
+                            pageSizes: true,
+                            buttonCount: 5
+                        },
+                        columns: [{
+                            field: "AdresseNoeud",
+                            title: "Adresse du noeud",
+                            width: 50
+                        }, {
+                            field: "OrderDate",
+                            title: "Date Implementation",
+                            format: "{0:yyyy/MM/dd HH:m}",
+                            width: 160
+                        }, 
+                        {
+                            field: "Parcelle",
+                            title: "Parcelle",
+                            width: 50
+                        }, {
+                            field: "Secteur",
+                            title: "Secteur",
+                            width: 50
+                        }, {
+                            field: "CodeActivation",
+                            title: "Code Activation",
+                            width: 50
+                        }]
+                    });
+                });
+            </script>
+		</div>
+    <div id="example" class="k-content">
+            <div id="window"style="display:none" >
+            <center>
+             <table style="border-collapse: collapse;border:none;width:100%">
+             <tr> <td> <img src="../../Content/themes/base/images/température_s.gif"  height="35px" width="40px"  /> </td> <td>  Tempétraure</td> <td><INPUT TYPE="CHECKBOX" id=Temperature style= "float:left;" > </td> </tr>
+             <tr> <td> <img src="../../Content/themes/base/images/humidité_s.png"  height="35px" width="40px"  /></td> <td> Humidité </td> <td><INPUT TYPE="CHECKBOX" id=Humidite style= "float:left;" > </td> </tr>
+             <tr> <td> <img src="../../Content/themes/base/images/pluvimetrie_s.png"  height="35px" width="40px"  /></td> <td> Pluviométrie </td> <td><INPUT TYPE="CHECKBOX" id=Pluviometrie style= "float:left;" > </td> </tr>
+             <tr> <td> <img src="../../Content/themes/base/images/rayonnemet_s.png"  height="35px" width="40px"  /></td> <td> Rayonnement solaire </td> <td><INPUT TYPE="CHECKBOX" id=rayonnement style= "float:left;" > </td> </tr>
+             <tr> <td> <img src="../../Content/themes/base/images/vitessevent_s.png"  height="35px" width="40px"  /></td> <td> Vitesse du vent </td> <td><INPUT TYPE="CHECKBOX" id=VitesseVent style= "float:left;" > </td> </tr>
+             <tr> <td> <img src="../../Content/themes/base/images/sensduvent_s.png"  height="35px" width="40px"  /></td> <td> Sens du vent </td> <td><INPUT TYPE="CHECKBOX" id=SensVent style= "float:left;" > </td> </tr>
+             <tr><td colspan="3"> <input type="button" value="Visualiser" onclick="Visualiser(id_noeud)"/> </td></tr>
+             </table>
+              </center>  
+            </div>
+         <script>
+             function Visualiser(id_noeud) {
+                 var Temp = document.getElementById('Temperature');
+                 var Hum = document.getElementById('Humidite');
+                 var Pluv = document.getElementById('Pluviometrie');
+                 var Ray = document.getElementById('rayonnement');
+                 var VV = document.getElementById('VitesseVent');
+                 var SV = document.getElementById('SensVent');
+                 if (Temp.checked) {
+                     TempératureClimat(id_noeud);
+
+                 }
+                 if (Hum.checked) {
+                     humiditéClimat(id_noeud);
+                 }
+                 if (Pluv.checked) {
+                     PluviometrieClimat(id_noeud);
+                 }
+                 if (Ray.checked) {
+                     Rayonnement(id_noeud);
+                 }
+                 if (VV.checked) {
+                     VitesseDuvent(id_noeud);
+                 }
+                 if (SV.checked) {
+                     SensDuvent(id_noeud);
+                 }
+
+             }
+         
+         </script>
+          <script>
+              $(document).ready(function () {
+                  var window = $("#window"),
+                        undo = $("#undo")
+                                .bind("click", function () {
+                                    window.data("kendoWindow").center().open();
+                                    // undo.hide();
+                                });
+                  //window.data("kendoWindow").close();
+                  undo.show();
+                  var onClose = function () {
+                      undo.show();
+                  }
+                  if (!window.data("kendoWindow")) {
+                      window.kendoWindow({
+                          width: "300px",
+                          title: "Visualisation des Mesures",
+                          actions: [
+                                "Close"
+                            ],
+                          close: onClose
+                      });
+                  }
+              });
+            </script>
+
+            <style scoped>
+
+                #example 
+                {
+                    min-height:500px;
+                }
+
+                #undo {
+                    text-align: center;
+                    position: absolute;
+                    white-space: nowrap;
+                    padding: 1em;
+                    cursor: pointer;
+                }
+                .armchair {
+                	float: left;
+                	margin: 30px 30px 120px 30px;
+                	text-align: center;
+                }
+                .armchair img {
+                    display: block;
+                    margin-bottom: 10px;
+                }
+            </style>
+        </div>
+	
+	<script>
+
+
+	    function TempératureClimat(idClimat) {
+	        var window = $("#window");
+	        window.data("kendoWindow").center().close();
+	        if ($("div#tabs ul li:contains(Température)").length != 0) {
+	            var index = $('#tabs a[href="#Température"]').parent().index();
+	            $('#tabs').tabs('option', 'active', index);
+
+
+	        } else {
+
+	            $("#tabs").tabs("refresh");
+	            $("#tabs").children("ul:first").append("<li><a href='#Température'>Température</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+	            $.ajax({
+	                url: '../../UserSession/TemperatureClimat',
+	                type: 'POST',
+	                data: { idNoeudClimat: idClimat },
+	                //dataType: 'json',
+	                async: false,
+	                success: function (result) {
+	                    $("#tabs").append(result);
+	                    $("#tabs").tabs("refresh");
+	                },
+	                error: function (xhr, ajaxOptions, thrownError) {
+	                    alert(xhr.status);
+	                    alert(xhr.responseText);
+	                    alert(thrownError);
+	                },
+	                complete: function () {
+	                    $(this).attr("disabled", "false");
+	                    $(".wait").remove();
+	                }
+	            });
+
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 3 });
+
+	        }
+	    }
+
+	    function humiditéClimat(idClimat) {
+	        var window = $("#window");
+	        window.data("kendoWindow").center().close();
+
+	        if ($("div#tabs ul li:contains(Humidité)").length != 0) {
+
+	            var index = $('#tabs a[href="#Humidité"]').parent().index() - 1;
+	            $('#tabs').tabs('option', 'active', index);
+
+	        } else {
+
+	            $("#tabs").tabs("refresh");
+	            $("#tabs").children("ul:first").append("<li><a href='#Humidité'>Humidité</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+	            var num_tabs = $("div#tabs ul li").length;
+
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+	            $.ajax({
+	                url: '../../UserSession/HumiditeClimat',
+	                type: 'POST',
+	                data: { idNoeudClimat: idClimat },
+	                //dataType: 'json',
+	                async: false,
+	                success: function (result) {
+	                    $("#tabs").append(result);
+	                    $("#tabs").tabs("refresh");
+	                },
+	                error: function (xhr, ajaxOptions, thrownError) {
+	                    alert(xhr.status);
+	                    alert(xhr.responseText);
+	                    alert(thrownError);
+	                },
+	                complete: function () {
+	                    $(this).attr("disabled", "false");
+	                    $(".wait").remove();
+	                }
+	            });
+
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 3 });
+
+	        }
+	    }
+
+	    function PluviometrieClimat(idClimat) {
+	        var window = $("#window");
+	        window.data("kendoWindow").center().close();
+	        if ($("div#tabs ul li:contains(Pluviométrie)").length != 0) {
+
+	            var index = $('#tabs a[href="#Pluviométrie"]').parent().index() - 1;
+	            $('#tabs').tabs('option', 'active', index);
+
+	        } else {
+
+	            $("#tabs").tabs("refresh");
+	            $("#tabs").children("ul:first").append("<li><a href='#Pluviométrie'>Pluviométrie</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+	            $.ajax({
+	                url: '../../UserSession/PluviometrieClimat',
+	                type: 'POST',
+	                data: { idNoeudClimat: idClimat },
+	                //dataType: 'json',
+	                async: false,
+	                success: function (result) {
+	                    $("#tabs").append(result);
+	                    $("#tabs").tabs("refresh");
+	                },
+	                error: function (xhr, ajaxOptions, thrownError) {
+	                    alert(xhr.status);
+	                    alert(xhr.responseText);
+	                    alert(thrownError);
+	                },
+	                complete: function () {
+	                    $(this).attr("disabled", "false");
+	                    $(".wait").remove();
+	                }
+	            });
+
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 3 });
+
+	        }
+	    }
+	    function Rayonnement(idClimat) {
+	        var window = $("#window");
+	        window.data("kendoWindow").center().close();
+	        if ($("div#tabs ul li:contains(Rayonnement)").length != 0) {
+
+	            var index = $('#tabs a[href="#Rayonnement"]').parent().index() - 1;
+	            $('#tabs').tabs('option', 'active', index);
+
+	        } else {
+
+	            $("#tabs").tabs("refresh");
+	            $("#tabs").children("ul:first").append("<li><a href='#Rayonnement'>Rayonnement</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+	            var num_tabs = $("div#tabs ul li").length;
+
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+	            $.ajax({
+	                url: '../../UserSession/RayonnementSolaireClimat',
+	                type: 'POST',
+	                data: { idNoeudClimat: idClimat },
+	                //dataType: 'json',
+	                async: false,
+	                success: function (result) {
+	                    $("#tabs").append(result);
+	                    $("#tabs").tabs("refresh");
+	                },
+	                error: function (xhr, ajaxOptions, thrownError) {
+	                    alert(xhr.status);
+	                    alert(xhr.responseText);
+	                    alert(thrownError);
+	                },
+	                complete: function () {
+	                    $(this).attr("disabled", "false");
+	                    $(".wait").remove();
+	                }
+	            });
+
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 3 });
+
+	        }
+	    }
+	    function VitesseDuvent(idClimat) {
+	        var window = $("#window");
+	        window.data("kendoWindow").center().close();
+	        if ($("div#tabs ul li:contains(Vitesse du Vent)").length != 0) {
+
+	            var index = $('#tabs a[href="#Vitesse_du_Vent"]').parent().index() - 1;
+	            $('#tabs').tabs('option', 'active', index);
+
+	        } else {
+
+	            $("#tabs").tabs("refresh");
+	            $("#tabs").children("ul:first").append("<li><a href='#Vitesse_du_Vent'>Vitesse du Vent</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+	            var num_tabs = $("div#tabs ul li").length;
+
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+	            $.ajax({
+	                url: '../../UserSession/VitesseVentClimat',
+	                type: 'POST',
+	                data: { idNoeudClimat: idClimat },
+	                //dataType: 'json',
+	                async: false,
+	                success: function (result) {
+	                    $("#tabs").append(result);
+	                    $("#tabs").tabs("refresh");
+	                },
+	                error: function (xhr, ajaxOptions, thrownError) {
+	                    alert(xhr.status);
+	                    alert(xhr.responseText);
+	                    alert(thrownError);
+	                },
+	                complete: function () {
+	                    $(this).attr("disabled", "false");
+	                    $(".wait").remove();
+	                }
+	            });
+
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 3 });
+
+	        }
+
+
+	    }
+	    function SensDuvent(idClimat) {
+	        var window = $("#window");
+	        window.data("kendoWindow").center().close();
+	        if ($("div#tabs ul li:contains(Sens du Vent)").length != 0) {
+
+	            var index = $('#tabs a[href="#Sens_du_Vent"]').parent().index() - 1;
+	            $('#tabs').tabs('option', 'active', index);
+
+	        } else {
+
+	            $("#tabs").tabs("refresh");
+	            $("#tabs").children("ul:first").append("<li><a href='#Sens_du_Vent'>Sens du Vent</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+	            var num_tabs = $("div#tabs ul li").length;
+
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 7 });
+	            $.ajax({
+	                url: '../../UserSession/SensVentClimat',
+	                type: 'POST',
+	                data: { idNoeudClimat: idClimat },
+	                //dataType: 'json',
+	                async: false,
+	                success: function (result) {
+	                    $("#tabs").append(result);
+	                    $("#tabs").tabs("refresh");
+	                },
+	                error: function (xhr, ajaxOptions, thrownError) {
+	                    alert(xhr.status);
+	                    alert(xhr.responseText);
+	                    alert(thrownError);
+	                },
+	                complete: function () {
+	                    $(this).attr("disabled", "false");
+	                    $(".wait").remove();
+	                }
+	            });
+
+	            var num_tabs = $("div#tabs ul li").length;
+	            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 3 });
+
+	        }
+	    }
+   
+    </script>
+			
+</div>

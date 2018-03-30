@@ -1,0 +1,107 @@
+﻿@model IEnumerable<WeatherStation.Models.ProjectModel>
+
+@{
+    ViewBag.Title = "Choix du Projet";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+</br></br></br></br>
+
+<center>
+    <div style = "font:bold 24px Lucida Sans Unicode,verdana;  width:320px; text-align:center; center bottom no-repeat; color:#273a90">
+        Choix du projet
+    </div>
+</center>
+
+</br></br></br>
+
+<div id="example" class="k-content">
+    <div id="grid_p" ></div>
+</div>
+
+<script type="text/javascript">
+
+    var orders = [];
+
+        @foreach (var item in Model)
+        {
+            @:orders.push({
+                @:OrderDate: '@item.DateAjoutProjet.ToString("dd/MM/yyyy")',
+                @:NomProjet: '@item.NomProjet',
+                @:DescriptionProjet :'@item.DescriptionProjet', 
+                @:Idprojet : @item.IdProjet
+            @:});
+        }
+
+</script>
+
+<script type="text/javascript">
+
+    function onChange(arg) {
+        var selected = $.map(this.select(), function (row) {
+            @foreach (var item in Model) {
+                @:if ('@item.NomProjet'== row.cells[0].innerHTML) {
+                    TempData["Project"] = new WeatherStation.Models.PassModel { idUser = item.IdProjet, admin = false };
+                    @:location.href = '@Url.Action("ChoixExploitation", "Exploitation")';
+                    break;
+                }
+            }
+        });
+        //alert("Selected: " + selected.length + " item(s), [" + selected.join(", ") + "]");
+    }
+
+    function addExtraStylingToGrid() {
+        $(".k-grid > table > tbody > tr").hover(
+            function() {
+                $(this).toggleClass("k-state-hover");
+            }        
+        );
+    };
+
+    $("#grid_p").kendoGrid({
+        dataSource: {
+            data: orders,
+            pageSize: 5
+        },
+        change: onChange,
+        selectable: true,
+        scrollable: false,
+        groupable: false,
+        sortable: true,
+        dataBound: addExtraStylingToGrid,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 5
+        },
+        columns: [
+        {
+            field: "NomProjet",
+            title: "Nom",
+            width: 50,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        }, {
+            field: "DescriptionProjet",
+            title: "Description",
+            width: 50,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },{
+            field: "OrderDate",
+            title: "Date de création",
+            format: "{0:yyyy/MM/dd}",
+            width: 160,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        }]
+    });
+</script>
+
+<script type="text/javascript">
+    $("img#image").show();
+    $("div#authentification").hide();
+</script>

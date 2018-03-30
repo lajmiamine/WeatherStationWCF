@@ -1,0 +1,357 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="AgricultureModelStoreContainer" CdmEntityContainer="AgricultureEntities">
+    <EntitySetMapping Name="Bilan">
+      <EntityTypeMapping TypeName="AgricultureModel.Bilan">
+        <MappingFragment StoreEntitySet="Bilan">
+          <ScalarProperty Name="IdBilan" ColumnName="IdBilan" />
+          <ScalarProperty Name="DateBilan" ColumnName="DateBilan" />
+          <ScalarProperty Name="EToi" ColumnName="EToi" />
+          <ScalarProperty Name="Kci" ColumnName="Kci" />
+          <ScalarProperty Name="ETci" ColumnName="ETci" />
+          <ScalarProperty Name="ETai" ColumnName="ETai" />
+          <ScalarProperty Name="Pi" ColumnName="Pi" />
+          <ScalarProperty Name="Ii" ColumnName="Ii" />
+          <ScalarProperty Name="Di" ColumnName="Di" />
+          <ScalarProperty Name="RUi" ColumnName="RUi" />
+          <ScalarProperty Name="RFUi" ColumnName="RFUi" />
+          <ScalarProperty Name="Ti" ColumnName="Ti" />
+          <ScalarProperty Name="Zi" ColumnName="Zi" />
+          <ScalarProperty Name="Q" ColumnName="Q" />
+          <ScalarProperty Name="FK_IdImplCultureParcelle" ColumnName="FK_IdImplCultureParcelle" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="calendirer_irrigation">
+      <EntityTypeMapping TypeName="AgricultureModel.calendirer_irrigation">
+        <MappingFragment StoreEntitySet="calendirer_irrigation">
+          <ScalarProperty Name="Datedebut" ColumnName="Datedebut" />
+          <ScalarProperty Name="Duree" ColumnName="Duree" />
+          <ScalarProperty Name="FK_IdElectrovanne" ColumnName="FK_IdElectrovanne" />
+          <ScalarProperty Name="IdCalendrier" ColumnName="IdCalendrier" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="culture">
+      <EntityTypeMapping TypeName="AgricultureModel.culture">
+        <MappingFragment StoreEntitySet="culture">
+          <ScalarProperty Name="IdCulture" ColumnName="IdCulture" />
+          <ScalarProperty Name="NomCulture" ColumnName="NomCulture" />
+          <ScalarProperty Name="DureePhIni" ColumnName="DureePhIni" />
+          <ScalarProperty Name="DureePhDev" ColumnName="DureePhDev" />
+          <ScalarProperty Name="DureePhMid" ColumnName="DureePhMid" />
+          <ScalarProperty Name="DureePhEnd" ColumnName="DureePhEnd" />
+          <ScalarProperty Name="Kcini" ColumnName="Kcini" />
+          <ScalarProperty Name="Kcmid" ColumnName="Kcmid" />
+          <ScalarProperty Name="Kcend" ColumnName="Kcend" />
+          <ScalarProperty Name="Zini" ColumnName="Zini" />
+          <ScalarProperty Name="Zend" ColumnName="Zend" />
+          <ScalarProperty Name="Pini" ColumnName="Pini" />
+          <ScalarProperty Name="Pmid" ColumnName="Pmid" />
+          <ScalarProperty Name="Pend" ColumnName="Pend" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="electrovanne">
+      <EntityTypeMapping TypeName="AgricultureModel.electrovanne">
+        <MappingFragment StoreEntitySet="electrovanne">
+          <ScalarProperty Name="IdElectrovanne" ColumnName="IdElectrovanne" />
+          <ScalarProperty Name="FK_IdImlpNoeudIrrigation" ColumnName="FK_IdImlpNoeudIrrigation" />
+          <ScalarProperty Name="FK_IdSecteur" ColumnName="FK_IdSecteur" />
+          <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+          <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+          <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+          <ScalarProperty Name="DebitL" ColumnName="DebitL" />
+          <ScalarProperty Name="DebitMM" ColumnName="DebitMM" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.exploitation">
+        <MappingFragment StoreEntitySet="exploitation">
+          <ScalarProperty Name="Culture" ColumnName="Culture" />
+          <ScalarProperty Name="Sol" ColumnName="Sol" />
+          <ScalarProperty Name="Irrigation" ColumnName="Irrigation" />
+          <ScalarProperty Name="Climat" ColumnName="Climat" />
+          <ScalarProperty Name="IdExploitation" ColumnName="IdExploitation" />
+          <ScalarProperty Name="NomExploitation" ColumnName="NomExploitation" />
+          <ScalarProperty Name="DescriptionExploitation" ColumnName="DescriptionExploitation" />
+          <ScalarProperty Name="DateAjoutExploitation" ColumnName="DateAjoutExploitation" />
+          <ScalarProperty Name="ImageExploitation" ColumnName="ImageExploitation" />
+          <ScalarProperty Name="AdresseExploitation" ColumnName="AdresseExploitation" />
+          <ScalarProperty Name="FK_IdProjet" ColumnName="FK_IdProjet" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_culture_parcelle">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_culture_parcelle">
+        <MappingFragment StoreEntitySet="implanter_culture_parcelle">
+          <ScalarProperty Name="IdImplanterCulture" ColumnName="IdImplanterCulture" />
+          <ScalarProperty Name="DateImplantationCulture" ColumnName="DateImplantationCulture" />
+          <ScalarProperty Name="DebutSaison" ColumnName="DebutSaison" />
+          <ScalarProperty Name="FinSaison" ColumnName="FinSaison" />
+          <ScalarProperty Name="DebitNominalL" ColumnName="DebitNominalL" />
+          <ScalarProperty Name="DebitNominalMM" ColumnName="DebitNominalMM" />
+          <ScalarProperty Name="FK_IdCulture" ColumnName="FK_IdCulture" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_noeud_exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_noeud_exploitation">
+        <MappingFragment StoreEntitySet="implanter_noeud_exploitation">
+          <ScalarProperty Name="IdImplanter_noeud_secteur" ColumnName="IdImplanter_noeud_secteur" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="AdresseNoeud" ColumnName="AdresseNoeud" />
+          <ScalarProperty Name="periode" ColumnName="periode" />
+          <ScalarProperty Name="Voltage" ColumnName="Voltage" />
+          <ScalarProperty Name="CodeActivation" ColumnName="CodeActivation" />
+          <ScalarProperty Name="CodeCommunication" ColumnName="CodeCommunication" />
+          <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+          <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+          <ScalarProperty Name="DateImplementation" ColumnName="DateImplementation" />
+          <ScalarProperty Name="FK_Id_secteur" ColumnName="FK_Id_secteur" />
+          <ScalarProperty Name="NomNoeud" ColumnName="NomNoeud" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_noeudclimat_exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_noeudclimat_exploitation">
+        <MappingFragment StoreEntitySet="implanter_noeudclimat_exploitation">
+          <ScalarProperty Name="SeuilInfTemp" ColumnName="SeuilInfTemp" />
+          <ScalarProperty Name="SeuilSuppTemp" ColumnName="SeuilSuppTemp" />
+          <ScalarProperty Name="SeuilInfHumidite" ColumnName="SeuilInfHumidite" />
+          <ScalarProperty Name="SeuilSuppHumidite" ColumnName="SeuilSuppHumidite" />
+          <ScalarProperty Name="IdImplanter_noeud_secteur" ColumnName="IdImplanter_noeud_secteur" />
+          <ScalarProperty Name="seuilPluviometrie" ColumnName="seuilPluviometrie" />
+          <ScalarProperty Name="seuilVitesseVent" ColumnName="seuilVitesseVent" />
+          <ScalarProperty Name="Temperature" ColumnName="Temperature" />
+          <ScalarProperty Name="Humidite" ColumnName="Humidite" />
+          <ScalarProperty Name="Pluviometrie" ColumnName="Pluviometrie" />
+          <ScalarProperty Name="Rayonnement" ColumnName="Rayonnement" />
+          <ScalarProperty Name="vitessevent" ColumnName="vitessevent" />
+          <ScalarProperty Name="sensvent" ColumnName="sensvent" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_noeudclimatfictive_exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_noeudclimatfictive_exploitation">
+        <MappingFragment StoreEntitySet="implanter_noeudclimatfictive_exploitation">
+          <ScalarProperty Name="IdNodeCF" ColumnName="IdNodeCF" />
+          <ScalarProperty Name="FK_IdNodeC" ColumnName="FK_IdNodeC" />
+          <ScalarProperty Name="FK_IdExp" ColumnName="FK_IdExp" />
+          <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+          <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_noeudirrigation_exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_noeudirrigation_exploitation">
+        <MappingFragment StoreEntitySet="implanter_noeudirrigation_exploitation">
+          <ScalarProperty Name="SeuilPression1" ColumnName="SeuilPression1" />
+          <ScalarProperty Name="SeuilPression2" ColumnName="SeuilPression2" />
+          <ScalarProperty Name="SeuilPression3" ColumnName="SeuilPression3" />
+          <ScalarProperty Name="SeuilPression4" ColumnName="SeuilPression4" />
+          <ScalarProperty Name="IdImplanter_noeud_secteur" ColumnName="IdImplanter_noeud_secteur" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_noeudplante_exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_noeudplante_exploitation">
+        <MappingFragment StoreEntitySet="implanter_noeudplante_exploitation">
+          <ScalarProperty Name="Seuil_inf_temp" ColumnName="Seuil_inf_temp" />
+          <ScalarProperty Name="Seuil_supp_temp" ColumnName="Seuil_supp_temp" />
+          <ScalarProperty Name="IdImplanter_noeud_secteur" ColumnName="IdImplanter_noeud_secteur" />
+          <ScalarProperty Name="Seuil_inf_hummectation" ColumnName="Seuil_inf_hummectation" />
+          <ScalarProperty Name="Seuil_supp_hummectation" ColumnName="Seuil_supp_hummectation" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="implanter_noeudsol_exploitation">
+      <EntityTypeMapping TypeName="AgricultureModel.implanter_noeudsol_exploitation">
+        <MappingFragment StoreEntitySet="implanter_noeudsol_exploitation">
+          <ScalarProperty Name="CodeProfondeurTemperature" ColumnName="CodeProfondeurTemperature" />
+          <ScalarProperty Name="SeuilHumidité1" ColumnName="SeuilHumidité1" />
+          <ScalarProperty Name="SeuilHumidité2" ColumnName="SeuilHumidité2" />
+          <ScalarProperty Name="SeuilHumidité3" ColumnName="SeuilHumidité3" />
+          <ScalarProperty Name="SeuilHumidité4" ColumnName="SeuilHumidité4" />
+          <ScalarProperty Name="CodeProfondeurHumidite" ColumnName="CodeProfondeurHumidite" />
+          <ScalarProperty Name="IdImplanter_noeud_secteur" ColumnName="IdImplanter_noeud_secteur" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="mesure_noeud">
+      <EntityTypeMapping TypeName="AgricultureModel.mesure_noeud">
+        <MappingFragment StoreEntitySet="mesure_noeud">
+          <ScalarProperty Name="IdMesureNoeud" ColumnName="IdMesureNoeud" />
+          <ScalarProperty Name="DateMesureNoeud" ColumnName="DateMesureNoeud" />
+          <ScalarProperty Name="FK_IdImplNoeud" ColumnName="FK_IdImplNoeud" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="mesure_noeudclimat">
+      <EntityTypeMapping TypeName="AgricultureModel.mesure_noeudclimat">
+        <MappingFragment StoreEntitySet="mesure_noeudclimat">
+          <ScalarProperty Name="Pluviometrie" ColumnName="Pluviometrie" />
+          <ScalarProperty Name="SensVent" ColumnName="SensVent" />
+          <ScalarProperty Name="VitesseVent" ColumnName="VitesseVent" />
+          <ScalarProperty Name="RayonnementSolaire" ColumnName="RayonnementSolaire" />
+          <ScalarProperty Name="TemperatureAir" ColumnName="TemperatureAir" />
+          <ScalarProperty Name="HumiditeAir" ColumnName="HumiditeAir" />
+          <ScalarProperty Name="IdMesureNoeud" ColumnName="IdMesureNoeud" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="mesure_noeudclimat_moyennes">
+      <EntityTypeMapping TypeName="AgricultureModel.mesure_noeudclimat_moyennes">
+        <MappingFragment StoreEntitySet="mesure_noeudclimat_moyennes">
+          <ScalarProperty Name="Pluviometrie" ColumnName="Pluviometrie" />
+          <ScalarProperty Name="IdMesureMoyenne" ColumnName="IdMesureMoyenne" />
+          <ScalarProperty Name="JourMesure" ColumnName="JourMesure" />
+          <ScalarProperty Name="TMin" ColumnName="TMin" />
+          <ScalarProperty Name="TMax" ColumnName="TMax" />
+          <ScalarProperty Name="TMoy" ColumnName="TMoy" />
+          <ScalarProperty Name="HMin" ColumnName="HMin" />
+          <ScalarProperty Name="HMax" ColumnName="HMax" />
+          <ScalarProperty Name="HMoy" ColumnName="HMoy" />
+          <ScalarProperty Name="RMax" ColumnName="RMax" />
+          <ScalarProperty Name="RMin" ColumnName="RMin" />
+          <ScalarProperty Name="Rmoy" ColumnName="Rmoy" />
+          <ScalarProperty Name="REst" ColumnName="REst" />
+          <ScalarProperty Name="VvMax" ColumnName="VvMax" />
+          <ScalarProperty Name="VvMin" ColumnName="VvMin" />
+          <ScalarProperty Name="Vvmoy" ColumnName="Vvmoy" />
+          <ScalarProperty Name="VEst" ColumnName="VEst" />
+          <ScalarProperty Name="ET0" ColumnName="ET0" />
+          <ScalarProperty Name="FK_IdNoeudClimat" ColumnName="FK_IdNoeudClimat" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="mesure_noeudirrigation">
+      <EntityTypeMapping TypeName="AgricultureModel.mesure_noeudirrigation">
+        <MappingFragment StoreEntitySet="mesure_noeudirrigation">
+          <ScalarProperty Name="Pression1" ColumnName="Pression1" />
+          <ScalarProperty Name="Pression2" ColumnName="Pression2" />
+          <ScalarProperty Name="Pression3" ColumnName="Pression3" />
+          <ScalarProperty Name="Pression4" ColumnName="Pression4" />
+          <ScalarProperty Name="Electrovanne1" ColumnName="Electrovanne1" />
+          <ScalarProperty Name="Electrovanne2" ColumnName="Electrovanne2" />
+          <ScalarProperty Name="Electrovanne3" ColumnName="Electrovanne3" />
+          <ScalarProperty Name="Electrovanne4" ColumnName="Electrovanne4" />
+          <ScalarProperty Name="Quantite" ColumnName="Quantite" />
+          <ScalarProperty Name="IdMesureNoeud" ColumnName="IdMesureNoeud" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="mesure_noeudplante">
+      <EntityTypeMapping TypeName="AgricultureModel.mesure_noeudplante">
+        <MappingFragment StoreEntitySet="mesure_noeudplante">
+          <ScalarProperty Name="RayonnementHaut" ColumnName="RayonnementHaut" />
+          <ScalarProperty Name="RayonnementBas" ColumnName="RayonnementBas" />
+          <ScalarProperty Name="TemperatureFeuilles" ColumnName="TemperatureFeuilles" />
+          <ScalarProperty Name="HumiditeFeuilles" ColumnName="HumiditeFeuilles" />
+          <ScalarProperty Name="IdMesureNoeud" ColumnName="IdMesureNoeud" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="mesure_noeudsol">
+      <EntityTypeMapping TypeName="AgricultureModel.mesure_noeudsol">
+        <MappingFragment StoreEntitySet="mesure_noeudsol">
+          <ScalarProperty Name="Temperature1" ColumnName="Temperature1" />
+          <ScalarProperty Name="Temperature2" ColumnName="Temperature2" />
+          <ScalarProperty Name="Temperature3" ColumnName="Temperature3" />
+          <ScalarProperty Name="Temperature4" ColumnName="Temperature4" />
+          <ScalarProperty Name="Humidite1" ColumnName="Humidite1" />
+          <ScalarProperty Name="Humidite2" ColumnName="Humidite2" />
+          <ScalarProperty Name="Humidite3" ColumnName="Humidite3" />
+          <ScalarProperty Name="Humidite4" ColumnName="Humidite4" />
+          <ScalarProperty Name="IdMesureNoeud" ColumnName="IdMesureNoeud" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="notification">
+      <EntityTypeMapping TypeName="AgricultureModel.notification">
+        <MappingFragment StoreEntitySet="notification">
+          <ScalarProperty Name="IdNotif" ColumnName="IdNotif" />
+          <ScalarProperty Name="MessgeNotif" ColumnName="MessgeNotif" />
+          <ScalarProperty Name="DateNotif" ColumnName="DateNotif" />
+          <ScalarProperty Name="Vue" ColumnName="Vue" />
+          <ScalarProperty Name="TypeNotif" ColumnName="TypeNotif" />
+          <ScalarProperty Name="FK_IdNode" ColumnName="FK_IdNode" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="parcelle">
+      <EntityTypeMapping TypeName="AgricultureModel.parcelle">
+        <MappingFragment StoreEntitySet="parcelle">
+          <ScalarProperty Name="IdParcelle" ColumnName="IdParcelle" />
+          <ScalarProperty Name="NomParcelle" ColumnName="NomParcelle" />
+          <ScalarProperty Name="DescriptionParcelle" ColumnName="DescriptionParcelle" />
+          <ScalarProperty Name="DateAjoutParcelle" ColumnName="DateAjoutParcelle" />
+          <ScalarProperty Name="ImageParcelle" ColumnName="ImageParcelle" />
+          <ScalarProperty Name="AdresseParcelle" ColumnName="AdresseParcelle" />
+          <ScalarProperty Name="CouleurParcelle" ColumnName="CouleurParcelle" />
+          <ScalarProperty Name="Occ" ColumnName="Occ" />
+          <ScalarProperty Name="Opfp" ColumnName="Opfp" />
+          <ScalarProperty Name="TypeSol" ColumnName="TypeSol" />
+          <ScalarProperty Name="Surface" ColumnName="Surface" />
+          <ScalarProperty Name="FK_IdExploitation" ColumnName="FK_IdExploitation" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="projet">
+      <EntityTypeMapping TypeName="AgricultureModel.projet">
+        <MappingFragment StoreEntitySet="projet">
+          <ScalarProperty Name="PrivilegeExploitation" ColumnName="PrivilegeExploitation" />
+          <ScalarProperty Name="IdProjet" ColumnName="IdProjet" />
+          <ScalarProperty Name="NomProjet" ColumnName="NomProjet" />
+          <ScalarProperty Name="DescriptionProjet" ColumnName="DescriptionProjet" />
+          <ScalarProperty Name="DateAjoutExploitation" ColumnName="DateAjoutExploitation" />
+          <ScalarProperty Name="FK_IdProprietaire" ColumnName="FK_IdProprietaire" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="proprietaire">
+      <EntityTypeMapping TypeName="AgricultureModel.proprietaire">
+        <MappingFragment StoreEntitySet="proprietaire">
+          <ScalarProperty Name="IdProprietaire" ColumnName="IdProprietaire" />
+          <ScalarProperty Name="NomProprietaire" ColumnName="NomProprietaire" />
+          <ScalarProperty Name="TelephoneProprietaire" ColumnName="TelephoneProprietaire" />
+          <ScalarProperty Name="DateAjoutEProprietaire" ColumnName="DateAjoutEProprietaire" />
+          <ScalarProperty Name="PasswordProprietaire" ColumnName="PasswordProprietaire" />
+          <ScalarProperty Name="EmailProprietaire" ColumnName="EmailProprietaire" />
+          <ScalarProperty Name="AdresseProprietaire" ColumnName="AdresseProprietaire" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="rampe">
+      <EntityTypeMapping TypeName="AgricultureModel.rampe">
+        <MappingFragment StoreEntitySet="rampe">
+          <ScalarProperty Name="IdRampe" ColumnName="IdRampe" />
+          <ScalarProperty Name="Longueur" ColumnName="Longueur" />
+          <ScalarProperty Name="LongueurPortion" ColumnName="LongueurPortion" />
+          <ScalarProperty Name="DebitParTrouL" ColumnName="DebitParTrouL" />
+          <ScalarProperty Name="DebitParTroumm" ColumnName="DebitParTroumm" />
+          <ScalarProperty Name="NombreTrous" ColumnName="NombreTrous" />
+          <ScalarProperty Name="DebitTotalL" ColumnName="DebitTotalL" />
+          <ScalarProperty Name="DebitTotalMM" ColumnName="DebitTotalMM" />
+          <ScalarProperty Name="FK_IdElectrovanne" ColumnName="FK_IdElectrovanne" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="secteur">
+      <EntityTypeMapping TypeName="AgricultureModel.secteur">
+        <MappingFragment StoreEntitySet="secteur">
+          <ScalarProperty Name="IdSecteur" ColumnName="IdSecteur" />
+          <ScalarProperty Name="NomSecteur" ColumnName="NomSecteur" />
+          <ScalarProperty Name="DescriptionSecteur" ColumnName="DescriptionSecteur" />
+          <ScalarProperty Name="DateAjoutSecteur" ColumnName="DateAjoutSecteur" />
+          <ScalarProperty Name="ImageSecteur" ColumnName="ImageSecteur" />
+          <ScalarProperty Name="AdresseSecteur" ColumnName="AdresseSecteur" />
+          <ScalarProperty Name="Surface" ColumnName="Surface" />
+          <ScalarProperty Name="FK_IdParcelle" ColumnName="FK_IdParcelle" />
+          <ScalarProperty Name="FK_IdElect" ColumnName="FK_IdElect" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

@@ -1,0 +1,859 @@
+﻿   @*@model WeatherStation.Models.ExploitationModel*@
+    <style type ="text/css">
+        .k-notification {
+            border: 0;
+        }
+        /* Info template */
+        .k-notification-info.k-group {
+            background: rgba(0%,0%,0%,.7);
+            color: #fff;
+        }
+        .new-mail {
+            width: 300px;
+            height: 100px;
+        }
+        .new-mail h3 {
+            font-size: 1em;
+            padding: 32px 10px 5px;
+        }
+        .new-mail img {
+            float: left;
+            margin: 30px 15px 30px 30px;
+        }
+
+        /* Error template */
+        .k-notification-error.k-group {
+            background: rgba(100%,0%,0%,.7);
+            color: #ffffff;
+        }
+        .wrong-pass {
+            width: 300px;
+            height: 100px;
+        }
+        .wrong-pass h3 {
+            font-size: 16px;
+            padding: 32px 10px 5px;
+            color: #ffffff;
+        }
+        .wrong-pass img {
+            float: left;
+            margin: 30px 15px 30px 30px;
+        }
+
+        /* Success template */
+        .k-notification-upload-success.k-group {
+            background: rgba(0%,60%,0%,.7);
+            color: #fff;
+        }
+        .upload-success {
+            width: 240px;
+            height: 100px;
+            padding: 0 30px;
+            line-height: 100px;
+        }
+        .upload-success h3 {
+            font-size: 1.7em;
+            font-weight: normal;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .upload-success img {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+    </style>
+    <script id="my-template" type="text/kendo-ui">
+    <span id="${id}" class='ob-menu-item'>${text}</span>
+    </script>
+    <script src="../../Scripts/jquery.signalR-1.1.4.js"></script>
+    <script src="@Url.Content("~/signalr/hubs")"></script>
+    <script type="text/javascript">
+
+    var List_ALLNotif = [];
+        var list_id = [];
+        //requette ajax for getting all notification
+        var b =0;
+        $.ajax({
+            url: '../../UserSession/Notification',
+            type: 'GET',
+            datatype: 'json',
+            async: false,
+            data: {
+                idExp:  @Model.IdExploitation
+            },
+            success: function (data) {
+                for (var t = 0; t < data.length; t++){
+                    var date_ = new Date(Number(data[t].Date.substring(6, 19)));
+                    if(!data[t].vue)
+                    {
+                        b++;
+                        List_ALLNotif.push({
+                            message: data[t].message,
+                            Date: kendo.format('{0:dd/MM/yyyy HH:mm}', date_)
+                        });
+                        list_id.push(data[t].Id_Notif);
+                    }
+                }
+            }
+        });
+
+
+
+
+        $(function () {
+            // Proxy created on the fly
+            var job = $.connection.notifHub;
+            // Declare a function on the job hub so the server can invoke it
+            job.client.displayStatus = function () {
+                getData();
+                $.connection.hub.stop();
+                $.connection.hub.start();
+            };
+            // Start the connection
+            $.connection.hub.start();
+            getData1();
+        });
+
+        function getData1() {
+            $.ajax({
+                url: '../UserSession/GetNotif',
+                type: 'GET',
+                datatype: 'json',
+                success: function (data){
+                }
+            });
+            $('.counter').text(b).show();
+        }
+        var Client = false;
+        var node = null;
+        function getData() {
+            $.ajax({
+                url: '../UserSession/GetNotif',
+                type: 'GET',
+                datatype: 'json',
+                success: function (data){
+                    node = data[data.length - 1].id_noeud;
+                    //notification
+                    var countNotif = parseInt($('.counter').text());
+                    var newcountNotif = ++countNotif;
+                    $('.counter').text(
+                        newcountNotif).show();
+                    jQuery('<div/>', {
+                }).appendTo('.notif-bot-cnt')
+                                .delay(5000)
+                                .fadeOut();
+                notification.show({
+                    message: data[data.length - 1].message
+                }, "error");
+                var date_N = new Date(Number(data[data.length - 1].Date.substring(6, 19)));
+                KendoMenuAdd(data[data.length - 1].message + '\n' + kendo.format('{0:dd/MM/yyyy HH:mm}', date_N), 2, $("> li:first", "#listNotif"));
+                list_id.push(data[data.length - 1].Id_Notif);
+            }
+        });
+
+    }
+    function KendoMenuAdd(menuName, menuId, parentIndex) {
+        var template = kendo.template($("#my-template").html());
+        var menuData = $("#menu").data("kendoMenu");
+        menuData.insertAfter({ text: template({ text: menuName, id: menuId }), encoded: false }, parentIndex);
+    }
+    </script>
+   @* SHOW-NOTIF *@
+   <span id = "notification" style = "display:none;"></span>
+   <script id = "errorTemplate" type = "text/x-kendo-template">
+        <div class = "wrong-pass">
+            <img src="../../Content/css/notification/notification/error-icon.png" />
+            <h3>#= message #</h3>
+        </div>
+    </script>
+    <script type = "text/javascript">
+        var notification = $("#notification").kendoNotification({
+            position: {
+                pinned: true,
+                top: ($(window).height() / 2) - 70,
+                right: ($(window).width() / 2) - 160
+            },
+            autoHideAfter: 3000,
+            stacking: "down",
+            templates: [{
+                type: "error",
+                template: $("#errorTemplate").html()
+            }]
+
+        }).data("kendoNotification");
+   </script>
+
+            <ul id = "menu">
+                <li><a href = "../">Acceuil</a></li>
+                <li>
+                    Projet
+                    <ul>
+                        <li @*style="width:100%"*@><a href = "../Account/LogOn">Fermer</a></li>
+                    </ul>
+                </li>
+                <li @*style="margin-left:-10px"*@>
+                    Terrain
+                    <ul>
+                        <li>Consulter
+                            <ul>
+                                <li id = "exp_function">
+                                    @Model.NomExploitation
+                                    <ul>
+                                        @foreach (var par in Model.ParcellesFils)
+                                        {
+                                            <li id = "par_function-@par.IdParcelle-@par.NomParcelle">@par.NomParcelle
+                                                <ul>
+                                                    @foreach (var sec in par.SecteursParcelle)
+                                                    {
+                                                        <li id = "sec_function-@par.IdParcelle-@par.NomParcelle-@sec.IdSecteur">@sec.NomSecteur </li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li @*style="margin-left:-10px"*@>
+                    Noeuds
+                    <ul>
+                        @if (Model.Climat)
+                        { <li>
+                            Climat
+                            <ul>
+                                <li id = "noeudsClimat">Tous</li>
+                                @foreach (var parcel in Model.ParcellesFils)
+                                {
+                                    foreach (var sector in parcel.SecteursParcelle)
+                                    {
+                                        foreach (var node in sector.ChildrenNodes)
+                                        {
+                                            if (node.NodeType == 1)
+                                            {
+                                                <li id = "">@node.AdresseNoeud</li>
+                                            }
+                                        }
+                                    }
+                                }
+                            </ul>
+                        </li> }
+                        @if (Model.Sol)
+                        { <li>
+                            Sol
+                            <ul>
+                                <li id = "noeudsSol">Tous</li>
+                                @foreach (var parcel in Model.ParcellesFils)
+                                {
+                                    foreach (var sector in parcel.SecteursParcelle)
+                                    {
+                                        foreach (var node in sector.ChildrenNodes)
+                                        {
+                                            if (node.NodeType == 2)
+                                            {
+                                                <li id = "">@node.AdresseNoeud</li>
+                                            }
+                                        }
+                                    }
+                                }
+                            </ul>
+                        </li> }
+                        @if (Model.Plante)
+                        { <li>
+                            Plante
+                            <ul>
+                                <li id = "noeudsPlante">Tous</li>
+                                @foreach (var parcel in Model.ParcellesFils)
+                                {
+                                    foreach (var sector in parcel.SecteursParcelle)
+                                    {
+                                        foreach (var node in sector.ChildrenNodes)
+                                        {
+                                            if (node.NodeType == 3)
+                                            {
+                                                <li id = "">@node.AdresseNoeud</li>
+                                            }
+                                        }
+                                    }
+                                }
+                            </ul>
+                        </li> }
+                        @if (Model.Irrigation)
+                        { <li>
+                            Irrigation
+                            <ul>
+                                <li id = "noeudsIrrigation">Tous</li>
+                                @foreach (var parcel in Model.ParcellesFils)
+                                {
+                                    foreach (var sector in parcel.SecteursParcelle)
+                                    {
+                                        foreach (var node in sector.ChildrenNodes)
+                                        {
+                                            if (node.NodeType == 4)
+                                            {
+                                                <li id = "">@node.AdresseNoeud</li>
+                                            }
+                                        }
+                                    }
+                                }
+                            </ul>
+                        </li> }
+                    </ul>
+                </li>
+                @if (Model.Climat)
+                {   <li>
+                        Climat
+                        <ul>
+                            <li id = "Temperature">Température</li>
+                            <li id = "Humidity">Humidité</li>
+                            <li id = "SolaRadiation">Rayonnement Solaire</li>
+                            <li id = "WindSpeed">Vitesse Vent</li>
+                            <li id = "ET0-Ribbon">EvapoTranspiration</li>
+                        </ul>
+                    </li> }
+                @if (Model.Irrigation)
+                {   <li>
+                        Irrigation
+                        <ul>
+                            <li>
+                                Calendrier
+                                <ul>
+                                    @foreach (var parcel in Model.ParcellesFils)
+                                    {
+                                        foreach (var sector in parcel.SecteursParcelle)
+                                        {
+                                            foreach (var irrigNode in sector.ChildrenNodes)
+                                            {
+                                                if (irrigNode.NodeType == 4)
+                                                {
+                                                    <li id = "Calendar_Ribbon-@irrigNode.IdImplanter_noeud_secteur-@irrigNode.AdresseNoeud">@irrigNode.AdresseNoeud</li>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                            <li id = "scada">Schéma d'Irrigation</li>
+                        </ul>
+                    </li> }
+                @if (Model.Sol)
+                { <li id = "">Sol</li> }
+                @if (Model.Plante)
+                { <li id = "">Plante</li> }
+                                          
+                <li style = "width:110px" >
+                    <div style = "float:right" class = "counter">0</div>Notification&nbsp;&nbsp;
+                    <ul id = "listNotif">
+                        <li style = "display:none"></li>
+                            <script type ="text/javascript">
+                                for (var t = 0; t < List_ALLNotif.length; t++) {
+                                    $('#listNotif').append('<li>' + List_ALLNotif[t].message + '<br/>' + List_ALLNotif[t].Date + '</li>');
+                                }
+                            </script>
+                        <li id = "DisplayAll">Afficher Tous</li> 
+                    </ul>
+                </li>
+            </ul>
+
+<script type="text/javascript">
+    $("#DisplayAll").click(function (){
+        var length = $("div#tabs ul li:contains(Notifications)").length;
+        var index = $("#tabs a[href='#vertical2_Notification']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        } else {
+            $("#tabs").tabs("refresh");
+            $.ajax({
+                url: '../../UserSession/AllNotifications',
+                type: 'POST',
+                data: { idExp: '@Model.IdExploitation'},
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);            
+                    $("#tabs").children("ul:first").append("<li><a href='#vertical2_Notification'>Notifications</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+                    var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+                    $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1});
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(xhr.responseText);
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $(this).attr("disabled", "false");
+                    $(".wait").remove();
+                },
+            });
+        }
+    });
+    function onActivate(e) {
+        var item_menu = ($(e.item).children(".k-link").text()).toString();
+        if((item_menu.substring(0,12) == "Notification") && (list_id.length != 0))
+        {
+                 //set champs vue a 0 pour les notifications vue 
+                //requette ajax pour modifier les 0 à 1
+                $.connection.hub.stop();
+                $.ajax({
+                    url: '../../UserSession/SetVisibilityNotif',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data:JSON.stringify({
+                        idExp: '@Model.IdExploitation',
+                        notifs: list_id
+                    }),
+                    async: false,
+                    success: function (result){
+                   
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")");
+                        alert(err.Message);
+                    },
+                }); 
+                $.connection.hub.start();
+                 getData1();
+                $('.counter').text('0').hide();
+                list_id = [];
+        }
+    }
+
+
+    $("#menu").clone(true).find(".k-state-active").removeClass("k-state-active");
+    $("#menu").kendoMenu({
+    activate: onActivate,
+    }).css({
+        'float': 'left',
+        //'position': 'absolute',
+        //'left': '50%',
+        //'top': '50%',
+        //'margin-left': -$("#image").width()/2,
+        'margin-top': $("#image").height() / 4
+    });
+
+</script>
+
+<script type = "text/javascript">
+
+    $("#exp_function").click(function () {
+     
+        var length = $("div#tabs ul li:contains(@Model.NomExploitation)").length;
+        var index = $("#tabs a[href = '#map']").parent().index();
+           
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            $.ajax({
+                url: '../../UserSession/LandViewUser',
+                type: 'GET',
+                data: { idExpl: '@Model.IdExploitation' },
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                    loadLeftSplitterWithExpInfos();
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#map' onclick='loadLeftSplitterWithExpInfos();' >@Model.NomExploitation</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    });
+
+    function loadLeftSplitterWithExpInfos()
+    {
+        $.ajax({
+            url: '../../UserSession/InfoExploitation',
+            type: 'GET',
+            data: { idExpl: '@Model.IdExploitation'},
+            async: false,
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading1"), true);        
+            //},
+            success: function (result) {
+                $("#infos").empty();
+                $("#infos").append(result);
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading1"), false);
+            //}
+        });
+    }
+
+    $("[id^='par_function']").click(function (e) {
+
+        var item_id = $(this).attr('id').split('-');
+
+        $("#infos").innerHTML = "";
+         //reset items tree sizes
+        @foreach (var par in Model.ParcellesFils)
+        {
+        @:$("div#@par.IdParcelle").css( 'font-size', '100%');
+        }
+        $("div#" + item_id[1]).css('font-size', '115%');
+
+        var length = $("div#tabs ul li:contains(" + item_id[2] + ")").length;
+        var index = $("#tabs a[href='#par-" + item_id[1] + "']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            $.ajax({
+                url: '../../UserSession/SecteursNoeudsUser',
+                type: 'GET',
+                data: { idParcel: item_id[1] },
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#par-" + item_id[1] + "'onclick='loadLeftSplitterWithParInfos("+ item_id[1] +");' >" + item_id[2] + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });            
+        }
+        loadLeftSplitterWithParInfos(item_id[1]);
+        e.stopPropagation();
+    });
+
+    function loadLeftSplitterWithParInfos(idParcelle) {
+        
+        $.ajax({
+            url: '../../UserSession/InfoParcelle',
+            type: 'GET',
+            data: {
+                idParcel: idParcelle
+            },
+            async: false,
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading1"), true);        
+            //},
+            success: function (result) {
+                $("#infos").empty();
+                $("#infos").append(result);
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading1"), false);
+            //}
+        });
+    }
+
+    $("[id^='sec_function']").click(function (e) {
+
+        var item_id = $(this).attr('id').split('-');
+
+         //reset items tree sizes
+        @foreach (var par in Model.ParcellesFils)
+        {
+        @:$("div#@par.IdParcelle").css( 'font-size', '100%');
+        }
+        $("div#" + item_id[1]).css('font-size', '115%');
+        var length = $("div#tabs ul li:contains(" + item_id[2] + ")").length;
+        var index = $("#tabs a[href='#par-" + item_id[1] + "']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            $.ajax({
+                url: '../../UserSession/SecteursNoeudsUser',
+                type: 'GET',
+                data: { idParcel: item_id[1] },
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                    loadLeftSplitterWithSecInfos(item_id[3]);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#par-" + item_id[1] + "'onclick='loadLeftSplitterWithSecInfos("+ item_id[1] +");' >" + item_id[2] + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });            
+        }
+        e.stopPropagation();
+    });
+
+    function loadLeftSplitterWithSecInfos(idSecteur) {
+        
+        $.ajax({
+            url: '../../UserSession/InfoSecteur',
+            type: 'GET',
+            data: { idSector: idSecteur},
+            async: false,
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading1"), true);        
+            //},
+            success: function (result) {
+                $("#infos").empty();
+                $("#infos").append(result);
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading1"), false);
+            //}
+        });
+    }
+
+    $("#noeudsClimat").click(function (e) {
+
+         var length = $("div#tabs ul li:contains(Noeuds Climat)").length;
+         var index = $("#tabs a[href='#Liste_des_noeuds_Climat']").parent().index();
+         if (length != 0 && index != -1) {
+             $('#tabs').tabs('option', 'active', index);
+        }
+        else{
+        $.ajax({
+            url: '../../UserSession/ListeNoeudParExploitation',
+            type: 'GET',
+            data: {
+                typeNode: 1,
+                idExpl:@Model.IdExploitation
+            },
+            async: false,
+//            beforeSend: function() {
+//                kendo.ui.progress($("#loading1"), true);        
+//            },
+            success: function (result){
+                $("#tabs").append(result);
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            },
+//            complete: function() {
+//                kendo.ui.progress($("#loading1"), false);
+//            }
+        });
+         $("#tabs").children("ul:first").append("<li><a href='#Liste_des_noeuds_Climat'>Noeuds Climat</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+         var num_tabs = $('#tabs a[href="#Liste_des_noeuds_Climat"]').parent().index();
+         $("#tabs").tabs("refresh").tabs({ active: num_tabs });
+         }
+         e.stopPropagation();
+    });
+
+    $("#noeudsSol").click(function (e) {
+
+        var length = $("div#tabs ul li:contains(Noeuds Sol)").length;
+        var index = $("#tabs a[href='#Liste_des_noeuds_Sol']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else{
+            $.ajax({
+                url: '../../UserSession/ListeNoeudParExploitation',
+                type: 'GET',
+                data: {
+                    typeNode: 2,
+                    idExpl:@Model.IdExploitation
+                    },
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result){
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#Liste_des_noeuds_Sol'>Noeuds Sol</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $('#tabs a[href="#Liste_des_noeuds_Sol"]').parent().index();
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs });
+        }
+    });
+
+    $("#noeudsPlante").click(function () {
+
+        var length = $("div#tabs ul li:contains(Noeuds Plante)").length;
+        var index = $("#tabs a[href='#Liste_des_noeuds_Plante']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }else{
+            $.ajax({
+                url: '../../UserSession/ListeNoeudParExploitation',
+                type: 'GET',
+                data: {
+                    typeNode: 3,
+                    idExpl:@Model.IdExploitation
+                },
+                async: false,
+                //beforeSend: function() {
+                //    kendo.ui.progress($("#loading1"), true);        
+                //},
+                success: function (result){
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function() {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#Liste_des_noeuds_Plante'>Noeuds Plante</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $('#tabs a[href="#Liste_des_noeuds_Plante"]').parent().index();
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs });
+        }
+    });
+
+    $("#noeudsIrrigation").click(function () {
+
+        var length = $("div#tabs ul li:contains(Noeuds Irrigation)").length;
+        var index = $("#tabs a[href='#Liste_des_noeuds_Irrigation']").parent().index();
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else{
+        $.ajax({
+            url: '../../UserSession/ListeNoeudParExploitation',
+            type: 'GET',
+            data: {
+                typeNode: 4,
+                idExpl:@Model.IdExploitation
+            },
+            async: false,
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading1"), true);        
+            //},
+            success: function (result){
+                $("#tabs").append(result);
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading1"), false);
+            //}
+        });
+         $("#tabs").children("ul:first").append("<li><a href='#Liste_des_noeuds_Irrigation'>Noeuds Irrigation</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+         var num_tabs = $('#tabs a[href="#Liste_des_noeuds_Irrigation"]').parent().index();
+         $("#tabs").tabs("refresh").tabs({ active: num_tabs });
+        }
+    });
+
+    $("#ET0-Ribbon").click(function () {
+
+        $("#elementId").data("kendoWindow").center().close();
+
+        var startTime = new Date(new Date().setDate(new Date().getDate() - new Date().getDay())); //Sun, 17 Aug 2014 09:16:50 GMT //Sun, 17 Aug 2014 09:19:04 GMT
+
+        var length = $("div#tabs ul li:contains(ET @Model.NomExploitation)").length;
+        var index = $("#tabs a[href='#ET-@Model.IdExploitation']").parent().index();
+
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            $.ajax({
+                url: "../../UserSession/EvapoTranspirationByParcelThisWeek",
+                type: 'GET',
+                data: {
+                    idExploitation: '@Model.IdExploitation',
+                    startTime: startTime
+                },
+                //beforeSend: function () {
+                //    kendo.ui.progress($("#loading1"), true);
+                //},
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+                //complete: function () {
+                //    kendo.ui.progress($("#loading1"), false);
+                //}
+            });
+
+            $("#tabs").children("ul:first").append("<li><a href='#ET-@Model.IdExploitation'>ET @Model.NomExploitation</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length;
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    });
+
+    $("[id^='Calendar_Ribbon']").click(function (e) {
+
+        var item_id = $(this).attr('id').split('-');
+        
+        var length = $("div#tabs ul li:contains(Calendrier " + item_id[2] + ")").length;
+        var index = $("#tabs a[href='#irrcal-" + item_id[1] + "']").parent().index();
+        
+        if (length != 0 && index != -1) {
+            $('#tabs').tabs('option', 'active', index);
+        }
+        else {
+            //            var idNIrrig = 'Model.ParcellesFils.FirstOrDefault().';
+            $.ajax({
+                url: "../../UserSession/IrrigCalendar",
+                type: 'POST',
+                data: { 
+                    idNoeudIrrig: item_id[1]
+                },
+//                beforeSend: function() {
+//                    kendo.ui.progress($("#loading1"), true);        
+//                },
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                },
+//                complete: function() {
+//                    kendo.ui.progress($("#loading1"), false);
+//                }
+            })
+            $("#tabs").children("ul:first").append("<li><a href='#irrcal-" + item_id[1] + "'>Calendrier " + item_id[2] + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $("div#tabs ul.ui-tabs-nav li").length; // alert('length = ' + length + '\nindex = ' + index + '\nnum_tabs = ' + num_tabs);
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    });
+</script>

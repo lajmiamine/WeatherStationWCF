@@ -1,0 +1,15 @@
+﻿@model WeatherStation.Models.ParcelModel
+
+<table id="infos-par-@Model.IdParcelle" style="width:95%;height:95%">          
+    <tr><td COLSPAN=2><strong>@Model.NomParcelle </strong></td></tr>
+    <tr><td ><strong>Description</strong></td><td>@Model.DescriptionParcelle</td></tr>
+    <tr><td><strong>Surface</strong></td><td>@Model.Surface</td></tr>
+    <tr><td><strong>Date d'ajout</strong></td><td>@Model.DateAjoutParcelle.ToString().Substring(0,10)</td></tr>
+    <tr><td><strong>Type du sol</strong></td><td>@Model.TypeSol</td></tr>
+    <tr><td><strong>Type de culture</strong></td><td> </td></tr>
+    <tr><td><strong>Exploitation</strong></td><td>@Model.NomExploitationMere</td></tr>
+    <tr><td><strong>Nombre de parcelles</strong></td><td>@Model.NombreSecteursFilles</td></tr>
+    @*<tr><td><strong>Début saison</strong></td><td>@Model.Saison.DebutSaison</td></tr>
+    <tr><td><strong>Fin saison</strong></td><td>@Model.Saison.FinSaison</td></tr>*@
+</table>
+

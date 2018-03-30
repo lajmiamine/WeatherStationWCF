@@ -1,0 +1,1547 @@
+﻿@model IEnumerable<WeatherStation.Models.MesuresTemperatureClimatModel>
+
+@{
+    System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+    customCulture.NumberFormat.NumberDecimalSeparator = ".";
+    System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+}
+
+<div id = "vertical2_Température" style = "height:95%; width: 100%;">
+    <div id = "top-pane1">
+        <ul id = "menu_date">
+            <li id = "Horaire" style = "width:100px">Horaire</li>
+            <li id = "Journaliere" style = "width:100px">Journaliére </li>
+            <li id = "Hebdomadaire" >Hebdomadaire </li>
+            <li id = "mensuelle" style = "width:100px">mensuelle </li>
+            <li id = "periodique">periodique </li>
+        </ul>
+        <ul id = "menu_reporting">
+            <li onClick = "clickMonBoutonExcel();"><img id = "MonBoutonExcel" src = "../../Content/images/excel.png" /></li>
+            <li @*onClick = "clickMonBoutonPdf();"*@><img id="MonBoutonPdf" src = "../../Content/images/curve.png" /></li>
+            <li onClick = "DisplayPdf();"><img src = "../../Content/images/pdf.jpeg" /></li>
+            <li><img id = "refresh" src = "../../Content/images/refresh.png" /></li>
+            <li><img id = "colorpicker" onClick = "clickColorPicker();"/></li>
+            @*<li onClick = "clickColorPicker();"><img id = "colorpicker" src = "../../Content/themes/base/images/colorpicker.png" /></li>*@
+        </ul>
+        <div id = "window2" style = "display:none" >
+            <center>
+                <br /><br />
+                    <strong><label for = "start">date debut:</label></strong><input id = "start" style = "width: 200px" />
+                <br /><br />
+                    <strong><label for = "end">date fin:</label></strong><input id = "end" style = "width: 200px" />
+                <br /><br />
+                <button type = "button" id = "check">Check</button>
+                <button type = "button" id = "Annuler_TEMP">Annuler</button>
+                <br /><br />
+            </center>  
+        </div>
+    </div>
+    <div id="middle-pane1">
+        <div id="stock-chart" style = "height: 95%"></div>
+
+        <div id="loading"></div>
+    </div>
+    <div id="bottom-pane1">
+        <div id="grid" style = "height: 100%"></div>
+    </div>
+</div>
+
+<script type = "text/javascript">
+
+    $("#vertical2_Température").kendoSplitter({
+        orientation: "vertical",
+        panes: [
+            { collapsible: true, size: "6%" },
+            { collapsible: true, size: "64%" },
+            { collapsible: true, size: "30%" }
+        ]
+    });
+
+    var list_temp1 = [], list_temp2 = [], orders = [], id = 1,
+        list_temp1_min = '@Model.Where(i => i.TemperatureClimat != null).Min(j => j.TemperatureClimat)',
+        list_temp1_max = '@Model.Where(i => i.TemperatureClimat != null).Max(j => j.TemperatureClimat)';
+
+    @foreach (var mesure in Model)
+    {
+        @:list_temp2.push('@mesure.DateMesure.ToString("yyyy/MM/dd HH:mm:ss")');
+        @:if ('@mesure.TemperatureClimat' != '') {
+            @:list_temp1.push(@mesure.TemperatureClimat);
+            @:orders.push({
+                @:ID: id ++,
+                @:OrderDate: '@mesure.DateMesure.ToString("yyyy/MM/dd HH:mm:ss")',
+                @:Temperature: '@mesure.TemperatureClimat',
+            @:});
+        @:}
+        @:else {
+                @:list_temp1.push(null);
+        @:}
+    }
+
+    var list_seuil = [];
+
+    $.ajax({
+        url: '../../UserSession/SeuilsTemperature',
+        type: 'Get',
+        data: { idnoeudclimat: '@Model.ElementAt(0).IdParentNode'},
+        datatype: 'json',
+        async: false,
+        success: function (res) {
+            list_seuil.push(res.seuilInfTemperatureAir);
+            list_seuil.push(res.seuilSuppTemperatureAir);
+        }
+    });
+
+    function  Selection_Courbe(x)
+    {
+        var chart = $("#stock-chart").data("kendoStockChart");
+        var date =x.toString();
+        var datefinale = new Date(Number(date.substring(0,4)),(Number(date.substring(5,7)))-1,Number(date.substring(8,10)),Number(date.substring(11,13)),Number(date.substring(14,16)),00);
+        var select=0;
+        for(var d=0;d<chart.series[0].data.length;d++)
+        {
+            var dattttttttttee = new Date(chart.series[0].data[d].x);
+            if((datefinale.getFullYear()==dattttttttttee.getFullYear())&&(datefinale.getMonth()==dattttttttttee.getMonth())&&(datefinale.getDay()==dattttttttttee.getDay())&&(datefinale.getHours()==dattttttttttee.getHours())&&(datefinale.getMinutes()==dattttttttttee.getMinutes())&&(datefinale.getSeconds()==dattttttttttee.getSeconds())&&((chart.series[0].data[d].y)!=null))
+            {
+                select=d;
+            }
+        }
+
+        chart.series[0].data[select].select();
+        chart.series[0].markers.visible = true;
+    }
+
+    function onChangeTemp(e) {
+
+        var grid_temp = $("#grid").data("kendoGrid");
+        var rows_temp = grid_temp.select();
+        var select_temp = grid_temp.items().index(rows_temp); // alert("rows length: " + rows_temp.length + "\nRows index: " + select_temp + "\nRows uid: " + rows_temp.uid);
+       if (select_temp != -1) {
+            $(".k-grid-content").animate({
+                scrollTop: ($('[data-uid = "' + grid_temp.dataItem(rows_temp).uid + '"] ').offset().top - $(".k-selectable").offset().top)
+            }, 800);
+            //($('[data-uid = "' + grid_temp.dataItem(rows_temp).uid + '"] ')).css("background-color", "#239c4d");         
+            var stockChartTemp = $("#stock-chart").data("kendoStockChart");
+            rows_temp.each(function(index, row) {
+                var selectedItem = grid_temp.dataItem(row);
+//                alert("rows: " + selectedItem.ID + ", " + selectedItem.OrderDate + ", " + selectedItem.Temperature);
+                var index_temp = jQuery.inArray(selectedItem.Temperature, stockChartTemp.options.series[0].data);
+//                alert("index: " + index); alert(stockChart.options.series[0].data[index] + "\n" + selectedItem.Temperature);
+                $(".k-tooltip").show();
+            });
+        }
+    }
+
+    $("#grid").kendoGrid({
+        dataSource: {
+            data: orders,
+            pageSize: 500
+        },
+        height: '99%',
+        change: onChangeTemp,
+        selectable: "multiple",
+        scrollable: true,
+        groupable: false,
+        sortable: true,
+//        resizable: true,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 3
+        },
+        dataBound : onDataBound,
+        columns: [{
+            field: "ID",
+            title: "ID",
+            width: 50,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },{
+            field: "OrderDate",
+            title: "Date",
+            format: "{0:dd/MM/yyyy HH:mm:ss}",
+            width: 100,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        },
+        {
+            field: "Temperature",
+            title: "Temperature(°C)",
+            width: 100,
+            headerAttributes : {
+                style: "text-align:center"
+            }
+        }]
+    });
+
+    function onDataBound(arg) {
+        var grid = $("#grid").data("kendoGrid");
+        var gridData = grid.dataSource.view();
+        for (var i = 0; i < gridData.length; i++) {
+            //get the item uid
+            var currentUid = gridData[i].uid;
+            //if the record fits the custom condition
+            if (gridData[i].Temperature >  list_seuil[1]) {
+                //find the row based on the uid and the custom class
+                var currenRow = grid.table.find("tr[data-uid='" + currentUid + "']");
+                //$(currenRow).addClass("ClassPublished");
+                $(currenRow).css("background-color", "#f4ada6");
+            }
+            else if (gridData[i].Temperature < list_seuil[0]) {
+                //find the row based on the uid and the custom class
+                var currenRow = grid.table.find("tr[data-uid='" + currentUid + "']");
+                $(currenRow).css("background-color", "#c6e6ff");
+            }
+        }   
+    }
+
+    /************ Plot Discount *******************/
+    var i = 0 , inc = 0;
+    var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours(),new Date().getMinutes());
+    
+    for(var k = 0; k < list_temp2.length; k++)
+    {
+        if(new Date(list_temp2[k]) <= new Date())
+        {
+            inc++;
+        }
+    } 
+    var plot_discount = [];
+    // alert(inc);
+    for(var k = 0; k < inc; k += 10)
+    {
+        var temps =  new Date(Number(list_temp2[k].substring(6, 19))); 
+        if (list_temp1[k] == null)
+        {
+            // alert("pas d'enregistrement ou bien la période change");
+            //2 éme cas pas d'enregistrement
+            //boucle from list_temp1[k] jusqu'a une valeur list_temp1[k] non null
+            var p = k;
+            while((list_temp1[p] == null)&&(p < inc))
+            {
+                p++;
+            }
+            //si on trouve une valeur non null on hachure la zone(list_temp1[k] -> list_temp1[k] non null)  (traitement graphyque)
+ 
+            plot_discount.push({
+                from: k,
+                to: p,
+                color: "#dfddd3"
+            });
+
+            //stockChart_.options.categoryAxis[0].plotBands[i].opacity = 0.3;
+            i++;
+            k=p;
+        }        
+        // on verifie la période puis on refait la boucle a partir de la valeur non null jusqu'a maintenant
+    }
+  
+    $("#stock-chart").kendoStockChart({
+
+        title: {
+            text: "Date : " + kendo.format('{0:dd/MM/yyyy}',new Date()),
+            color: "#000000",
+            font: "12px sans-serif",
+        },
+
+        dateField: null,
+
+        series: [{
+            name: "Temperature",
+            type: "line",
+            style: "smooth",
+            //field: "Temperature",
+            data: list_temp1,
+            color:"#910000",
+            markers: {
+                visible : false,
+            },
+            tooltip: {
+                visible: true,
+                template: "Time=#= kendo.format('{0:dd/MM/yyyy HH:mm}',category) # ; #= series.name # = #= value # °C"
+            },
+        },{
+            name: "Seuil",
+        }],
+
+        valueAxis: [{
+            name: 'temperature',
+            data: list_temp1,
+            color:"#910000",
+            labels: {
+                format: "{0}"
+            },
+            min: Math.floor(list_temp1_min/* - (list_temp1_max - list_temp1_min) * 0.1*/),
+            max: Math.ceil(list_temp1_max/* + (list_temp1_max - list_temp1_min) * 0.1*/),
+
+            title: {
+                text: "temperature °C",
+                font: "12px sans-serif",
+            },
+            notes: {
+               
+                visible: true,
+                line: {
+                    length: 1100,
+                    color: "#a0a700",
+                },
+                data: [{
+                    value: list_seuil[0],
+                    label:{
+                        text :'seuil max',
+                        color: "#a0a700",
+                        position:'outside',
+                    },                    
+                },
+                {
+                    value: list_seuil[1],
+                    label: {
+                        text: "seuil min",
+                        color: "#a0a700",
+                        position:'outside'
+                    },
+                    
+                }]
+            },
+            plotBands: [{
+                from: -5,
+                to: list_seuil[0],
+                color: "#f5f5f5"
+            },
+            {        
+                from: list_seuil[1],
+                to: 100,
+                color: "#f5f5f5"
+            }]
+        }],
+
+        legend: {
+            position: "bottom",
+            visible: true,
+            border: {
+                width: 2,
+                color: "grey",
+                dashType: "solid"
+            },
+        },
+
+      //  xAxis:{
+//            color:"#910000",
+//            labels: {
+//                template: "#= kendo.format('{0}',value/60) #"
+//            }
+        //plotBands: plot_discount,
+       // },
+
+        categoryAxis: {
+            categories: list_temp2,
+            type: "date",
+            baseUnit: "minutes",            
+            line:{
+                color:"#910000",
+            },
+            labels: {
+                visible: true,
+                step: 120
+            },
+            majorGridLines: {
+                visible: false,
+            },
+            majorTicks: {
+                visible: true,
+                size: 4,
+                step: 60,
+            },
+//            plotBands: plot_discount,
+        },
+
+        navigator: {
+            dateField: null,
+            hint: {
+                // hint template
+                template: "From: #= from # To: #= to #",
+                visible: false,
+            },
+            categoryAxis: {
+                categories: list_temp2,
+//                type: "date",
+                autoBaseUnitSteps:{
+                    minutes:[15] ,
+                    hours:[2],
+                }
+            },
+            select: {
+                from: list_temp2[0],
+                to:list_temp2[list_temp2.length - 1],
+            },
+            series:{
+                type: "area",
+                missingValues: "interpolate",
+                area: {
+                    line: {
+                        style: "smooth"
+                    }
+                },
+                data: list_temp1,
+                color: "#910000",
+            },
+        },
+        seriesClick: onSeriesClick_temp,
+        legendItemClick: onLegendItemClick_temp,
+    });
+
+    function onSeriesClick_temp(e) {
+        /*kendoConsole.log//alert(kendo.format("Series click :: {0} ({1}): {2}",
+                            e.series.name, e.category, e.value));*/
+        var grid_chart = $("#grid").data("kendoGrid");
+//                rowIndex = e.value,
+//                row = grid.tbody.find(">tr:not(.k-grouping-row)").eq(rowIndex);
+        // Retrieve all data from the DataSource
+        var data_chart = grid_chart.dataSource.data();
+        // Find those records that have OrderDate set to "test"
+        // and return them in `res` array
+        var res_chart = $.grep(data_chart, function (d) {
+//            alert("d.OrderDate: " + d.OrderDate + "\ne.category: " + e.category);
+//            alert("d.Temperature: " + d.Temperature + "\ne.value: " + e.value);
+            return /*d.OrderDate == e.category &&*/ d.Temperature == e.value;
+        }); //alert(res);
+//        if (row.length != 0) {
+//            grid.scrollTop($(row).position().top);
+//            $("#grid div.k-grid-content").scrollTop($(row).position().top); //scroll the content
+//        }
+//        grid.select(row);
+        selectRowTemp(e.category, e.value);
+    }
+
+    function onLegendItemClick_temp(e) { //alert("onLegendItemClick\n" + e.text);
+        var stockChart = $("#stock-chart").data("kendoStockChart");
+        // kendoConsole.log(kendo.format("Legend item click :: {0}", e.text));
+        // kendoConsole.log(kendo.format("Legend item click :: {0}", e.text));
+        if(stockChart.options.valueAxis[0].notes.visible == false) {
+            stockChart.options.valueAxis[0].notes.visible = true;
+            stockChart.options.valueAxis[0].plotBands[0].color ="#f5f5f5";
+            stockChart.options.valueAxis[0].plotBands[1].color ="#f5f5f5";
+        }
+        else{
+            stockChart.options.valueAxis[0].notes.visible = false;
+            stockChart.options.valueAxis[0].plotBands[0].color = "#ffffff";
+            stockChart.options.valueAxis[0].plotBands[1].color = "#ffffff";
+        }
+    }
+ 
+    function selectRowTemp(Datee,temp)
+    {
+        var grid_temp = $("#grid").data("kendoGrid"),
+            view_temp = grid_temp.dataSource.view();
+        var rows_temp = $.grep(view_temp, function(item) {
+            return String(item.Temperature) === String(temp) && String(new Date(item.OrderDate)) === String(new Date(Datee));
+        }).map(function(item) {
+            return grid_temp.tbody.find(">[data-uid=" + item.uid + "]");
+        });
+        //$(rows_temp).css("background-color", "#ffffff");
+        grid_temp.clearSelection();grid_temp.select(rows_temp);
+    }
+
+    function clickColorPicker() {
+        colorpicker.open();
+    }
+
+    var colorpicker = $("#colorpicker").kendoColorPicker({
+        change: function (e) {
+            //kendoConsole.log("Change in picker #" + this.element.attr("id") + " :: " + e.value);
+            var stockChart = $("#stock-chart").data("kendoStockChart");
+            stockChart.options.series[0].color = e.value;
+            stockChart.options.valueAxis[0].color = e.value;
+            stockChart.options.valueAxis[0].labels.color = e.value;
+            stockChart.options.valueAxis[0].line.color = e.value;
+            stockChart.options.valueAxis[0].title.color = e.value;
+            stockChart.options.series[2].color = e.value;
+            stockChart.refresh();
+        },
+        //  toolIcon: "k-foreColor"
+    }).data("kendoColorPicker");
+           
+</script>
+
+@*Menu forms of Selection & Reporting*@
+<script type="text/javascript">
+
+    $("#menu_date").clone(true).find(".k-state-active").removeClass("k-state-active");    
+    $("#menu_date").kendoMenu({
+    }).css({
+        'float': 'left',
+//      'margin-top': $("#image").height() / 4
+    });
+    
+    $("#menu_reporting").clone(true).find(".k-state-active").removeClass("k-state-active");
+    $("#menu_reporting").kendoMenu({
+    }).css({
+        'float': 'right',
+        'height': $("#menu_date").height()
+//          'margin-right': 30,
+//          'position': 'absolute',
+//          'left': '50%',
+//          'top': '50%',
+//          'margin-left': -$("#image").width() / 2,
+//            'margin-top': $("#image").height() / 4
+    });
+
+</script>
+
+@*Period Popup Form*@
+<script type='text/javascript'>
+
+    var undo = $("#undo").bind("click", function () {
+                    $("#window2").data("kendoWindow").center().open();
+                });
+    undo.show();
+
+    var onClose = function () {
+        undo.show();
+    };
+
+    if (!$("#window2").data("kendoWindow")) {
+        $("#window2").kendoWindow({
+//            width: "400px",
+            title: "Choix periode",
+            actions: ["Close"],
+            close: onClose
+        });
+    }
+
+</script>
+               
+
+@*ChoixHeure*@
+<script type='text/javascript'>
+
+    $("#Horaire").kendoDateTimePicker({
+        value: new Date(),
+        close: myfunctionheurrefresh,
+    });
+
+    $(".k-input").css("background-color", "#e8e8e8");
+    $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+
+    var datepicker_hour = $("#Horaire").data("kendoDateTimePicker");
+
+    $("#Horaire").click(function () {
+        datepicker_hour.open("date");
+    });
+    
+    function myfunctionheurrefresh() {
+       
+        var startTime = new Date($("#Horaire").data("kendoDateTimePicker").value());
+        var time = [], temp = [], orders_update = [], seuil_min = [], seuil_max = [],id = 1 ;
+        var Min_hour, Max_hour;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneHour',
+            type: 'GET',
+            data: {
+                idNoeudClimat : '@Model.ElementAt(0).IdParentNode',
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading"), true);        
+            //},
+            success: function (res) {
+                var i = 0;
+                while ((res[i].TemperatureClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min_hour = res[i].TemperatureClimat;
+                Max_hour = res[i].TemperatureClimat;
+                 //alert(Min + '\n' + Max);
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    //list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    time.push(res[j].DateMesure);
+                    temp.push(res[j].TemperatureClimat);
+                    if (res[j].TemperatureClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            Temperature: res[j].TemperatureClimat,
+                        });
+                        if(res[j].TemperatureClimat > Max_hour)
+                        {
+                            Max_hour = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat < Min_hour)
+                        {
+                            Min_hour = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].TemperatureClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].TemperatureClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].TemperatureClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading"), false);
+            //}
+        });
+
+        jQuery("#grid").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid").data("kendoGrid").refresh();
+        
+        //coloration grid 
+        var grid = $("#grid").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.Temperature >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.Temperature < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+        var stockChart = $("#stock-chart").data("kendoStockChart");
+        stockChart.options.title.text = "time :" + kendo.format('{0:dd/MM/yyyy HH:mm}',startTime); 
+        stockChart.options.categoryAxis[0].categories = time;
+        stockChart.options.categoryAxis[0].labels.step = 5;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.series[0].data = temp;
+        stockChart.options.series[0].name = "Temperature";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.valueAxis[0].min = Math.floor(Min_hour/* - (Max_hour - Min_hour) * 0.1*/);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max_hour/* + (Max_hour - Min_hour) * 0.1*/);
+        stockChart.options.categoryAxis[1].categories = time;
+        stockChart.options.categoryAxis[1].labels.step = 5;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+//      stockChart.options.categoryAxis[0].select.from = stockChart.options.categoryAxis[0].min;  //give the new range values
+//      stockChart.options.categoryAxis[0].select.to = stockChart.options.categoryAxis[0].max;
+        stockChart._navigator.options.select.from =time[0];
+        stockChart._navigator.options.select.to =time[time.length-1];
+        stockChart.options.series[2].data = temp;
+        stockChart.options.series[2].name = "Temperature";
+        stockChart.options.series[2].markers.visible = false;
+        //plot discount
+        var i = 0 , inc = 0;
+        for(var k = 0; k < time.length; k++)
+        {
+            var date_ = Number(time[k].substring(6, 19))
+            if(new Date(date_) <= new Date())
+            {
+                inc++;
+            }
+        }
+        var plot_discount_Day = [];
+        for(var k = 0;k < inc - 10 ; k += 10)
+        {
+            if (temp[k] == null)
+            {  
+                var u = k;
+                while((temp[u] == null) && (u < temp.length))
+                {
+                    u++;
+                }
+                //si on trouve une valeur non null on hachure la zone(list_temp1[k] -> list_temp1[k] non null)  (traitement graphyque)
+                plot_discount_Day.push({
+                    from: k,
+                    to: u,
+                    color: "#dfddd3"
+                });
+                k = u;
+            }
+        } 
+//        stockChart.options.categoryAxis[0].plotBands = plot_discount_Day;
+        stockChart.refresh();
+    }
+
+</script>
+
+
+
+@*choix Day*@
+<script type='text/javascript'>
+
+    $("#Journaliere").kendoDatePicker({        
+        close: myfunctionDaterefresh,      
+    });
+
+	$(".k-input").css("background-color", "#e8e8e8");
+	$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+    $("#Journaliere").click(function () {
+        $("#Journaliere").data("kendoDatePicker").open("date");
+	});
+
+    function myfunctionDaterefresh() {
+    
+        var startTime = $("#Journaliere").data("kendoDatePicker").value();
+        if (startTime == null) {
+            startTime = new Date();
+        }
+        var day = [], temp = [], orders_update = [], id = 1;
+        var Min_Temp, Max_Temp;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneDay',
+            type: 'GET',
+            data: {
+                idNoeudClimat : '@Model.ElementAt(0).IdParentNode',
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading"), true);        
+            //},
+            success: function (res) {
+                var i = 0;
+                while ((res[i].TemperatureClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min_Temp = res[i].TemperatureClimat;
+                Max_Temp = res[i].TemperatureClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    day.push(res[j].DateMesure);
+                    temp.push(res[j].TemperatureClimat);
+                    //list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    if (res[j].TemperatureClimat != null) {
+                        if(res[j].TemperatureClimat > Max_Temp)
+                        {
+                            Max_Temp = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat < Min_Temp)
+                        {
+                            Min_Temp = res[j].TemperatureClimat;
+                        }
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            Temperature: res[j].TemperatureClimat,
+                        });
+                    }
+                }
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading"), false);
+            //}
+        });
+        $("#grid").data("kendoGrid").dataSource.data(orders_update);
+        $("#grid").data("kendoGrid").refresh();
+        //coloration grid 
+        var grid = $("#grid").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.Temperature >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.Temperature < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#B0E0E6");
+        });
+
+        var stockChart = $("#stock-chart").data("kendoStockChart");
+        stockChart.options.title.text = "Date :" + kendo.format('{0:dd/MM/yyyy}',startTime);
+        stockChart.options.categoryAxis[0].labels.step = 120;
+        stockChart.options.categoryAxis[0].majorTicks.step = 60;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.categoryAxis[0].categories = day;
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].name = "Temperature";
+        stockChart.options.series[0].data = temp;
+        stockChart.options.valueAxis[0].min = Math.floor(Min_Temp/* - (Max_Temp - Min_Temp) * 0.1*/);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max_Temp/* + (Max_Temp - Min_Temp) * 0.1*/);
+        stockChart.options.categoryAxis[1].categories = day;
+        stockChart.options.categoryAxis[1].labels.step = 120;
+        stockChart.options.categoryAxis[1].majorTicks.step = 60;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = day[0];
+        stockChart._navigator.options.select.to = day[day.length-1];
+        stockChart.options.series[2].data = temp;
+        stockChart.options.series[2].name = "Temperature";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart.refresh();
+        var i = 0 , inc = 0;
+        var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours(),new Date().getMinutes());
+        for(var k = 0; k < day.length; k++)
+        {
+            var date_ = Number(day[k].substring(6, 19))
+            if(new Date(date_) <= new Date())
+            {
+                inc++;
+            }
+        }
+        var plot_discount_Day = [];
+        for(var k = 0;k < inc - 10 ; k += 10)
+        {
+            if (temp[k] == null)
+            {
+                var u = k;
+                while((temp[u] == null) && (u < temp.length))
+                {
+                    u++;
+                }
+                
+                //si on trouve une valeur non null on hachure la zone(list_temp1[k] -> list_temp1[k] non null)  (traitement graphique)               
+                plot_discount_Day.push({
+                    from: k,
+                    to: u,
+                    color: "#dfddd3"
+                });
+                k = u;
+            }
+            ////        // on verifie la période puis on refait la boucle a partir de la valeur non null jusqu'a maintenant
+        }
+        stockChart.options.categoryAxis[0].plotBands = plot_discount_Day;
+        stockChart.refresh();
+    }
+</script>
+
+@* choix semaine*@
+<script type='text/javascript'>
+
+    $("#Hebdomadaire").kendoDatePicker({
+        change: myfonctionWeekRefresh
+    });
+
+    $(".k-input").css("background-color", "#e8e8e8");
+    $(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+    var datepicker_Week = $("#Hebdomadaire").data("kendoDatePicker");
+    
+    $("#Hebdomadaire").click(function () {
+        datepicker_Week.open("date");
+    });
+
+    function myfonctionWeekRefresh() {
+
+        var tr = $(".k-state-selected", Hebdomadaire._table).closest("tr");
+        var day = this.value();
+        var first = $("td:first", tr).find("a").attr("title");
+        var last = $("td:last", tr).find("a").attr("title");
+        var startTime = new Date(first), endTime = new Date(last); //alert(first + '\n' + last);
+        var week = [], temp = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneWeek',
+            type: 'GET',
+            data: {
+                idNoeudClimat : '@Model.ElementAt(0).IdParentNode',
+                startTime : startTime
+            },
+            dataType: 'json',
+            async: false,
+//            beforeSend: function() {
+//                kendo.ui.progress($("#loading1"), true);        
+//            },
+            success: function (res) {
+                var i = 0;
+                while ((res[i].TemperatureClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].TemperatureClimat;
+                Max = res[i].TemperatureClimat;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    week.push(res[j].DateMesure);
+                    temp.push(res[j].TemperatureClimat);
+                    if (res[j].TemperatureClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            Temperature: res[j].TemperatureClimat,
+                        });
+                        if(res[j].TemperatureClimat > Max)
+                        {
+                            Max = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat < Min)
+                        {
+                            Min = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].TemperatureClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].TemperatureClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].TemperatureClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+//            complete: function() {
+//                kendo.ui.progress($("#loading1"), false);
+//            }
+        });
+        //alert("week: " + week.length + "\ntemp: " + temp.length + "\norders_update: " + orders_update.length);
+        jQuery("#grid").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid").data("kendoGrid").refresh();
+   
+        //coloration grid 
+        var grid = $("#grid").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.Temperature >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.Temperature < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+
+        var stockChart = $("#stock-chart").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut : " + kendo.format('{0:dd/MM/yyyy}', first)+ "Date fin : " + kendo.format('{0:dd/MM/yyyy}', last);
+        stockChart.options.categoryAxis[0].labels.step = 720;
+        stockChart.options.categoryAxis[0].majorTicks.step = 300;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.categoryAxis[0].categories = week;
+        stockChart.options.series[0].name = "Temperature";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].data = temp;
+        stockChart.options.valueAxis[0].min = Math.floor(Min/* - (Max - Min) * 0.1*/);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max/* + (Max - Min) * 0.1*/);
+        stockChart.options.categoryAxis[1].categories = week;
+        stockChart.options.categoryAxis[1].labels.step = 480;
+        stockChart.options.categoryAxis[1].majorTicks.step = 300;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart.options.series[2].data = temp;
+        stockChart.options.series[2].name = "Temperature";
+        stockChart._navigator.options.select.from = week[0];
+        stockChart._navigator.options.select.to = week[week.length-1];
+        stockChart.options.series[2].markers.visible = false;
+
+        //plot discount
+        var i = 0 , inc = 0;
+        var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours(),new Date().getMinutes());
+        for(var k = 0; k < week.length; k++)
+        {
+            var date_ = Number(week[k].substring(6, 19))
+            if(new Date(date_) <= new Date())
+            {
+                inc++;
+            }
+        }
+        var plot_discount_Day = [];
+        for(var k = 0;k < inc - 10 ; k += 10)
+        {
+            if (temp[k] == null)
+            {  
+                var u = k;
+                while((temp[u] == null) && (u < temp.length))
+                {
+                    u++;
+                }
+                //si on trouve une valeur non null on hachure la zone(list_temp1[k] -> list_temp1[k] non null)  (traitement graphyque)
+                plot_discount_Day.push({
+                    from: k,
+                    to: u,
+                    color: "#dfddd3"
+                });
+                k = u;
+            }
+            ////        // on verifie la période puis on refait la boucle a partir de la valeur non null jusqu'a maintenant
+        }
+        stockChart.options.categoryAxis[0].plotBands = plot_discount_Day;
+        stockChart.refresh();
+    }
+
+</script>
+
+@* Choix Mois *@
+<script type='text/javascript'>
+       
+    $("#mensuelle").kendoDatePicker({
+        // defines the start view
+        start: "year",
+
+        // defines when the calendar should return date
+        depth: "year",
+
+        // display month and year in the input
+        format: "MMMM yyyy",
+        close: myfunctionMoisrefresh,
+    });
+
+	$(".k-input").css("background-color", "#e8e8e8");
+	$(".k-state-hover> .k-picker-wrap > .k-state-default").css("visibility", "hidden");
+	    
+	var datepicker_month = $("#mensuelle").data("kendoDatePicker");
+
+	$("#mensuelle").click(function () {
+        datepicker_month.open("date");
+	});
+
+    function  myfunctionMoisrefresh()
+    {
+        var startTime = $("#mensuelle").data("kendoDatePicker").value();
+        var month = [], temp = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByIntervalOneMonth',
+            type: 'GET',
+            //beforeSend: function() {
+            //    kendo.ui.progress($("#loading1"), true);        
+            //},
+            data: { idNoeudClimat : '@Model.ElementAt(0).IdParentNode', startTime : startTime },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                var i = 0;
+                while ((res[i].Tmoy == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].Tmoy;
+                Max = res[i].Tmoy;
+                for (var j = 0; j < res.length; j++) {
+                    var date = new Date(Number(res[j].DateMesureMoy.substring(6, 19)));
+                    month.push(res[j].DateMesureMoy);
+                    temp.push(res[j].Tmoy);
+                    //list9.push([date.getTime(), res[j].Tmoy]);
+                    if (res[j].Tmoy != null)
+                    {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: kendo.format('{0:dd/MM/yyyy}', date),
+                            Temperature: res[j].Tmoy,
+                        });
+                        if(res[j].Tmoy > Max)
+                        {
+                            Max = res[j].Tmoy;
+                        }
+                        if(res[j].Tmoy < Min)
+                        {
+                            Min = res[j].Tmoy;
+                        }
+                        if(res[j].Tmoy > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].Tmoy]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].Tmoy < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].Tmoy]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+            //complete: function() {
+            //    kendo.ui.progress($("#loading1"), false);
+            //}
+        });
+
+        jQuery("#grid").data("kendoGrid").dataSource.data(orders_update); 
+        jQuery("#grid").data("kendoGrid").refresh();
+   
+        //coloration grid 
+        var grid = $("#grid").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) { 
+            if (row.Temperature > list_seuil[1])
+            {
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            }
+            else if (row.Temperature < list_seuil[0])
+            {
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+            }
+        });
+        
+        var stockChart = $("#stock-chart").data("kendoStockChart");
+        stockChart.options.title.text = "Mois : " + kendo.format('{0:MM/yyyy}',startTime);
+//            stockChart.options.navigator.series.type = "line";
+        stockChart.options.categoryAxis[0].categories = month;
+        stockChart.options.categoryAxis[0].labels.step = 2;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1;
+        stockChart.options.categoryAxis[0].baseUnit = "days";
+        stockChart.options.series[0].name = "Temperature moyenne";
+        stockChart.options.series[0].data = temp;
+        stockChart.options.series[0].markers.visible = true;
+        stockChart.options.valueAxis[0].min = Math.floor(Min /*- (Max - Min) * 0.1*/);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max /*+ (Max - Min) * 0.1*/);
+        stockChart.options.categoryAxis[1].categories = month;
+        stockChart.options.categoryAxis[1].labels.step = 2;
+        stockChart.options.categoryAxis[1].majorTicks.step = 1;
+        stockChart.options.categoryAxis[1].baseUnit = "days";
+        stockChart.options.series[2].data = temp;
+        stockChart.options.series[2].name = "Temperature";
+        stockChart.options.series[2].markers.visible = false;
+        stockChart._navigator.options.select.from = month[0];
+        stockChart._navigator.options.select.to =month[month.length-1];
+        //plot discount
+        var i = 0 , inc = 0;
+        var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours(),new Date().getMinutes());
+        for(var k = 0; k < month.length; k++)
+        {
+            var date_ = Number(month[k].substring(6, 19))
+            if(new Date(date_) <= new Date())
+            {
+                inc++;
+            }
+        }
+        var plot_discount_Day = [];
+        for(var k = 0;k < inc - 10 ; k += 10)
+        {
+            if (temp[k] == null)
+            {  
+                var u = k;
+                while((temp[u] == null) && (u < temp.length))
+                {
+                    u++;
+                }
+                //si on trouve une valeur non null on hachure la zone(list_temp1[k] -> list_temp1[k] non null)  (traitement graphyque)
+                plot_discount_Day.push({
+                    from: k,
+                    to: u,
+                    color: "#dfddd3"
+                });
+                k = u;
+            }
+            ////        // on verifie la période puis on refait la boucle a partir de la valeur non null jusqu'a maintenant
+        } 
+//            stockChart.options.navigator.series.type = "line";
+        stockChart.options.categoryAxis[0].plotBands = plot_discount_Day;
+        stockChart.refresh();
+    }
+</script>
+
+@*choix periode*@
+<script type='text/javascript'>
+
+    $("#periodique").click(function () {
+        $("#window2").data("kendoWindow").center().open();
+    });
+        
+    function startChange() {
+        var startDate = start.value(), endDate = end.value();
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function endChange() {
+
+        var endDate = end.value(), startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    var start = $("#start").kendoDateTimePicker({
+        change: startChange
+    }).data("kendoDateTimePicker");
+
+    var end = $("#end").kendoDateTimePicker({
+        change: endChange,
+//        close: myfunctionperiodrefresh,
+    }).data("kendoDateTimePicker");
+
+    start.max(end.value());
+    end.min(start.value());
+
+    $("#check").kendoButton({
+        click: RefreshPeriod,
+        imageUrl: "../content/images/connection.png",
+    });
+    $("#Annuler_TEMP").kendoButton({
+        click: exit,
+        imageUrl: "../content/images/cancel.png",
+    });
+    function exit()
+    {
+        $("#window2").data("kendoWindow").center().close();
+    } 
+//    $("#check").click(function () {
+     function RefreshPeriod()
+     {
+        $("#window2").data("kendoWindow").center().close();
+
+        var startTime = $("#start").data("kendoDateTimePicker").value();
+        var endTime = $("#end").data("kendoDateTimePicker").value();
+        var interval = [], temp = [], orders_update = [], seuil_min = [], seuil_max = [];
+        var Min, Max, id = 1;
+        $.ajax({
+            url: '../../UserSession/TemperatureClimatByInterval',
+            type: 'GET',
+//            beforeSend: function() {
+//                kendo.ui.progress($("#loading1"), true);        
+//            },
+            data: {
+                idNoeudClimat : '@Model.ElementAt(0).IdParentNode',
+                startTime : startTime,
+                endTime : endTime
+            },
+            dataType: 'json',
+            async: false,
+            success: function (res) { //alert(res.length);
+                var i = 0;
+                while ((res[i].TemperatureClimat == null) && (i < res.length - 1)) {
+                    i++;
+                }
+                Min = res[i].TemperatureClimat;
+                Max = res[i].TemperatureClimat;
+                for (var j = 0; j < res.length; j++){                    
+                    var date = new Date(Number(res[j].DateMesure.substring(6, 19)));
+                    interval.push(res[j].DateMesure);
+                    temp.push(res[j].TemperatureClimat);
+//                    list9.push([date.getTime(), res[j].TemperatureClimat]);
+                    if (res[j].TemperatureClimat != null) {
+                        orders_update.push({
+                            ID: id ++,
+                            OrderDate: date,
+                            Temperature: res[j].TemperatureClimat,
+                        });
+                        if(res[j].TemperatureClimat > Max)
+                        {
+                            Max = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat < Min)
+                        {
+                            Min = res[j].TemperatureClimat;
+                        }
+                        if(res[j].TemperatureClimat > list_seuil[1])
+                        {
+                            seuil_max.push([date.getTime(), res[j].TemperatureClimat]);
+                        }
+                        else
+                        {
+                            seuil_max.push([date.getTime(), null]);
+                        }
+                        if(res[j].TemperatureClimat < list_seuil[0])
+                        {
+                            seuil_min.push([date.getTime(), res[j].TemperatureClimat]);
+                        }
+                        else 
+                        {
+                            seuil_min.push([date.getTime(), null]);
+                        }
+                    }
+                }
+            },
+//            complete: function() {
+//                kendo.ui.progress($("#loading1"), false);
+//            }
+        });
+
+        $("#grid").data("kendoGrid").dataSource.data(orders_update); 
+        $("#grid").data("kendoGrid").refresh();
+
+        //coloration grid 
+        var grid = $("#grid").data("kendoGrid");
+        var data = grid.dataSource.data();
+        $.each(data, function (i, row) {
+            if (row.Temperature >= list_seuil[1])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#ffb1af");
+            else if (row.Temperature < list_seuil[0])
+                $('tr[data-uid="' + row.uid + '"] ').css("background-color", "#aedfe5");
+        });
+        var stockChart = $("#stock-chart").data("kendoStockChart");
+        stockChart.options.title.text = "Date debut:" + kendo.format('{0:dd/MM/yyyy}',startTime) + " - date fin: " + kendo.format('{0:dd/MM/yyyy}',endTime); 
+        stockChart.options.categoryAxis[0].categories = interval;
+        stockChart.options.categoryAxis[0].labels.step = 2400;
+        stockChart.options.categoryAxis[0].majorTicks.step = 1200;
+        stockChart.options.categoryAxis[0].baseUnit = "minutes";
+        stockChart.options.series[0].markers.visible = false;
+        stockChart.options.series[0].name = "Temperature";
+        stockChart.options.series[0].data = temp;
+        stockChart.options.valueAxis[0].min = Math.floor(Min/* - (Max - Min) * 0.1*/);
+        stockChart.options.valueAxis[0].max = Math.ceil(Max/* + (Max - Min) * 0.1*/);
+        stockChart.options.categoryAxis[1].categories = interval;
+        stockChart.options.categoryAxis[1].labels.step = 600;
+        stockChart.options.categoryAxis[1].majorTicks.step = 600;
+        stockChart.options.categoryAxis[1].baseUnit = "minutes";
+        stockChart._navigator.options.select.from = interval[0];
+        stockChart._navigator.options.select.to = interval[interval.length-1];
+        stockChart.options.series[2].name = "Temperature";
+        stockChart.options.series[2].data = temp;
+        //plot discount
+        var i = 0 , inc = 0;
+        //var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours(),new Date().getMinutes());
+        for(var k = 0; k < interval.length; k++)
+        {
+            var date_ = Number(interval[k].substring(6, 19))
+            if(new Date(date_) <= new Date())
+            {
+                inc++;
+            }
+        }
+        var plot_discount_Day = [];
+        for(var k = 0;k < inc - 10 ; k += 10)
+        {
+            if (temp[k] == null)
+            {  
+                var u = k;
+                while((temp[u] == null) && (u < temp.length))
+                {
+                    u++;
+                }
+                //si on trouve une valeur non null on hachure la zone(list_temp1[k] -> list_temp1[k] non null)  (traitement graphyque)
+                plot_discount_Day.push({
+                    from: k,
+                    to: u,
+                    color: "#dfddd3"
+                });
+                k = u;
+            }
+            ////        // on verifie la période puis on refait la boucle a partir de la valeur non null jusqu'a maintenant
+        } 
+//            stockChart.options.navigator.series.type = "line";
+        stockChart.options.categoryAxis[0].plotBands = plot_discount_Day;
+        stockChart.refresh();
+//    });
+      }
+</script>
+
+@* reporting*@
+<script type="text/javascript">
+
+    $("#refresh").click(function () {
+        myfunctionDaterefresh();
+    });
+
+//    function clickMonBoutonPdf() {
+    $("#MonBoutonExcel").click(function () {
+        var chart = $("#stock-chart").data("kendoStockChart");
+        var image = chart.imageDataURL(); //Kendo UI
+        var a = $("<a>").attr("href", image).attr("download", "img.png").appendTo("body");
+        a[0].click();
+        a.remove();
+    });
+    
+    //$("#MonBoutonPdf").telerik_ReportViewer({
+    //    serviceUrl: "../api/reports/",
+    //    templateUrl: 'src/templates/telerikReportViewerTemplate-x.x.x.x.htmll',
+    //    reportSource: { report: "product catalog.trdx" }
+    //});
+//    }
+
+//    function clickMonBoutonExcel() {
+    $("#MonBoutonPdf").click(function () {
+        
+        window.open('@Url.Action("ActionReport","UserSession")', "downloadfile");
+
+
+        //var dataSource = $("#grid").data("kendoGrid").dataSource;
+        //var filteredDataSource = new kendo.data.DataSource({
+        //    data: dataSource.data(),
+        //    filter: dataSource.filter()
+        //});
+
+        //filteredDataSource.read();
+        //var data = filteredDataSource.view();
+        //var result = "data:application/vnd.ms-excel,";
+        //result += "<table><tr><th>Date</th><th>Humidité °C</th><th> Date</th></tr>";
+        //for (var i = 0; i < data.length; i++) {
+        //    var datee = data[i].OrderDate; 
+        //    result += "<tr>";
+        //    result += "<td>";
+        //    result += kendo.format('{0:dd/MM/yyyy HH:mm}', datee);
+        //    result += "</td>";
+        //    result += "<td>";
+        //    result += data[i].Temperature;
+        //    result += "</td>";
+        //    result += "</tr>";
+        //}
+        //result += "</table>";
+        //if (window.navigator.msSaveBlob) {
+        //    window.navigator.msSaveBlob(new Blob([result]), 'export.csv');
+        //} else {
+        //    window.open(result);
+        //}
+    });
+    //    }
+//    exporting pdf
+    function DisplayPdf() {
+
+        (function (API) {
+        API.myText = function (txt, options, x, y) {
+        options = options || {};
+        /* Use the options align property to specify desired text alignment
+        * Param x will be ignored if desired text alignment is 'center'.
+        * Usage of options can easily extend the function to apply different text 
+        * styles and sizes 
+        */
+        if (options.align == "center") {
+        // Get current font size
+        var fontSize = this.internal.getFontSize();
+
+        // Get page width
+        var pageWidth = this.internal.pageSize.width;
+
+        // Get the actual text's width
+        /* You multiply the unit width of your string by your font size and divide
+        * by the internal scale factor. The division is necessary
+        * for the case where you use units other than 'pt' in the constructor
+        * of jsPDF.
+        */
+        txtWidth = this.getStringUnitWidth(txt) * fontSize / this.internal.scaleFactor;
+
+        // Calculate text's x coordinate
+        x = (pageWidth - txtWidth) / 2;
+        }
+
+        // Draw text at x,y
+        this.text(txt, x, y);
+        }
+        })(jsPDF.API);
+        var data = [], data_ = [], data_2 = [], data_parcelle = [], data_secteur = [];
+        var name = 0;
+        $.ajax({
+            url: '../../UserSession/Informations_Générales_',
+            type: 'GET',
+            data: { idNoeudClimat : @Model.ElementAt(0).IdParentNode},
+            dataType: 'json',
+            async: false,
+            success: function (res){
+            // Information Agriculteur
+            name= res.secteur.Parcelle.ExploitationPère.ProjetPère.Proprietaire_Pere.UserName;
+            //    Information projet
+            var date_proj = new Date(Number(res.secteur.Parcelle.ExploitationPère.ProjetPère.DateAjoutExploitation.substring(6, 19)));
+            var datttt_proj = new Date(date_proj.getTime())
+            data_.push({
+                "Nom": res.secteur.Parcelle.ExploitationPère.ProjetPère.NomProjet,
+                "Description": res.secteur.Parcelle.ExploitationPère.ProjetPère.DescriptionProjet,
+                "Datedajout": kendo.format('{0:dd/MM/yyyy}',datttt_proj) ,
+            });
+           
+            var date_2 = new Date(Number(res.secteur.Parcelle.ExploitationPère.DateAjoutExploitation.substring(6, 19)));
+            var datttt = new Date(date_2.getTime());
+            // Information sur l'exploitation      
+            data_2.push({
+                "Nom": res.secteur.Parcelle.ExploitationPère.NomExploitation,
+                "Description": res.secteur.Parcelle.ExploitationPère.DescriptionExploitation,
+                "Datedajout":kendo.format('{0:dd/MM/yyyy}',datttt) ,
+                // "Adresse": "ccccccccc",
+                // "Liste des parcelles": res.secteur.Parcelle.ExploitationPère.ParcellesFils
+            });
+
+            var date_par = new Date(Number(res.secteur.Parcelle.ExploitationPère.DateAjoutExploitation.substring(6, 19)));
+            var datttt_par = new Date(date_par.getTime());
+            // Information sur les parcelles
+            data_parcelle.push({
+                "Nom": res.secteur.Parcelle.NomParcelle,
+                "Description": res.secteur.Parcelle.DescriptionParcelle,
+                "Datedajout": kendo.format('{0:dd/MM/yyyy}',datttt_par),
+                // "Adresse": "ccccccccc",
+                // "Liste des parcelles": res.secteur.Parcelle.ExploitationPère.ParcellesFils
+            });
+            var date_sec = new Date(Number(res.secteur.Parcelle.ExploitationPère.DateAjoutExploitation.substring(6, 19)));
+            var datttt_sec = new Date(date_sec.getTime());
+            data_secteur.push({
+                "Nom": res.secteur.NomSecteur,
+                "Description": res.secteur.DescriptionSecteur,
+                "Datedajout": kendo.format('{0:dd/MM/yyyy}',datttt_sec),
+                 
+                // "Liste des parcelles": res.secteur.Parcelle.ExploitationPère.ParcellesFils
+            });
+            }
+        });
+        var name = 0;
+        //  Export data table Grid
+        var data_grid = [];
+        var dataSource = $("#grid").data("kendoGrid").dataSource;
+        var filteredDataSource = new kendo.data.DataSource({
+            data: dataSource.data(),
+            filter: dataSource.filter()
+        });
+
+        filteredDataSource.read();
+        var data = filteredDataSource.view();
+        for (var i = 0; i < data.length; i++) {
+            var dat = data[i].OrderDate;
+            var temp = data[i].Temperature;
+            data_grid.push({
+                "Date": kendo.format('{0:dd/MM/yyyy HH:mm}', dat),
+                "Température": temp
+            });
+        }
+        var date = new Date();
+        // information sur l'agriculteur:
+        var fontSize = 10, height = 0;
+        doc = new jsPDF('p', 'pt', 'letter');
+        header(doc);
+        footer(doc);
+        doc.addPage();
+        header(doc);
+        footer(doc);
+        doc.setFontSize(16);
+        doc.text(10, 140, "I- Informations sur l'agriculteur:");
+        doc.setFontSize(10);
+        var height = table_pdf(doc, data_,160);
+        doc.setFontSize(16);
+        doc.text(10, 240, "II- Informations sur l'exploitation:");
+        doc.setFontSize(10);
+        table_pdf(doc, data_2,260);
+        // doc.text(1, tttt + 0, 'Codes and Limitations Table');
+        doc.setFontSize(16);
+        doc.text(10, 340, 'III- Informations sur le parcelle:');
+        doc.setFontSize(10);
+        table_pdf(doc, data_parcelle,360);
+        doc.setFontSize(16);
+        doc.text(10, 440, 'IV- Informations sur le secteur:');
+        doc.setFontSize(10);
+        table_pdf(doc, data_secteur,460);
+        doc.setFontSize(10);
+        doc.addPage();
+        header(doc);
+        footer(doc);
+        doc.setFontSize(16);
+        doc.text(10, 140, 'V- Présentation de la courbe');
+        var chart = $("#stock-chart").data("kendoStockChart");
+        var imageDataURL = chart.imageDataURL();
+        doc.addImage(imageDataURL, "JPEG", 40, 160, 490, 280);
+        doc.setFontSize(10);
+        doc.myText("figure représentative de la température ", { align: "center" }, 0, 450);
+        // doc.setTextColor('#348841');
+        // doc.text(40, 470, 'Cette courbe représente les mesure de la température durant cette journée');
+        doc.text(40, 490, 'valeur Min:  ' + list_seuil[0]);
+        doc.text(40, 510, 'valeur Max:  ' + list_seuil[1]);
+        //    //Grid
+        doc.addPage();
+        header(doc);
+        footer(doc);
+        doc.setFontSize(16);
+        doc.text(10, 140, ' Tableau des mesures');
+        doc.setFontSize(10);
+        height = table_pdf(doc, data_grid,160);
+        doc.save('sample-file.pdf');    
+    }
+</script>

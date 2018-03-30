@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <connectionStrings>
+    <add name="AgricultureEntities" connectionString="metadata=res://*/App_Data.Agriculture.csdl|res://*/App_Data.Agriculture.ssdl|res://*/App_Data.Agriculture.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=WIN-SFQSOMMDDVS;initial catalog=Agriculture;integrated security=True;multipleactiveresultsets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
+  </connectionStrings>
+</configuration>

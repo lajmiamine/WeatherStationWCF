@@ -1,0 +1,12 @@
+﻿@model WeatherStation.Models.ExploitationModel
+
+<div id="infos_exp" style="overflow: auto; height: 100%;">
+    <table style="width:95%;height:95%">
+        <tr><td COLSPAN=2 style="color:#FF0000;"><strong> @Model.NomExploitation</td></strong></tr>
+        @*<tr><td><strong>Adresse</strong></td><td>@Model.AdresseExploitation</td></tr>*@
+        <tr><td><strong>Description</strong></td><td>@Model.DescriptionExploitation</td></tr>
+        <tr><td><strong>Date d'ajout</strong></td><td>@Model.DateAjoutExploitation.ToString().Substring(0, 10)</td></tr>
+        <tr><td><strong>Projet</strong></td><td>@Model.NomProjetPère</td></tr>
+        <tr><td><strong>Nombre de parcelles</strong></td><td>@Model.NombreParcellesFils</td></tr>
+    </table>
+</div>

@@ -1,0 +1,90 @@
+﻿    
+    <div id="treeview-sprites1"style="height:100%;"></div>
+
+    <script type="text/javascript">
+
+        function onSelectt(e) {
+            @foreach (var par in Model.ParcellesFils) {
+                foreach (var sec in par.SecteursParcelle) {
+                    foreach (var node in sec.ChildrenNodes) {
+                        @: if (this.text(e.node) == '@node.AdresseNoeud')
+					        @:node_function(@par.IdParcelle, '@par.NomParcelle',@node.IdImplanter_noeud_secteur);
+                    }
+                }
+            }
+        }
+
+        $("#treeview-sprites1").kendoTreeView({
+            dataSource: [{
+                text: '@Model.NomExploitation',
+                expanded: true,
+                imageUrl: " ../../Content/images/exploitation.png",
+                items: [{
+                    text: "Noeuds Climat",
+                    expanded: false,
+                    imageUrl: "../../Content/images/rouge_s.png",
+                    items: [
+                        @foreach (var par in Model.ParcellesFils) {
+                            foreach (var sec in par.SecteursParcelle) {
+                                foreach (var node in sec.ChildrenNodes) {
+                                    if (node.NodeType == 1 && Model.Climat)
+                                    {
+                                        @: { text: '@node.AdresseNoeud' },
+                                    }                                 
+                                }
+                            }
+                        }
+                    ]
+                }, {
+                    text: "Noeuds Sol",
+                    expanded: false,
+                    imageUrl: " ../../Content/images/orange_s.png",
+                    items: [
+                        @foreach (var par in Model.ParcellesFils) {
+                            foreach (var sec in par.SecteursParcelle) {
+                                foreach (var node in sec.ChildrenNodes) {
+                                    if (node.NodeType == 2 && Model.Sol)
+                                    {
+                                        @: { text: '@node.AdresseNoeud' },
+                                    }                                  
+                                }
+                            }      
+                        }                                   
+                    ]
+                }, {
+                    text: "Noeuds Plante",
+                    expanded: false,
+                    imageUrl: " ../../Content/images/vert_s.png",
+                    items: [
+                        @foreach (var par in Model.ParcellesFils) {
+                            foreach (var sec in par.SecteursParcelle) {
+                                foreach (var node in sec.ChildrenNodes) {
+                                    if (node.NodeType == 3 && Model.Plante)
+                                    {
+                                        @: { text: '@node.AdresseNoeud'},
+                                    }                                 
+                                }
+                            }
+                        }
+                    ]
+                }, {
+                    text: "Noeuds Irrigation",
+                    expanded: false,
+                    imageUrl: " ../../Content/images/bleu_s.png",
+                    items: [
+                        @foreach (var par in Model.ParcellesFils) {
+                            foreach (var sec in par.SecteursParcelle) {
+                                foreach (var node in sec.ChildrenNodes) {
+                                    if (node.NodeType == 4 && Model.Irrigation)
+                                    {
+                                        @: { text: '@node.AdresseNoeud'},
+                                    }                                  
+                                }
+                            }
+                        }
+                    ]
+                }]
+            }],
+            select: onSelectt,
+        });
+    </script>

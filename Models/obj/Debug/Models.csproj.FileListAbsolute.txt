@@ -1,0 +1,11 @@
+C:\Documents and Settings\Administrateur\Mes documents\Visual Studio 2010\Projects\WeatherStation\Models\bin\Debug\Models.dll
+C:\Documents and Settings\Administrateur\Mes documents\Visual Studio 2010\Projects\WeatherStation\Models\bin\Debug\Models.pdb
+C:\Documents and Settings\Administrateur\Mes documents\Visual Studio 2010\Projects\WeatherStation\Models\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\Administrateur\Mes documents\Visual Studio 2010\Projects\WeatherStation\Models\obj\Debug\Models.dll
+C:\Documents and Settings\Administrateur\Mes documents\Visual Studio 2010\Projects\WeatherStation\Models\obj\Debug\Models.pdb
+C:\Users\Administrator\Documents\Visual Studio 2010\Projects\WeatherStation\Models\bin\Debug\Models.dll.config
+C:\Users\Administrator\Documents\Visual Studio 2010\Projects\WeatherStation\Models\bin\Debug\Models.dll
+C:\Users\Administrator\Documents\Visual Studio 2010\Projects\WeatherStation\Models\bin\Debug\Models.pdb
+C:\Users\Administrator\Documents\Visual Studio 2010\Projects\WeatherStation\Models\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\Visual Studio 2010\Projects\WeatherStation\Models\obj\Debug\Models.dll
+C:\Users\Administrator\Documents\Visual Studio 2010\Projects\WeatherStation\Models\obj\Debug\Models.pdb

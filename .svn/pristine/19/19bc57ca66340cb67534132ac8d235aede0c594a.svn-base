@@ -1,0 +1,124 @@
+﻿@model IEnumerable<WeatherStation.Models.NodeModel>
+<div id = "Liste_des_noeuds_Irrigation">
+    <div id = "example" class = "k-content">
+        <div id = "grid_NIQ" ></div>
+    </div>
+</div>
+
+<script type = "text/javascript">
+    var startDate = new Date(2013, 08, 1);
+    var datedebut = startDate.getFullYear() + '-' + (startDate.getMonth() + 1) + '-' + (startDate.getDate()) + ' ' + startDate.getHours() + ':' + startDate.getMinutes() + ':' + startDate.getSeconds();
+    function QuantiteEauJournaliere(idNoeudIrrig) {
+        if ($("div#tabs ul li:contains(Consommation Mois)").length != 0) {
+            //$("#tabs").tabs('select', ).tabs({ active: num_tabs - 1 });
+            var index = $('#tabs a[href = "#Consommation_d_eau_Par_Mois"]').parent().index();
+            $('#tabs').tabs('option', 'active', index - 1);
+        }
+        else {
+            $.ajax({
+                url: '../../UserSession/QantiteEauMois',
+                type: 'GET',
+                data: { idNoeudIrrig: idNoeudIrrig, mois: (startDate.getMonth() + 1) },
+                async: false,
+                success: function (result) {
+                    $("#tabs").append(result);
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    alert(err.Message);
+                }
+            });
+            $("#tabs").children("ul:first").append("<li><a href='#Consommation_d_eau_Par_Mois'>Consommation Mois</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+            var num_tabs = $('#tabs a[href="#Consommation_d_eau_Par_Mois"]').parent().index();
+            $("#tabs").tabs("refresh").tabs({ active: num_tabs - 1 });
+        }
+    }    
+</script>
+
+<script type = "text/javascript">
+    var orders = [];
+    @foreach (var item in Model)
+    {
+        @:var annee = @item.DateImplementation.Year;
+        @:var mois = @item.DateImplementation.Month;
+        @:var jour = @item.DateImplementation.Day;
+        @:var heure = @item.DateImplementation.Hour;
+        @:var minute = @item.DateImplementation.Minute;
+        @:var seconde = @item.DateImplementation.Second;
+        @:orders.push({
+            @:OrderDate: new Date(annee, mois, jour, heure, minute, seconde, 0),
+            @:AdresseNoeud: '@item.AdresseNoeud',
+            @:Secteur :'@item.NomSecteur', 
+            @:Parcelle : '@item.NomParcelle',
+            @:CodeActivation :@item.codeActivation,
+        @:}); 
+    }              
+</script>
+
+
+<script type="text/javascript">
+    var idIrrig = 0;
+    function onChange(arg) {
+        var selected = $.map(this.select(), function (item) {
+            QuantiteEauJournaliere($(item).text());
+        });
+        kendoConsole.log("Selected: " + selected.length + " item(s), [" + selected.join(", ") + "]");
+        //alert(id_noeud);
+    }
+
+    $("#grid_NIQ").kendoGrid({
+        dataSource: {
+            data: orders,
+            pageSize: 5
+        },
+        change: onChange,
+        selectable: "multiple cell",
+        scrollable: false,
+        groupable: false,
+        sortable: true,
+        pageable: {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 5
+        },
+        columns: [{
+            field: "AdresseNoeud",
+            title: "Adresse du noeud",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "OrderDate",
+            title: "Date Implementation",
+            format: "{0:yyyy/MM/dd HH:m}",
+            width: 160,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        },
+        {
+            field: "Parcelle",
+            title: "Parcelle",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "Secteur",
+            title: "Secteur",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }, {
+            field: "CodeActivation",
+            title: "Code Activation",
+            width: 50,
+            headerAttributes: {
+                style: "text-align:center"
+            }
+        }]
+    });
+    
+</script>
